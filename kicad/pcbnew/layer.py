@@ -89,11 +89,4 @@ class LayerSet:
     @property
     def layers(self):
         """Returns the list of Layer IDs in this LayerSet."""
-        layer_ids = []
-        bin_str = self._obj.FmtBin().replace('_', '').replace('|', '')
-        bit_pos = len(bin_str) - 1
-        for bit in bin_str:
-            if bit == '1':
-                layer_ids.append(bit_pos)
-            bit_pos -= 1
-        return layer_ids
+        return [l for l in self._obj.Seq()]
