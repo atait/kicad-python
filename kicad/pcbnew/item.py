@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright 2015 Hasan Yavuz Özderya
+#  Copyright 2017 Hasan Yavuz Özderya
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 from math import radians, degrees
 from kicad.point import Point
+from kicad.pcbnew.layer import Layer
 
 class HasPosition(object):
     """Board items that has valid position property should inherit
@@ -65,3 +66,16 @@ class HasRotation(object):
     @rotation.setter
     def rotation(self, value):
         self._obj.SetOrientation(degrees(value) * 10.)
+
+class HasLayer(object):
+    """Board items that has layer should inherit this."""
+    def __init__(self):
+        raise NotImplementedError("This is an abstract class!")
+
+    @property
+    def layer(self):
+        return Layer(self._obj.GetLayer())
+
+    @layer.setter
+    def layer(self, value):
+        self._obj.SetLayer(value.value)
