@@ -34,11 +34,19 @@ class Layer(IntEnum):
     FrontMask       = pcbnew.F_Mask
     BackMask        = pcbnew.B_Mask
 
+    DrawingsUser    = pcbnew.Dwgs_User
+    CommentsUser    = pcbnew.Cmts_User
+    ECO1User        = pcbnew.Eco1_User
+    ECO2User        = pcbnew.Eco2_User
+
     EdgeCuts        = pcbnew.Edge_Cuts
+    Margin          = pcbnew.Margin
+    FrontFab        = pcbnew.F.Fab
+    BackFab         = pcbnew.B.Fab
     FrontCourtyard  = pcbnew.F_CrtYd
     BackCourtyard   = pcbnew.B_CrtYd
 
-    # TODO: add all layer names
+    # TODO: add inner layer names
 
 # dicts for converting layer name to id, used by _get_layer
 _std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
