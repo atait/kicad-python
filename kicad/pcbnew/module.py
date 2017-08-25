@@ -39,12 +39,12 @@ class ModuleLabel(HasPosition, HasRotation, HasLayer, object):
         return self._obj.SetText(value)
 
     @property
-    def width(self):
-        return float(self._obj.GetTextWidth()) / DEFAULT_UNIT_IUS
+    def thickness(self):
+        return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
 
-    @width.setter
-    def width(self, value):
-        return self._obj.SetTextWidth(value * DEFAULT_UNIT_IUS)
+    @thickness.setter
+    def thickness(self, value):
+        return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def size(self):
