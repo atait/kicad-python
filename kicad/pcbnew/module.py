@@ -29,6 +29,15 @@ from kicad.pcbnew.pad import Pad
 
 class ModuleLabel(HasPosition, HasRotation, HasLayer, object):
     """wrapper for `TEXTE_MODULE`"""
+
+    @property
+    def text(self):
+        return self._obj.GetText()
+
+    @text.setter
+    def text(self, value):
+        return self._obj.SetText(value)
+
     @property
     def width(self):
         return float(self._obj.GetTextWidth()) / DEFAULT_UNIT_IUS
