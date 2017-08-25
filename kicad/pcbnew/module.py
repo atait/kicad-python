@@ -134,6 +134,14 @@ class Module(HasPosition, HasRotation, object):
             else:
                 raise ValueError("You can place a module only on Front or Back layers!")
 
+    @property
+    def libName(self):
+        return self._obj.GetFPID().GetLibNickname().GetChars()
+
+    @property
+    def fpName(self):
+        return self._obj.GetFPID().GetLibItemName().GetChars()
+
     def copy(self, ref, pos=None, board=None):
         """Create a copy of an existing module on the board"""
         _module = pcbnew.MODULE(board and board._obj)
