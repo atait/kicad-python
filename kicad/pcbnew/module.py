@@ -1,6 +1,6 @@
 #  Copyright 2014 Piers Titus van der Torren <pierstitus@gmail.com>
 #  Copyright 2015 Miguel Angel Ajo <miguelangel@ajo.es>
-#  Copyright 2016 Hasan Yavuz Ozderya <hy@ozderya.net>
+#  Copyright 2017 Hasan Yavuz Ozderya <hy@ozderya.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,16 +21,47 @@ pcbnew = __import__('pcbnew')
 
 import kicad
 from kicad import Point
+from kicad import Size
+from kicad import DEFAULT_UNIT_IUS
 from kicad.pcbnew.item import HasPosition, HasRotation
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
 class ModuleLabel(HasPosition, HasRotation, object):
     """wrapper for `TEXTE_MODULE`"""
+    @property
+    def width(self):
+        return float(self._obj.GetTextWidth()) / DEFAULT_UNIT_IUS
+
+    @width.setter
+    def width(self, value):
+        return self._obj.SetTextWidth(value * DEFAULT_UNIT_IUS)
+
+    @property
+    def size(self):
+        return Size.wrap(self._obj.GetTextSize())
+
+    @size.setter
+    def size(self, value):
+        if isinstance(value, tuple):
+            if not isinstance(value, Size):
+                value = Size(value[0], value[1])
+            self._obj.SetTextSize(value.native_obj)
+
+        else: # value is a single number/integer
+            self._obj.SetTextSize(Size(value, value).native_obj)
+
     @staticmethod
     def wrap(instance):
         if type(instance) is pcbnew.TEXTE_MODULE:
             return kicad.new(ModuleLabel, instance)
+
+class ModuleLine(object):
+    """Wrapper for `EDGE_MODULE`"""
+    @staticmethod
+    def wrap(instance):
+        if type(instance) is pcbnew.EDGE_MODULE:
+            return kicad.new(ModuleLine, instance)
 
 class Module(HasPosition, HasRotation, object):
 
@@ -77,6 +108,17 @@ class Module(HasPosition, HasRotation, object):
     def valueLabel(self):
         # TODO: not critical but always return the same wrapper object
         return ModuleLabel.wrap(self._obj.Value())
+
+    @property
+    def graphicalItems(self):
+        """Text and drawings of module iterator."""
+        for item in self._obj.GraphicalItems():
+            if type(item) == pcbnew.EDGE_MODULE:
+                yield ModuleLine.wrap(item)
+            elif type(item) == pcbnew.TEXTE_MODULE:
+                yield ModuleLabel.wrap(item)
+            else:
+                raise Exception("Unknown module item type: %s" % type(item))
 
     @property
     def layer(self):
