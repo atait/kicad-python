@@ -41,8 +41,8 @@ class Layer(IntEnum):
 
     EdgeCuts        = pcbnew.Edge_Cuts
     Margin          = pcbnew.Margin
-    FrontFab        = pcbnew.F.Fab
-    BackFab         = pcbnew.B.Fab
+    FrontFab        = pcbnew.F_Fab
+    BackFab         = pcbnew.B_Fab
     FrontCourtyard  = pcbnew.F_CrtYd
     BackCourtyard   = pcbnew.B_CrtYd
 
