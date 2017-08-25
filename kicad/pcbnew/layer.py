@@ -42,7 +42,7 @@ class Layer(IntEnum):
 
 # dicts for converting layer name to id, used by _get_layer
 _std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
-                   for n in range(pcbnew.LAYER_ID_COUNT)}
+                   for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
 _std_layer_names = {s: n for n, s in _std_layer_dict.iteritems()}
 
 
