@@ -4,7 +4,7 @@
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -29,6 +29,13 @@ from kicad.pcbnew.pad import Pad
 
 class ModuleLabel(HasPosition, HasRotation, HasLayer, object):
     """wrapper for `TEXTE_MODULE`"""
+    def __init__(self, mod, text=None, layer=None):
+        self._obj = pcbnew.TEXTE_MODULE(mod.native_obj)
+        mod.native_obj.Add(self._obj)
+        if text:
+            self.text = text
+        if layer:
+            self.layer = layer
 
     @property
     def text(self):
