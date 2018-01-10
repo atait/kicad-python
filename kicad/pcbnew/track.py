@@ -53,3 +53,6 @@ class Track(object):
     @property
     def netName(self):
         return self._obj.GetNetname()
+
+    def delete(self):
+        self._obj.DeleteStructure()
