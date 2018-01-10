@@ -49,3 +49,7 @@ class Track(object):
     @width.setter
     def width(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+
+    @property
+    def netName(self):
+        return self._obj.GetNetname()
