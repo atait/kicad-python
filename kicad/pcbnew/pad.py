@@ -1,8 +1,8 @@
-#  Copyright 2016 Hasan Yavuz Ozderya <hy@ozderya.net>
+#  Copyright 2018 Hasan Yavuz Ozderya <hy@ozderya.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -20,7 +20,7 @@ pcbnew = __import__('pcbnew')
 import kicad
 from kicad import units
 from kicad import Size
-from kicad.pcbnew.item import HasPosition
+from kicad.pcbnew.item import HasPosition, HasConnection
 from enum import IntEnum
 
 class DrillShape(IntEnum):
@@ -34,7 +34,7 @@ class PadShape(IntEnum):
     RoundedRectangle = pcbnew.PAD_SHAPE_ROUNDRECT
     Trapezoid = pcbnew.PAD_SHAPE_TRAPEZOID
 
-class Pad(HasPosition, object):
+class Pad(HasPosition, HasConnection, object):
     def __init__(self):
         # TODO: add initialization parameters for `Pad`
         pass
