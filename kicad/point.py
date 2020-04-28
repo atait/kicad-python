@@ -18,7 +18,7 @@
 
 #TODO(mangelajo): we will have to come with something more generic
 #                 or make the wx* objects compatible across bindings
-pcbnew = __import__('pcbnew')
+from kicad import pcbnew_bare
 import cmath
 
 import kicad
@@ -34,7 +34,7 @@ class Point(units.BaseUnitTuple):
         :param y: y coordinate.
         """
         self._class = Point
-        self._obj = pcbnew.wxPoint(x * units.DEFAULT_UNIT_IUS,
+        self._obj = pcbnew_bare.wxPoint(x * units.DEFAULT_UNIT_IUS,
                                    y * units.DEFAULT_UNIT_IUS)
 
     def __str__(self):

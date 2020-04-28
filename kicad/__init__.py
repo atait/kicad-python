@@ -16,9 +16,20 @@
 #  MA 02110-1301, USA.
 #
 
+#: centralized import with fallback. Necessary for documentation.
+#: Import in this module in subpackages with
+#: from kicad import pcbnew_bare as pcbnew
+pcbnew_bare = None
+try:
+    pcbnew_bare = __import__('pcbnew')
+except:
+    pass
+
+
 from .units import *
-from .point import *
-from .size import *
+from .point import Point
+from .size import Size
+import kicad.pcbnew
 
 # if `enum` cannot be imported (windoze!) we provide our own copy
 try:
