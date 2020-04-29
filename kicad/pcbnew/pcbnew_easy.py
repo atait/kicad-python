@@ -28,7 +28,7 @@
 import math
 import cmath
 
-import pcbnew
+from kicad import pcbnew_bare as pcbnew
 
 
 # helper functions
@@ -50,7 +50,7 @@ def rotate(coord, angle):
     return (coord.real, coord.imag)
 
 # dicts for converting layer name to id, used by _get_layer
-layer_dict = {pcbnew.BOARD_GetStandardLayerName(n):n for n in range(pcbnew.LAYER_ID_COUNT)}
+layer_dict = {pcbnew.BOARD_GetStandardLayerName(n):n for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
 layer_names = {s:n for n, s in layer_dict.iteritems()}
 
 def _get_layer(s):

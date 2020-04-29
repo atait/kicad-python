@@ -16,7 +16,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-pcbnew = __import__('pcbnew')
+from kicad import pcbnew_bare as pcbnew
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units

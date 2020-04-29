@@ -19,7 +19,7 @@
 import cmath
 import math
 
-pcbnew = __import__('pcbnew')
+from kicad import pcbnew_bare as pcbnew
 import kicad
 
 
