@@ -16,7 +16,7 @@
 #  MA 02110-1301, USA.
 #
 
-pcbnew = __import__('pcbnew')
+from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad import units
 from kicad import Size
