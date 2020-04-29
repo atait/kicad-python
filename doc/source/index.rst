@@ -35,7 +35,7 @@ kicad
 
    kicad/point
    kicad/size
-   # kicad/obj
+   kicad/obj
    kicad/pcbnew/index
 
 Indices and tables

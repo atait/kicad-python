@@ -36,6 +36,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
 ]
+# Make kicad the python package visible
+sys.path.insert(0, os.path.abspath('../..'))
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['ytemplates']

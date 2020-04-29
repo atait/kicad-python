@@ -1,7 +1,7 @@
 point
 =====
 
-.. automodule:: kicad
+.. automodule:: kicad.point
 
 .. autoclass:: Point
    :members: x, y, rotate, rotated, mm, inch, mil, nm, wrap
