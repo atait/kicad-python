@@ -3,12 +3,19 @@ drawing
 
 .. automodule:: kicad.pcbnew.drawing
 
+.. autoclass:: Drawing
+   :members:
+   :undoc-members:
+
 .. autoclass:: Segment
-   :members: __init__, wrap, native_obj
+   :members:
+   :undoc-members:
 
 .. autoclass:: Circle
-   :members: __init__, wrap, native_obj
+   :members:
+   :undoc-members:
 
 .. autoclass:: Arc
-   :members: __init__, wrap, native_obj
+   :members:
+   :undoc-members:
 
