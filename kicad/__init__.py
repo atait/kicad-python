@@ -19,11 +19,13 @@
 #: centralized import with fallback. Necessary for documentation.
 #: Import in this module in subpackages with
 #: from kicad import pcbnew_bare as pcbnew
-pcbnew_bare = None
 try:
     pcbnew_bare = __import__('pcbnew')
 except:
-    pass
+    class SphinxEnumPhony:
+        def __getattr__(self, attr):
+            return 0
+    pcbnew_bare = SphinxEnumPhony()
 
 
 from .units import *
