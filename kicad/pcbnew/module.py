@@ -74,6 +74,10 @@ class ModuleLabel(HasPosition, HasRotation, HasLayer, object):
 
 class ModuleLine(object):
     """Wrapper for `EDGE_MODULE`"""
+    @property
+    def native_obj(self):
+        return self._obj
+
     @staticmethod
     def wrap(instance):
         if type(instance) is pcbnew.EDGE_MODULE:
