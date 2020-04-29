@@ -19,9 +19,38 @@
 from kicad import pcbnew_bare as pcbnew
 import kicad
 
+from enum import IntEnum
+
+class Layer(IntEnum):
+    Front           = pcbnew.F_Cu
+    Back            = pcbnew.B_Cu
+
+    FrontAdhesive   = pcbnew.F_Adhes
+    BackAdhesive    = pcbnew.B_Adhes
+    FrontSilkScreen = pcbnew.F_SilkS
+    BackSilkScreen  = pcbnew.B_SilkS
+    FrontPaste      = pcbnew.F_Paste
+    BackPaste       = pcbnew.B_Paste
+    FrontMask       = pcbnew.F_Mask
+    BackMask        = pcbnew.B_Mask
+
+    DrawingsUser    = pcbnew.Dwgs_User
+    CommentsUser    = pcbnew.Cmts_User
+    ECO1User        = pcbnew.Eco1_User
+    ECO2User        = pcbnew.Eco2_User
+
+    EdgeCuts        = pcbnew.Edge_Cuts
+    Margin          = pcbnew.Margin
+    FrontFab        = pcbnew.F_Fab
+    BackFab         = pcbnew.B_Fab
+    FrontCourtyard  = pcbnew.F_CrtYd
+    BackCourtyard   = pcbnew.B_CrtYd
+
+    # TODO: add inner layer names
+
 # dicts for converting layer name to id, used by _get_layer
 _std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
-                   for n in range(pcbnew.LAYER_ID_COUNT)}
+                   for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
 _std_layer_names = {s: n for n, s in _std_layer_dict.iteritems()}
 
 

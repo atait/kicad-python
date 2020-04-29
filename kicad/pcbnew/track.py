@@ -20,9 +20,9 @@ from kicad import pcbnew_bare as pcbnew
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
+from kicad.pcbnew.item import HasConnection
 
-
-class Track(object):
+class Track(HasConnection, object):
     def __init__(self, width, start, end, layer='F.Cu', board=None):
         self._track = pcbnew.TRACK(board and board.native_obj)
         self._track.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
@@ -36,3 +36,19 @@ class Track(object):
     @property
     def native_obj(self):
         return self._track
+
+    @staticmethod
+    def wrap(instance):
+        """Wraps a C++ api TRACK object, and returns a `Track`."""
+        return kicad.new(Track, instance)
+
+    @property
+    def width(self):
+        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
+
+    @width.setter
+    def width(self, value):
+        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+
+    def delete(self):
+        self._obj.DeleteStructure()

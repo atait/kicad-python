@@ -20,24 +20,47 @@ from kicad import pcbnew_bare as pcbnew
 from kicad.pcbnew import layer
 from kicad.point import Point
 from kicad import units
+from kicad.pcbnew.item import HasPosition
 
-
-class Via(object):
-    def __init__(self, coord, layer_pair, size, drill, board=None):
-        self._via = pcbnew.VIA(board and board.native_obj)
-        self._via.SetWidth(int(size * units.DEFAULT_UNIT_IUS))
+class Via(HasPosition, object):
+    def __init__(self, coord, layer_pair, diameter, drill, board=None):
+        self._obj = pcbnew.VIA(board and board.native_obj)
+        self.diameter = diameter
         coord_point = Point.build_from(coord)
-        self._via.SetEnd(coord_point.native_obj)
-        self._via.SetStart(coord_point.native_obj)
+        self._obj.SetEnd(coord_point.native_obj)
+        self._obj.SetStart(coord_point.native_obj)
         if board:
-            self._via.SetLayerPair(board.get_layer(layer_pair[0]),
+            self._obj.SetLayerPair(board.get_layer(layer_pair[0]),
                                    board.get_layer(layer_pair[1]))
         else:
-            self._via.SetLayerPair(layer.get_std_layer(layer_pair[0]),
+            self._obj.SetLayerPair(layer.get_std_layer(layer_pair[0]),
                                    layer.get_std_layer(layer_pair[1]))
 
-        self._via.SetDrill(int(drill * units.DEFAULT_UNIT_IUS))
+        self.drill = drill
 
     @property
     def native_obj(self):
-        return self._via
+        return self._obj
+
+    @staticmethod
+    def wrap(instance):
+        """Wraps a C++ api VIA object, and returns a `Via`."""
+        return kicad.new(Via, instance)
+
+    @property
+    def drill(self):
+        """Via drill diameter"""
+        return float(self._obj.GetDrill()) / units.DEFAULT_UNIT_IUS
+
+    @drill.setter
+    def drill(self, value):
+        self._obj.SetDrill(int(value * units.DEFAULT_UNIT_IUS))
+
+    @property
+    def diameter(self):
+        """Via diameter"""
+        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
+
+    @diameter.setter
+    def diameter(self, value):
+        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))

@@ -26,12 +26,39 @@ from kicad.pcbnew.track import Track
 from kicad.pcbnew.via import Via
 from kicad import units
 
+class _ModuleList(object):
+    """Internal class to represent `Board.modules`"""
+    def __init__(self, board):
+        self._board = board
+
+    def __getitem__(self, key):
+        found = self._board._obj.FindModuleByReference(key)
+        if found:
+            return module.Module.wrap(found)
+        else:
+            raise KeyError("No module with reference: %s" % key)
+
+    def __iter__(self):
+        # Note: this behavior is inconsistent with python manuals
+        # suggestion. Manual suggests that a mapping should iterate
+        # over keys ('reference' in our case). See:
+        # https://docs.python.org/2.7/reference/datamodel.html?emulating-container-types#object.__iter__
+        # But in my opinion `_ModuleList` is a list then mapping.
+        for m in self._board._obj.GetModules():
+            yield module.Module.wrap(m)
+
+    def __len__(self):
+        return self._board._obj.GetModules().GetCount()
 
 class Board(object):
-    def __init__(self):
+    def __init__(self, wrap=None):
         """Board object"""
-        board = pcbnew.BOARD()
-        self._obj = board
+        if wrap:
+            self._obj = wrap
+        else:
+            self._obj = pcbnew.BOARD()
+
+        self._modulelist = _ModuleList(self)
 
     @property
     def native_obj(self):
@@ -40,7 +67,7 @@ class Board(object):
     @staticmethod
     def wrap(instance):
         """Wraps a C++/old api BOARD object, and returns a Board."""
-        return kicad.new(Board, instance)
+        return Board(wrap=instance)
 
     def add(self, obj):
         """Adds an object to the Board.
@@ -53,16 +80,40 @@ class Board(object):
     @property
     def modules(self):
         """Provides an iterator over the board Module objects."""
-        for m in self._obj.GetModules():
-            yield module.Module.wrap(m)
+        return self._modulelist
+
+    def moduleByRef(self, ref):
+        """Returns the module that has the reference `ref`. Returns `None` if
+        there is no such module."""
+        found = self._obj.FindModuleByReference(ref)
+        if found:
+            return module.Module.wrap(found)
+
+    @property
+    def vias(self):
+        """An iterator over via objects"""
+        for t in self._obj.GetTracks():
+            if type(t) == pcbnew.VIA:
+                yield Via.wrap(t)
+            else:
+                continue
+
+    @property
+    def tracks(self):
+        """An iterator over track objects"""
+        for t in self._obj.GetTracks():
+            if type(t) == pcbnew.TRACK:
+                yield Track.wrap(t)
+            else:
+                continue
 
     @staticmethod
-    def from_editor(self):
+    def from_editor():
         """Provides the board object from the editor."""
-        return Board.wrap(pcbnew.GetCurrentBoard())
+        return Board.wrap(pcbnew.GetBoard())
 
     @staticmethod
-    def load(self, filename):
+    def load(filename):
         """Loads a board file."""
         return Board.wrap(pcbnew.LoadBoard(filename))
 
@@ -74,6 +125,12 @@ class Board(object):
         if filename is None:
             filename = self._obj.GetFileName()
         self._obj.Save(filename)
+
+    # TODO: add setter for Board.filename
+    @property
+    def filename(self):
+        """Name of the board file."""
+        return self._obj.GetFileName()
 
     def add_module(self, ref, pos=(0, 0)):
         """Create new module on the board"""
