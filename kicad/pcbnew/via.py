@@ -65,6 +65,14 @@ class Via(HasPosition, object):
     def diameter(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
 
+    @property
+    def center(self):
+        """Via center"""
+        return Point.wrap(self._obj.GetCenter())
+
+    # @center.setter
+    # def center(self, value):
+    #     self._obj.SetCenter(int(value * units.DEFAULT_UNIT_IUS))
 
     @property
     def top_layer(self):
