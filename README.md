@@ -71,11 +71,17 @@ For `kicad-python` to find it, set the environment variable
 ```bash
 export PCBNEW_PATH=/usr/lib/python3/pcbnew.py
 ```
-according to the output of the prior command. Put this line in your .bashrc or .zshrc or <your CONDA_PREFIX>/envs/<your desired environment>/etc/conda/activate.d/find_pcbnew.sh... quick command
+according to the output of the prior command. Put this line in your .bashrc or .zshrc or conda using these commands
 ```bash
 conda create -n pcb-development  # you might have done this already
 conda activate pcb-development
 
 mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d
 echo "export PCBNEW_PATH=/usr/lib/python3/pcbnew.py" > ${CONDA_PREFIX}/etc/conda/activate.d/find_pcbnew.sh
+```
+
+Finally, make `kicad-python` visible system-wide with
+```bash
+cd /path/to/kicad-python
+pip install .
 ```
