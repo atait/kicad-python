@@ -49,9 +49,16 @@ class Layer(IntEnum):
     # TODO: add inner layer names
 
 # dicts for converting layer name to id, used by _get_layer
-_std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
-                   for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
-_std_layer_names = {s: n for n, s in _std_layer_dict.iteritems()}
+_std_layer_dict = None
+_std_layer_names = None
+def load_std_layers():
+    # lazy import for Sphinx to run properly
+    global _std_layer_dict, _std_layer_names
+    if _std_layer_dict is None:
+        _std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
+                           for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
+    if _std_layer_names is None:
+        _std_layer_names = {s: n for n, s in _std_layer_dict.items()}
 
 
 def get_board_layer(board, layer_name):
@@ -72,6 +79,7 @@ def get_board_layer_name(board, layer_id):
 
 def get_std_layer_name(layer_id):
     """Get layer name from layer id. """
+    load_std_layers()
     return _std_layer_names[layer_id]
 
 
@@ -80,6 +88,7 @@ def get_std_layer(layer_name):
 
     If it is already an int just return it.
     """
+    load_std_layers()
     return _std_layer_dict[layer_name]
 
 
