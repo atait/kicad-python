@@ -24,6 +24,7 @@ from kicad.pcbnew import drawing
 from kicad.pcbnew import module
 from kicad.pcbnew.track import Track
 from kicad.pcbnew.via import Via
+from kicad.pcbnew.drawing import Drawing
 from kicad import units
 
 class _ModuleList(object):
@@ -106,6 +107,13 @@ class Board(object):
                 yield Track.wrap(t)
             else:
                 continue
+
+    @property
+    def drawings(self):
+        all_drawings = []
+        for drawing in self._obj.GetDrawings():
+            if isinstance(drawing, (pcbnew.DRAWSEGMENT, pcbnew.TEXTE_PCB)):
+                yield Drawing.wrap(drawing)
 
     @staticmethod
     def from_editor():

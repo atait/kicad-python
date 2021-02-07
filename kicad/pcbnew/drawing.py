@@ -37,6 +37,8 @@ class Drawing(object):
     def wrap(instance):
         if type(instance) is pcbnew.DRAWSEGMENT:
             return Drawing._wrap_drawsegment(instance)
+        elif type(instance) is pcbnew.TEXTE_PCB:
+            return kicad.new(TextPCB, instance)
 
     @staticmethod
     def _wrap_drawsegment(instance):
@@ -108,3 +110,51 @@ class Arc(Drawing):
         arc.SetLayer(pcbnew_layer.get_board_layer(board, layer))
         arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = arc
+
+
+class TextPCB(Drawing):
+    ''' Todo: test the methods. It is copied from ModuleLabel '''
+    pass
+#     """wrapper for `TEXTE_PCB`"""
+#     def __init__(self, mod, text=None, layer=None):
+#         self._obj = pcbnew.TEXTE_PCB(mod.native_obj)
+#         mod.native_obj.Add(self._obj)
+#         if text:
+#             self.text = text
+#         if layer:
+#             self.layer = layer
+
+#     @property
+#     def text(self):
+#         return self._obj.GetText()
+
+#     @text.setter
+#     def text(self, value):
+#         return self._obj.SetText(value)
+
+#     @property
+#     def thickness(self):
+#         return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
+
+#     @thickness.setter
+#     def thickness(self, value):
+#         return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
+
+#     @property
+#     def size(self):
+#         return Size.wrap(self._obj.GetTextSize())
+
+#     @size.setter
+#     def size(self, value):
+#         if isinstance(value, tuple):
+#             if not isinstance(value, Size):
+#                 value = Size(value[0], value[1])
+#             self._obj.SetTextSize(value.native_obj)
+
+#         else: # value is a single number/integer
+#             self._obj.SetTextSize(Size(value, value).native_obj)
+
+#     @staticmethod
+#     def wrap(instance):
+#         if type(instance) is pcbnew.TEXTE_MODULE:
+#             return kicad.new(ModuleLabel, instance)
