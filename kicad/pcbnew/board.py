@@ -60,6 +60,7 @@ class Board(object):
             self._obj = pcbnew.BOARD()
 
         self._modulelist = _ModuleList(self)
+        self._removed_elements = []
 
     @property
     def native_obj(self):
@@ -133,6 +134,9 @@ class Board(object):
         if filename is None:
             filename = self._obj.GetFileName()
         self._obj.Save(filename)
+
+    def copy(self):
+        return Board(wrap=self._obj.Clone())
 
     # TODO: add setter for Board.filename
     @property
@@ -220,3 +224,18 @@ class Board(object):
         return self.add(
             drawing.Arc(center, radius, start_angle, stop_angle,
                         layer, width, board=self))
+
+
+    def remove(self, element, permanent=False):
+        ''' Makes it so Ctrl-Z works.
+            Keeps a reference to the element in the python pcb object,
+            so it persists for the life of that object
+        '''
+        if not permanent:
+            self._removed_elements.append(element)
+        self._obj.Remove(element._obj)
+
+    def restore_removed(self):
+        for element in self._removed_elements:
+            self._obj.Add(element._obj)
+        self._removed_elements = []
