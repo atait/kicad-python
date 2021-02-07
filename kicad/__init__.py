@@ -22,7 +22,7 @@
 #: from kicad import pcbnew_bare as pcbnew
 import os, sys
 try:
-    pcbnew_bare = __import__(pcbnew)
+    pcbnew_bare = __import__('pcbnew')
 except ImportError:
     pcbnew_swig_path = os.environ.get('PCBNEW_PATH', None)
     spoofing_for_documentation = os.environ.get('KICAD_PYTHON_IN_SPHINX_GENERATION', '0')
@@ -32,7 +32,7 @@ except ImportError:
                 'Incorrect location for \'PCBNEW_PATH\' ({}).'
                 ' It should point to a file called pcbnew.py'.format(pcbnew_swig_path))
         sys.path.insert(0, os.path.dirname(pcbnew_swig_path))
-        pcbnew_bare = __import__(pcbnew)
+        pcbnew_bare = __import__('pcbnew')
     elif spoofing_for_documentation == '1':
         class SphinxEnumPhony:
             def __getattr__(self, attr):
