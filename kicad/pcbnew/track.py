@@ -24,18 +24,15 @@ from kicad.pcbnew.item import HasConnection
 
 class Track(HasConnection, object):
     def __init__(self, width, start, end, layer='F.Cu', board=None):
-        self._track = pcbnew.TRACK(board and board.native_obj)
-        self._track.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
-        if board:
-            self._track.SetLayer(board.get_layer(layer))
-        else:
-            self._track.SetLayer(pcbnew_layer.get_std_layer(layer))
-        self._track.SetStart(Point.native_from(start))
-        self._track.SetEnd(Point.native_from(end))
+        self._obj = pcbnew.TRACK(board and board.native_obj)
+        self._obj.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
+        self.layer = layer
+        self._obj.SetStart(Point.native_from(start))
+        self._obj.SetEnd(Point.native_from(end))
 
     @property
     def native_obj(self):
-        return self._track
+        return self._obj
 
     @staticmethod
     def wrap(instance):
@@ -49,6 +46,22 @@ class Track(HasConnection, object):
     @width.setter
     def width(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+
+    @property
+    def layer(self):
+        brd = self._obj.GetBoard()
+        if brd:
+            return brd.GetLayerName(self._obj.GetLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
+
+    @layer.setter
+    def layer(self, value):
+        brd = self._obj.GetBoard()
+        if brd:
+            self._obj.SetLayer(brd.GetLayerID(value))
+        else:
+            self._obj.SetLayer(pcbnew_layer.get_std_layer(value))
 
     def delete(self):
         self._obj.DeleteStructure()

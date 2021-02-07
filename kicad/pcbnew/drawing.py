@@ -51,6 +51,22 @@ class Drawing(object):
         if obj_shape is pcbnew.S_ARC:
             return kicad.new(Arc, instance)
 
+    @property
+    def layer(self):
+        brd = self._obj.GetBoard()
+        if brd:
+            return brd.GetLayerName(self._obj.GetLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
+
+    @layer.setter
+    def layer(self, value):
+        brd = self._obj.GetBoard()
+        if brd:
+            self._obj.SetLayer(brd.GetLayerID(value))
+        else:
+            self._obj.SetLayer(pcbnew_layer.get_std_layer(value))
+
 
 class Segment(Drawing):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):

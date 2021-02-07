@@ -17,7 +17,7 @@
 #  MA 02110-1301, USA.
 #
 from kicad import pcbnew_bare as pcbnew
-from kicad.pcbnew import layer
+from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
 from kicad.pcbnew.item import HasPosition
@@ -33,8 +33,8 @@ class Via(HasPosition, object):
             self._obj.SetLayerPair(board.get_layer(layer_pair[0]),
                                    board.get_layer(layer_pair[1]))
         else:
-            self._obj.SetLayerPair(layer.get_std_layer(layer_pair[0]),
-                                   layer.get_std_layer(layer_pair[1]))
+            self._obj.SetLayerPair(pcbnew_layer.get_std_layer(layer_pair[0]),
+                                   pcbnew_layer.get_std_layer(layer_pair[1]))
 
         self.drill = drill
 
@@ -64,3 +64,36 @@ class Via(HasPosition, object):
     @diameter.setter
     def diameter(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+
+
+    @property
+    def top_layer(self):
+        brd = self._obj.GetBoard()
+        if brd:
+            return brd.GetLayerName(self._obj.TopLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.TopLayer())
+
+    @top_layer.setter
+    def top_layer(self, value):
+        brd = self._obj.GetBoard()
+        if brd:
+            self._obj.SetTopLayer(brd.GetLayerID(value))
+        else:
+            self._obj.SetTopLayer(pcbnew_layer.get_std_layer(value))
+
+    @property
+    def bottom_layer(self):
+        brd = self._obj.GetBoard()
+        if brd:
+            return brd.GetLayerName(self._obj.BottomLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.BottomLayer())
+
+    @bottom_layer.setter
+    def bottom_layer(self, value):
+        brd = self._obj.GetBoard()
+        if brd:
+            self._obj.SetTopLayer(brd.GetLayerID(value))
+        else:
+            self._obj.SetTopLayer(pcbnew_layer.get_std_layer(value))
