@@ -51,7 +51,7 @@ def rotate(coord, angle):
 
 # dicts for converting layer name to id, used by _get_layer
 layer_dict = {pcbnew.BOARD_GetStandardLayerName(n):n for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
-layer_names = {s:n for n, s in layer_dict.iteritems()}
+layer_names = {s:n for n, s in layer_dict.items()}
 
 def _get_layer(s):
     """Get layer id from layer name
@@ -209,12 +209,12 @@ class Pad(object):
                   'smd':pcbnew.PAD_SMD,
                   'conn':pcbnew.PAD_CONN,
                   'hole_not_plated':pcbnew.PAD_HOLE_NOT_PLATED}
-    _pad_types_id = {s:n for n, s in _pad_types.iteritems()}
+    _pad_types_id = {s:n for n, s in _pad_types.items()}
     _shapes = {'circle':pcbnew.PAD_CIRCLE,
                'rect':pcbnew.PAD_RECT,
                'oval':pcbnew.PAD_OVAL,
                'trapezoid':pcbnew.PAD_TRAPEZOID}
-    _shapes_id = {s:n for n, s in _shapes.iteritems()}
+    _shapes_id = {s:n for n, s in _shapes.items()}
 
     def __init__(self, pad):
         self._pad = pad
