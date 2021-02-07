@@ -1,0 +1,12 @@
+This is the `enum34` python module from
+https://pypi.python.org/pypi/enum34 . Normally you should download and
+install this using `pip` command:
+
+    pip install enum34
+
+Unfortunately at the moment KiCad's windows edition (which comes with
+its own python distribution) doesn't come with 'pip' program and it
+cannot be installed (*). `kicad-python` will try to import enum module
+from here if it cannot import it from the default python libraries.
+
+(*) https://bugs.launchpad.net/kicad/+bug/1525917

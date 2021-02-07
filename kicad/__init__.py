@@ -20,6 +20,13 @@ from .units import *
 from .point import *
 from .size import *
 
+# if `enum` cannot be imported (windoze!) we provide our own copy
+try:
+    import enum
+except ImportError:
+    import sys, os
+    module_dir = os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(os.path.join(module_dir,'3rdparty'))
 
 class BareClass(object):
     pass
