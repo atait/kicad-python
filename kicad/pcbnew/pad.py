@@ -17,6 +17,7 @@
 #
 
 from kicad import pcbnew_bare as pcbnew
+
 import kicad
 from kicad import units
 from kicad import Size

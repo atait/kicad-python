@@ -21,8 +21,6 @@ import math
 
 from kicad import pcbnew_bare as pcbnew
 import kicad
-
-
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units

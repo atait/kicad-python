@@ -18,7 +18,6 @@
 #
 from kicad import pcbnew_bare as pcbnew
 
-
 import kicad
 from kicad.pcbnew import drawing
 from kicad.pcbnew import module
