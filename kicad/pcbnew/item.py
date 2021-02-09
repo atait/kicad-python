@@ -88,3 +88,25 @@ class HasConnection(object):
     @property
     def netName(self):
         return self._obj.GetNetname()
+
+    @netName.setter
+    def netName(self, value):
+        """ Takes a name and attempts to look it up based on the containing board """
+        if not self._obj:
+            raise TypeError("Cannot set netName without a containing Board.")
+        try:
+            new_code = self._obj.GetBoard().GetNetcodeFromNetname(value)
+        except IndexError:
+            raise KeyError("Net name '{}' not found in board nets.".format(value))
+        self._obj.SetNetCode(new_code)
+
+    @property
+    def netCode(self):
+        return self._obj.GetNetCode()
+
+    @netCode.setter
+    def netCode(self, value):
+        self._obj.SetNetCode(value)
+
+
+
