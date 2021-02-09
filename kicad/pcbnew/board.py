@@ -111,12 +111,19 @@ class Board(object):
 
     @property
     def zones(self):
-        """An iterator over zone objects"""
+        """ An iterator over zone objects
+            Implementation note: The iterator breaks if zones are removed during the iteration,
+            so it is put in a list first, then yielded from that list.
+            This issue was not seen with the other iterators
+        """
+        builder = list()
         for t in self._obj.Zones():
             if type(t) == pcbnew.ZONE_CONTAINER:
-                yield Zone.wrap(t)
+                builder.append(Zone.wrap(t))
             else:
                 continue
+        for tt in builder:
+            yield tt
 
     @property
     def drawings(self):
@@ -251,3 +258,8 @@ class Board(object):
 
     def deselect_all(self):
         self._obj.ClearSelected()
+
+    def fill_zones(self, zone_to_fill=None):
+        ''' zone_to_fill=None fills all zones in this board '''
+        filler = pcbnew.ZONE_FILLER(self._obj)
+        filler.Fill(self._obj.Zones())
