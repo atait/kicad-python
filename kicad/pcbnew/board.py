@@ -24,6 +24,7 @@ from kicad.pcbnew import module
 from kicad.pcbnew.track import Track
 from kicad.pcbnew.via import Via
 from kicad.pcbnew.drawing import Drawing
+from kicad.pcbnew.zone import Zone
 from kicad import units
 
 class _ModuleList(object):
@@ -105,6 +106,15 @@ class Board(object):
         for t in self._obj.GetTracks():
             if type(t) == pcbnew.TRACK:
                 yield Track.wrap(t)
+            else:
+                continue
+
+    @property
+    def zones(self):
+        """An iterator over zone objects"""
+        for t in self._obj.Zones():
+            if type(t) == pcbnew.ZONE_CONTAINER:
+                yield Zone.wrap(t)
             else:
                 continue
 
@@ -223,7 +233,6 @@ class Board(object):
         return self.add(
             drawing.Arc(center, radius, start_angle, stop_angle,
                         layer, width, board=self))
-
 
     def remove(self, element, permanent=False):
         ''' Makes it so Ctrl-Z works.

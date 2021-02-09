@@ -49,7 +49,7 @@ class Track(HasConnection, object)
 2. Add these lines to kicad python shell startup file
    (PyShell_pcbnew_startup.py) with correct path to 'kicad-python'
 
-```
+```python
 import sys
 sys.path.append("/path/to/kicad-python/")
 from kicad.pcbnew.board import Board

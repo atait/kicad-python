@@ -31,6 +31,10 @@ except ImportError:
             raise EnvironmentError(
                 'Incorrect location for \'PCBNEW_PATH\' ({}).'
                 ' It should point to a file called pcbnew.py'.format(pcbnew_swig_path))
+        if not os.path.isfile(pcbnew_swig_path):
+            raise EnvironmentError(
+                'Incorrect location for \'PCBNEW_PATH\' ({}).'
+                ' File does not exist'.format(pcbnew_swig_path))
         sys.path.insert(0, os.path.dirname(pcbnew_swig_path))
         pcbnew_bare = __import__('pcbnew')
     elif spoofing_for_documentation == '1':
