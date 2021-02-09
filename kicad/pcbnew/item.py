@@ -84,8 +84,6 @@ class HasLayerEnumImpl(object):
 
 class HasLayer(HasLayerEnumImpl):
     _has_warned = False
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
 
     def print_warning(self):
         if not self._has_warned:
@@ -156,6 +154,37 @@ class HasConnection(object):
     @netCode.setter
     def netCode(self, value):
         self._obj.SetNetCode(value)
+
+
+class Selectable(object):
+    """ This influences the main window. Make sure to pcbnew.Refresh() to see it """
+    def __init__(self):
+        raise NotImplementedError("This is an abstract class!")
+
+    def is_selected(self):
+        return bool(self._obj.IsSelected())
+
+    def select(self, value=True):
+        """ Selecting changes the appearance and also plays a role in determining
+            what will be the subject of a subsequent command (delete, move to layer, etc.)
+        """
+        if value:
+            self._obj.SetSelected()
+        else:
+            self._obj.ClearSelected()
+
+    def deselect(self):
+        self.select(False)
+
+    def brighten(self, value=True):
+        """ Brightening gives a bright green appearance """
+        if value:
+            self._obj.SetBrightened()
+        else:
+            self._obj.ClearBrightened()
+
+
+
 
 
 

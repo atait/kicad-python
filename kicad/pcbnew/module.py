@@ -23,7 +23,7 @@ import kicad
 from kicad import Point
 from kicad import Size
 from kicad import DEFAULT_UNIT_IUS
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl
+from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
@@ -83,7 +83,7 @@ class ModuleLine(object):
         if type(instance) is pcbnew.EDGE_MODULE:
             return kicad.new(ModuleLine, instance)
 
-class Module(HasPosition, HasRotation, object):
+class Module(HasPosition, HasRotation, Selectable):
 
     def __init__(self, ref=None, pos=None, board=None):
         self._obj = pcbnew.MODULE(board.native_obj)

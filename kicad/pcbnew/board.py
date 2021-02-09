@@ -247,3 +247,7 @@ class Board(object):
         for element in self._removed_elements:
             self._obj.Add(element._obj)
         self._removed_elements = []
+
+
+    def deselect_all(self):
+        self._obj.ClearSelected()

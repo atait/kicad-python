@@ -21,7 +21,7 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad import units
 from kicad import Size
-from kicad.pcbnew.item import HasPosition, HasConnection
+from kicad.pcbnew.item import HasPosition, HasConnection, Selectable
 from enum import IntEnum
 
 class DrillShape(IntEnum):
@@ -35,7 +35,7 @@ class PadShape(IntEnum):
     RoundedRectangle = pcbnew.PAD_SHAPE_ROUNDRECT
     Trapezoid = pcbnew.PAD_SHAPE_TRAPEZOID
 
-class Pad(HasPosition, HasConnection, object):
+class Pad(HasPosition, HasConnection, Selectable):
     def __init__(self):
         # TODO: add initialization parameters for `Pad`
         pass

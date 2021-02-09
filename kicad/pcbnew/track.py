@@ -22,9 +22,9 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
-from kicad.pcbnew.item import HasConnection, HasLayerStrImpl
+from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
 
-class Track(HasConnection, HasLayerStrImpl):
+class Track(HasConnection, HasLayerStrImpl, Selectable):
     def __init__(self, width, start, end, layer='F.Cu', board=None):
         self._obj = pcbnew.TRACK(board and board.native_obj)
         self._obj.SetWidth(int(width * units.DEFAULT_UNIT_IUS))

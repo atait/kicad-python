@@ -22,9 +22,9 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
-from kicad.pcbnew.item import HasPosition
+from kicad.pcbnew.item import HasPosition, Selectable
 
-class Via(HasPosition, object):
+class Via(HasPosition, Selectable):
     def __init__(self, coord, layer_pair, diameter, drill, board=None):
         self._obj = pcbnew.VIA(board and board.native_obj)
         self.diameter = diameter

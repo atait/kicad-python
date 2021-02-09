@@ -24,10 +24,10 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
-from kicad.pcbnew.item import HasLayerStrImpl
+from kicad.pcbnew.item import HasLayerStrImpl, Selectable
 
 
-class Drawing(HasLayerStrImpl):
+class Drawing(HasLayerStrImpl, Selectable):
     @property
     def native_obj(self):
         return self._obj

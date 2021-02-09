@@ -22,7 +22,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
-from kicad.pcbnew.item import HasConnection, HasLayerStrImpl
+from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
 
 
 class KeepoutAllowance(object):
@@ -76,7 +76,7 @@ class KeepoutAllowance(object):
         return type(self).__name__ + str(self)
 
 
-class Zone(HasConnection, HasLayerStrImpl):
+class Zone(HasConnection, HasLayerStrImpl, Selectable):
     def __init__(self, layer='F.Cu', board=None):
         self._obj = pcbnew.ZONE_CONTAINER(board and board.native_obj)
         self.layer = layer
