@@ -67,7 +67,8 @@ class HasRotation(object):
     def rotation(self, value):
         self._obj.SetOrientation(degrees(value) * 10.)
 
-class HasLayer(object):
+
+class HasLayerEnumImpl(object):
     """Board items that has layer should inherit this."""
     def __init__(self):
         raise NotImplementedError("This is an abstract class!")
@@ -79,6 +80,54 @@ class HasLayer(object):
     @layer.setter
     def layer(self, value):
         self._obj.SetLayer(value.value)
+
+
+class HasLayer(HasLayerEnumImpl):
+    _has_warned = False
+    def __init__(self):
+        raise NotImplementedError("This is an abstract class!")
+
+    def print_warning(self):
+        if not self._has_warned:
+            print('\nDeprecation warning (HasLayer): Use either HasLayerEnumImpl or HasLayerStrImpl.'
+                  '\nDefault will change from Enum to Str in the future.')
+            self._has_warned = True
+
+    @property
+    def layer(self):
+        self.print_warning()
+        return Layer(self._obj.GetLayer())
+
+    @layer.setter
+    def layer(self, value):
+        self.print_warning()
+        self._obj.SetLayer(value.value)
+
+
+class HasLayerStrImpl(object):
+    """ Board items that has layer outside of standard layers should inherit this.
+        String implementation can sometimes be more intuitive, and accomodates custom layer names.
+        If the layer is not present, it will be caught at runtime, rather than disallowed.
+    """
+    def __init__(self):
+        raise NotImplementedError("This is an abstract class!")
+
+    @property
+    def layer(self):
+        brd = self._obj.GetBoard()
+        if brd:
+            return brd.GetLayerName(self._obj.GetLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
+
+    @layer.setter
+    def layer(self, value):
+        brd = self._obj.GetBoard()
+        if brd:
+            self._obj.SetLayer(brd.GetLayerID(value))
+        else:
+            self._obj.SetLayer(pcbnew_layer.get_std_layer(value))
+
 
 class HasConnection(object):
     """All BOARD_CONNECTED_ITEMs should inherit this."""

@@ -23,11 +23,11 @@ import kicad
 from kicad import Point
 from kicad import Size
 from kicad import DEFAULT_UNIT_IUS
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayer
+from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
-class ModuleLabel(HasPosition, HasRotation, HasLayer, object):
+class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl):
     """wrapper for `TEXTE_MODULE`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = pcbnew.TEXTE_MODULE(mod.native_obj)

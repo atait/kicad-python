@@ -24,9 +24,10 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
+from kicad.pcbnew.item import HasLayerStrImpl
 
 
-class Drawing(object):
+class Drawing(HasLayerStrImpl):
     @property
     def native_obj(self):
         return self._obj
@@ -50,22 +51,6 @@ class Drawing(object):
 
         if obj_shape is pcbnew.S_ARC:
             return kicad.new(Arc, instance)
-
-    @property
-    def layer(self):
-        brd = self._obj.GetBoard()
-        if brd:
-            return brd.GetLayerName(self._obj.GetLayer())
-        else:
-            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
-
-    @layer.setter
-    def layer(self, value):
-        brd = self._obj.GetBoard()
-        if brd:
-            self._obj.SetLayer(brd.GetLayerID(value))
-        else:
-            self._obj.SetLayer(pcbnew_layer.get_std_layer(value))
 
 
 class Segment(Drawing):

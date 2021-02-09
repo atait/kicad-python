@@ -22,7 +22,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units
-from kicad.pcbnew.item import HasConnection
+from kicad.pcbnew.item import HasConnection, HasLayerStrImpl
 
 
 class KeepoutAllowance(object):
@@ -76,7 +76,7 @@ class KeepoutAllowance(object):
         return type(self).__name__ + str(self)
 
 
-class Zone(HasConnection, object):
+class Zone(HasConnection, HasLayerStrImpl):
     def __init__(self, layer='F.Cu', board=None):
         self._obj = pcbnew.ZONE_CONTAINER(board and board.native_obj)
         self.layer = layer
@@ -119,22 +119,6 @@ class Zone(HasConnection, object):
     @property
     def allow(self):
         return KeepoutAllowance(self)
-
-    @property
-    def layer(self):
-        brd = self._obj.GetBoard()
-        if brd:
-            return brd.GetLayerName(self._obj.GetLayer())
-        else:
-            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
-
-    @layer.setter
-    def layer(self, value):
-        brd = self._obj.GetBoard()
-        if brd:
-            self._obj.SetLayer(brd.GetLayerID(value))
-        else:
-            self._obj.SetLayer(pcbnew_layer.get_std_layer(value))
 
     def delete(self):
         self._obj.DeleteStructure()
