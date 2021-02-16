@@ -83,11 +83,13 @@ class Arc(Drawing):
                  layer='F.SilkS', width=0.15, board=None):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
         start_coord = Point.native_from((start_coord.real, start_coord.imag))
+        center_coord = Point.native_from(center)
+        start_coord += center_coord
 
         angle = stop_angle - start_angle
         arc = pcbnew.DRAWSEGMENT(board and board.native_obj)
         arc.SetShape(pcbnew.S_ARC)
-        arc.SetCenter(Point.native_from(center))
+        arc.SetCenter(center_coord)
         arc.SetArcStart(start_coord)
         arc.SetAngle(angle * 10)
         arc.SetLayer(pcbnew_layer.get_board_layer(board, layer))
