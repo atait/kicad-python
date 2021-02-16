@@ -241,6 +241,10 @@ class Board(object):
             drawing.Arc(center, radius, start_angle, stop_angle,
                         layer, width, board=self))
 
+    def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15):
+        return self.add(
+            drawing.TextPCB(position, text, layer, size, thickness, board=self))
+
     def remove(self, element, permanent=False):
         ''' Makes it so Ctrl-Z works.
             Keeps a reference to the element in the python pcb object,
@@ -254,7 +258,6 @@ class Board(object):
         for element in self._removed_elements:
             self._obj.Add(element._obj)
         self._removed_elements = []
-
 
     def deselect_all(self):
         self._obj.ClearSelected()

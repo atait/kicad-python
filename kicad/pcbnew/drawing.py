@@ -23,8 +23,8 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
-from kicad import units
-from kicad.pcbnew.item import HasLayerStrImpl, Selectable
+from kicad import units, Size
+from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition
 
 
 class Drawing(HasLayerStrImpl, Selectable):
@@ -95,49 +95,87 @@ class Arc(Drawing):
         self._obj = arc
 
 
-class TextPCB(Drawing):
-    ''' Todo: test the methods. It is copied from ModuleLabel '''
-    pass
-#     """wrapper for `TEXTE_PCB`"""
-#     def __init__(self, mod, text=None, layer=None):
-#         self._obj = pcbnew.TEXTE_PCB(mod.native_obj)
-#         mod.native_obj.Add(self._obj)
-#         if text:
-#             self.text = text
-#         if layer:
-#             self.layer = layer
+class TextPCB(Drawing, HasPosition):
+    def __init__(self, position, text=None, layer='F.SilkS', size=1.0, thickness=0.15, board=None):
+        self._obj = pcbnew.TEXTE_PCB(board and board.native_obj)
+        self.position = position
+        if text:
+            self.text = text
+        self.layer = layer
+        self.size = size
+        self.thickness = thickness
 
-#     @property
-#     def text(self):
-#         return self._obj.GetText()
+    @property
+    def text(self):
+        return self._obj.GetText()
 
-#     @text.setter
-#     def text(self, value):
-#         return self._obj.SetText(value)
+    @text.setter
+    def text(self, value):
+        return self._obj.SetText(value)
 
-#     @property
-#     def thickness(self):
-#         return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
+    @property
+    def thickness(self):
+        return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
 
-#     @thickness.setter
-#     def thickness(self, value):
-#         return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
+    @thickness.setter
+    def thickness(self, value):
+        return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
 
-#     @property
-#     def size(self):
-#         return Size.wrap(self._obj.GetTextSize())
+    @property
+    def size(self):
+        return Size.wrap(self._obj.GetTextSize())
 
-#     @size.setter
-#     def size(self, value):
-#         if isinstance(value, tuple):
-#             if not isinstance(value, Size):
-#                 value = Size(value[0], value[1])
-#             self._obj.SetTextSize(value.native_obj)
+    @size.setter
+    def size(self, value):
+        if isinstance(value, tuple):
+            if not isinstance(value, Size):
+                value = Size(value[0], value[1])
+            self._obj.SetTextSize(value.native_obj)
 
-#         else: # value is a single number/integer
-#             self._obj.SetTextSize(Size(value, value).native_obj)
+        else: # value is a single number/integer
+            self._obj.SetTextSize(Size(value, value).native_obj)
 
-#     @staticmethod
-#     def wrap(instance):
-#         if type(instance) is pcbnew.TEXTE_MODULE:
-#             return kicad.new(ModuleLabel, instance)
+    @property
+    def orientation(self):
+        return self._obj.GetTextAngle() / 10
+
+    @orientation.setter
+    def orientation(self, value):
+        self._obj.SetTextAngle(value * 10)
+
+    @property
+    def justification(self):
+        hj = self._obj.GetHorizJustify()
+        vj = self._obj.GetVertJustify()
+        for k, v in lookups.items():
+            if hj == getattr(pcbnew, v):
+                hjs = k
+            if vj in getattr(pcbnew, v):
+                vjs = k
+        return hjs, vjs
+
+    @justification.setter
+    def justification(self, value):
+        if isinstance(value, (list, tuple)):
+            assert len(value) == 2
+            self.justification = value[0]
+            self.justification = value[1]
+        else:
+            try:
+                token = lookups[value]
+            except KeyError:
+                raise ValueError('Invalid justification {} of available {}'.format(value, list(lookups.keys())))
+            enum_val = getattr(pcbnew, token)
+            if 'HJUSTIFY' in token:
+                self._obj.SetHorizJustify(enum_val)
+            else:
+                self._obj.SetVertJustify(enum_val)
+
+lookups = dict(
+    left='GR_TEXT_HJUSTIFY_LEFT',
+    center='GR_TEXT_HJUSTIFY_CENTER',
+    right='GR_TEXT_HJUSTIFY_RIGHT',
+    bottom='GR_TEXT_VJUSTIFY_BOTTOM',
+    middle='GR_TEXT_VJUSTIFY_CENTER',
+    top='GR_TEXT_VJUSTIFY_TOP',
+)
