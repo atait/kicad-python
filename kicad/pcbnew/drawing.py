@@ -52,6 +52,19 @@ class Drawing(HasLayerStrImpl, Selectable):
         if obj_shape is pcbnew.S_ARC:
             return kicad.new(Arc, instance)
 
+        if obj_shape is pcbnew.S_POLYGON:
+            return kicad.new(Polygon, instance)
+
+        # Time to fail
+        layer = instance.GetLayer()
+        layer_str = pcbnew.BOARD_GetStandardLayerName(layer)
+        unsupported = ['S_CURVE', 'S_RECT', 'S_LAST']
+        for unsup in unsupported:
+            if obj_shape is getattr(pcbnew, unsup):
+                raise TypeError('Unsupported shape type: pcbnew.{} on layer {}.'.format(unsup, layer_str))
+
+        raise TypeError('Unrecognized shape type on layer {}'.format(layer_str))
+
 
 class Segment(Drawing):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
@@ -95,6 +108,11 @@ class Arc(Drawing):
         arc.SetLayer(pcbnew_layer.get_board_layer(board, layer))
         arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = arc
+
+
+class Polygon(Drawing):
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError('Polygon direct instantiation is not supported by kicad-python')
 
 
 class TextPCB(Drawing, HasPosition):
