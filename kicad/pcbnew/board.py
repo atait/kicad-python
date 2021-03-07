@@ -60,7 +60,6 @@ class Board(object):
             self._obj = pcbnew.BOARD()
 
         self._modulelist = _ModuleList(self)
-        self._removed_elements = []
 
     @property
     def native_obj(self):
@@ -251,8 +250,16 @@ class Board(object):
             so it persists for the life of that object
         '''
         if not permanent:
+            if not hasattr(self, '_removed_elements'):
+                self._removed_elements = []
             self._removed_elements.append(element)
         self._obj.Remove(element._obj)
+
+    def restore_removed(self):
+        if hasattr(self, '_removed_elements'):
+            for element in self._removed_elements:
+                self._obj.Add(element._obj)
+        self._removed_elements = []
 
     def restore_removed(self):
         for element in self._removed_elements:

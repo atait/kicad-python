@@ -23,7 +23,7 @@ import kicad
 from kicad import Point
 from kicad import Size
 from kicad import DEFAULT_UNIT_IUS
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable
+from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
@@ -72,7 +72,7 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl):
         if type(instance) is pcbnew.TEXTE_MODULE:
             return kicad.new(ModuleLabel, instance)
 
-class ModuleLine(object):
+class ModuleLine(HasLayerStrImpl):
     """Wrapper for `EDGE_MODULE`"""
     @property
     def native_obj(self):
@@ -84,6 +84,7 @@ class ModuleLine(object):
             return kicad.new(ModuleLine, instance)
 
 class Module(HasPosition, HasRotation, Selectable):
+
 
     def __init__(self, ref=None, pos=None, board=None):
         self._obj = pcbnew.MODULE(board.native_obj)
@@ -178,3 +179,20 @@ class Module(HasPosition, HasRotation, Selectable):
     def pads(self):
         for p in self._obj.Pads():
             yield Pad.wrap(p)
+
+    def remove(self, element, permanent=False):
+        ''' Makes it so Ctrl-Z works.
+            Keeps a reference to the element in the python pcb object,
+            so it persists for the life of that object
+        '''
+        if not permanent:
+            if not hasattr(self, '_removed_elements'):
+                self._removed_elements = []
+            self._removed_elements.append(element)
+        self._obj.Remove(element._obj)
+
+    def restore_removed(self):
+        if hasattr(self, '_removed_elements'):
+            for element in self._removed_elements:
+                self._obj.Add(element._obj)
+        self._removed_elements = []
