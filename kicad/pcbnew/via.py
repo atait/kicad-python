@@ -107,3 +107,8 @@ class Via(HasPosition, Selectable):
             self._obj.SetTopLayer(brd.GetLayerID(value))
         else:
             self._obj.SetTopLayer(pcbnew_layer.get_std_layer(value))
+
+    @property
+    def is_through(self):
+        return self._obj.GetViaType() == pcbnew.VIA_THROUGH
+        # self._obj.GetViaType() in [pcbnew.VIA_MICROVIA, pcbnew.VIA_BLIND_BURIED]

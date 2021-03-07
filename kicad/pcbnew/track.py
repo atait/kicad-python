@@ -49,5 +49,21 @@ class Track(HasConnection, HasLayerStrImpl, Selectable):
     def width(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
 
+    @property
+    def start(self):
+        return Point.wrap(self._obj.GetStart())
+
+    @start.setter
+    def start(self, value):
+        self._obj.SetStart(Point.native_from(value))
+
+    @property
+    def end(self):
+        return Point.wrap(self._obj.GetEnd())
+
+    @end.setter
+    def end(self, value):
+        self._obj.SetEnd(Point.native_from(value))
+
     def delete(self):
         self._obj.DeleteStructure()

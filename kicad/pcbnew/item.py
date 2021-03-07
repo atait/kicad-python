@@ -53,6 +53,7 @@ class HasPosition(object):
     def y(self, value):
         self.position = (self.x, value)
 
+
 class HasRotation(object):
     """Board items that has rotation property should inherit this."""
     def __init__(self):

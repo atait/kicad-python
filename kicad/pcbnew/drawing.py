@@ -66,7 +66,16 @@ class Drawing(HasLayerStrImpl, Selectable):
         raise TypeError('Unrecognized shape type on layer {}'.format(layer_str))
 
 
-class Segment(Drawing):
+class HasWidth(object):
+    @property
+    def width(self):
+        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
+
+    @width.setter
+    def width(self, value):
+        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+
+class Segment(Drawing, HasWidth):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
         line = pcbnew.DRAWSEGMENT(board and board.native_obj)
         line.SetShape(pcbnew.S_SEGMENT)
@@ -76,8 +85,24 @@ class Segment(Drawing):
         line.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = line
 
+    @property
+    def start(self):
+        return Point.wrap(self._obj.GetStart())
 
-class Circle(Drawing):
+    @start.setter
+    def start(self, value):
+        self._obj.SetStart(Point.native_from(value))
+
+    @property
+    def end(self):
+        return Point.wrap(self._obj.GetEnd())
+
+    @end.setter
+    def end(self, value):
+        self._obj.SetEnd(Point.native_from(value))
+
+
+class Circle(Drawing, HasWidth):
     def __init__(self, center, radius, layer='F.SilkS', width=0.15,
                  board=None):
         circle = pcbnew.DRAWSEGMENT(board and board.native_obj)
@@ -90,8 +115,32 @@ class Circle(Drawing):
         circle.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = circle
 
+    @property
+    def center(self):
+        return Point.wrap(self._obj.GetCenter())
 
-class Arc(Drawing):
+    @center.setter
+    def center(self, value):
+        self._obj.SetCenter(Point.native_from(value))
+
+    @property
+    def start(self):
+        return Point.wrap(self._obj.GetArcStart())
+
+    @start.setter
+    def start(self, value):
+        self._obj.SetArcStart(Point.native_from(value))
+
+    @property
+    def radius(self):
+        return float(self._obj.GetRadius()) / units.DEFAULT_UNIT_IUS
+
+    @radius.setter
+    def radius(self, value):
+        self._obj.SetRadius(int(value * units.DEFAULT_UNIT_IUS))
+
+
+class Arc(Drawing, HasWidth):
     def __init__(self, center, radius, start_angle, stop_angle,
                  layer='F.SilkS', width=0.15, board=None):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
@@ -109,8 +158,40 @@ class Arc(Drawing):
         arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = arc
 
+    @property
+    def center(self):
+        return Point.wrap(self._obj.GetCenter())
 
-class Polygon(Drawing):
+    @center.setter
+    def center(self, value):
+        self._obj.SetCenter(Point.native_from(value))
+
+    @property
+    def start(self):
+        return Point.wrap(self._obj.GetArcStart())
+
+    @start.setter
+    def start(self, value):
+        self._obj.SetArcStart(Point.native_from(value))
+
+    @property
+    def end(self):
+        return Point.wrap(self._obj.GetArcEnd())
+
+    @end.setter
+    def end(self, value):
+        self._obj.SetArcEnd(Point.native_from(value))
+
+    @property
+    def angle(self):
+        return float(self._obj.GetAngle()) / 10
+
+    @angle.setter
+    def angle(self, value):
+        self._obj.SetAngle(value * 10)
+
+
+class Polygon(Drawing, HasWidth):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError('Polygon direct instantiation is not supported by kicad-python')
 
@@ -167,7 +248,7 @@ class TextPCB(Drawing, HasPosition):
     def justification(self):
         hj = self._obj.GetHorizJustify()
         vj = self._obj.GetVertJustify()
-        for k, v in lookups.items():
+        for k, v in justification_lookups.items():
             if hj == getattr(pcbnew, v):
                 hjs = k
             if vj in getattr(pcbnew, v):
@@ -182,16 +263,16 @@ class TextPCB(Drawing, HasPosition):
             self.justification = value[1]
         else:
             try:
-                token = lookups[value]
+                token = justification_lookups[value]
             except KeyError:
-                raise ValueError('Invalid justification {} of available {}'.format(value, list(lookups.keys())))
+                raise ValueError('Invalid justification {} of available {}'.format(value, list(justification_lookups.keys())))
             enum_val = getattr(pcbnew, token)
             if 'HJUSTIFY' in token:
                 self._obj.SetHorizJustify(enum_val)
             else:
                 self._obj.SetVertJustify(enum_val)
 
-lookups = dict(
+justification_lookups = dict(
     left='GR_TEXT_HJUSTIFY_LEFT',
     center='GR_TEXT_HJUSTIFY_CENTER',
     right='GR_TEXT_HJUSTIFY_RIGHT',
