@@ -85,3 +85,23 @@ Finally, make `kicad-python` visible system-wide with
 cd /path/to/kicad-python
 pip install .
 ```
+
+## Examples
+
+### Hide all silkscreen labels
+```python
+for m in pcb.modules:
+    m.referenceLabel.visible = False
+pcbnew.Refresh()
+```
+
+Instead, we can keep them on Fab layers so we can still see them while designing the PCB.
+```python
+for m in pcb.modules:
+    ref = m.referenceLabel
+    if ref.layer == Layer.FrontSilkScreen:
+        ref.layer = Layer.FrontFab
+    elif ref.layer == Layer.BackSilkScreen:
+        ref.layer = Layer.BackFab
+pcbnew.Refresh()
+```
