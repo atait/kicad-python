@@ -27,7 +27,7 @@ from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Select
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
-class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl):
+class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl, Selectable):
     """wrapper for `TEXTE_MODULE`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = pcbnew.TEXTE_MODULE(mod.native_obj)
@@ -44,6 +44,14 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl):
     @text.setter
     def text(self, value):
         return self._obj.SetText(value)
+
+    @property
+    def visible(self):
+        raise ValueError('ModuleLabel.visible is write only.')
+
+    @visible.setter
+    def visible(self, value):
+        return self._obj.SetVisible(value)
 
     @property
     def thickness(self):
@@ -72,7 +80,7 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl):
         if type(instance) is pcbnew.TEXTE_MODULE:
             return kicad.new(ModuleLabel, instance)
 
-class ModuleLine(HasLayerStrImpl):
+class ModuleLine(HasLayerStrImpl, Selectable):
     """Wrapper for `EDGE_MODULE`"""
     @property
     def native_obj(self):
