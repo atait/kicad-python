@@ -8,8 +8,7 @@ better documentation via sphinx.
 
 ### Warning
 
-This library is under development and requires a fairly recent (daily)
-build of KiCad. It may not work with stable versions.
+This library and kicad API itself are under development. It has been tested for pcbnew plugins and shell with python 2 and 3. Standalone processing requires a python 3 build of kicad, which is currently only released for Linux. This has not been tested with kicad v6, although it should adapt to the v6 programming framework without modification, to the extent that v6 is backwards compatible.
 
 ## Description
 KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty and outdated; it is a clunky SWIG/C-style API with custom datatypes for things like lists; and it exposes too much functionality on equal footing.
@@ -27,24 +26,9 @@ which produces
 [F.Cu, B.Cu, B.Cu]
 [0.8, 0.8, 0.6]
 ```
-This simple interface is not possible with the SWIG API. The wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern. From the `Track` class:
-```python
-class Track(HasConnection, object)
-    ...
-    @property
-    def layer(self):
-        brd = self._obj.GetBoard()
-        return brd.GetLayerName(self._obj.GetLayer())
-```
-
-### pykicad
-[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI with abilities to refresh and move the view window. Both work for batch processing. 
-
-Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version works with any python3 version of kicad.
+This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern.
 
 ## Installation
-
-### Automatic version
 
 <!-- 1. Users: 
 ```bash
@@ -61,8 +45,7 @@ pip install kicad-python/.
 
 2. Open the pcbnew application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run
 ```python
-import pcbnew
-print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
+import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.GetKicadConfigPath())
 ```
 which will give you something like this
 ```
@@ -70,7 +53,7 @@ link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/usern
 ```
 Copy that *entire* last line.
 
-3. From any command line interpreter, paste that thing and run it.
+3. From any command line shell, paste that thing and run it.
 
 \[**fallback**\] If that fails because you don't have file permissions or something, you can instead set the environment variable "PCBNEW_PATH" to the first path that comes out of that command. Put this line in your .bashrc or .zshrc
 ```bash
@@ -83,22 +66,31 @@ pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()
 ```
 
 #### What is `link_kicad_python_to_pcbnew`?
-This command creates a bidirectional link, telling `kicad` (this package) and `pcbnew` (their builtin C++ package) where to find each other. First, it writes a pcbnew plugin that runs automatically when the application starts. It looks like this
+This command creates a bidirectional link, telling `kicad` (this package) and `pcbnew` (their builtin C++ wrapper) where to find each other. 
+
+First, it writes a script for the pcbnew application shell. This first step is crucial for using kicad-python for on-the-fly macros and plugin development. It runs automatically when the shell opens. It looks like this
 ```python
 import sys
 sys.path.append("/path/to/your/kicad-python/")
 from kicad.pcbnew.board import Board
-pcb = Board.from_editor()
+pcb = Board.from_editor()  # pcb is now a global variable
 ```
-The plugin *must* go in /home/myself/.config/kicad/scripting/plugins (depending on your system), and you have to tell it where that is in step #2.
+The script *must* go in /home/myself/.config/kicad/PyShell_pcbnew_startup.py (depending on your system).
 
-This first step is crucial for using kicad-python in the pcbnew application and action plugins.
+Second, it exposes kicad-python to the pcbnew action plugin environment. This is a script that goes in the "scripting/plugins" directory and is imported automatically when the application opens. It is crucial in order to use kicad-python in your action plugins.
 
-Then, it creates a link from your non-GUI python interpreter. This is stored in a file called `.path_to_pcbnew_module`, which is located in the package installation. Since it is a file, it persists after the first time. You can override this in an environment variable `PCBNEW_PATH`. Again, you have to give it some help to find it the first time in step #2.
+Third, it exposes `pcbnew` to this pythonic package. This is crucial for using kicad-python outside of the pcbnew application: batch processing, cloud computers, or any other applications (like FreeCAD!)
 
-This second step is crucial for using kicad-python outside of the pcbnew application: batch processing, cloud computers, or any other applications (like FreeCAD!)
+The path is stored in a file called `.path_to_pcbnew_module`, which is located in the package installation. Since it is a file, it persists after the first time. You can override this in an environment variable `PCBNEW_PATH`.
+
+### pykicad
+[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI with abilities to refresh and move the view window. Both work for batch processing. 
+
+Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version works with any python3 version of kicad.
+
 
 ## Examples
+These all can be run in the pcbnew application console on Mac/Windows/Linux and python 2/3.
 
 ### Hide silkscreen labels of selected footprints
 ```python
@@ -128,10 +120,10 @@ counters = defaultdict(lambda: 1)
 for m in pcb.modules:
     component_class = m.reference[0]
     counters[component_class] += 1
-    m.reference = '{}{:30d}'.format(component_class, counters[component_class])
+    m.reference = '{}{:03d}'.format(component_class, counters[component_class])
 pcbnew.Refresh()
 ```
-The `:30d` means three decimal places like "C003". Iteration order is not guaranteed, although you could figure it out using the `Module.position` properties.
+The `:03d` means three decimal places like "C003". Iteration order is not guaranteed, although you could figure it out using the `Module.position` properties.
 
 ### Change all drill sizes
 Because planning ahead doesn't always work

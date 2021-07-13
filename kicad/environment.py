@@ -54,7 +54,18 @@ def get_pcbnew_module():
     pcbnew_swig_path = get_pcbnew_path()
     if pcbnew_swig_path:
         sys.path.insert(0, os.path.dirname(pcbnew_swig_path))
-        pcbnew_bare = __import__('pcbnew')
+        try:
+            pcbnew_bare = __import__('pcbnew')
+        except ImportError as err:
+            if err.args[0].startswith('dynamic module does not define'):
+                print('You are likely using Mac or Windows,'
+                      ' which means kicad does not yet support python 3 on your system.'
+                      ' You will be able to use kicad-python within the pcbnew application,'
+                      ' but not as a standalone.')
+            else:
+                print('Warning: pcbnew.py was located but could not be imported. It might be a python 2/3 issue:\n')
+                print(err)
+            pcbnew_bare = None
     else:
         # special case for documentation without pcbnew at all
         spoofing_for_documentation = os.environ.get('KICAD_PYTHON_IN_SPHINX_GENERATION', '0')
@@ -65,13 +76,26 @@ def get_pcbnew_module():
             pcbnew_bare = SphinxEnumPhony()
         else:
             # failed to find pcbnew
-            raise EnvironmentError(
+            print(
                 'pcbnew is required by kicad-python.'
                 ' It gets installed when you install the kicad application, but not necessarily on your python path.'
                 '\nSee instructions for how to link them at https://github.com/atait/kicad-python'
             )
             pcbnew_bare = None
     return pcbnew_bare
+
+try:
+        get_pcbnew_path()
+    except ImportError as err:
+        if err.args[0].startswith('dynamic module does not define'):
+            print('You are likely using Mac or Windows,'
+                  ' which means kicad does not yet support python 3 on your system.'
+                  ' You will be able to use kicad-python in the pcbnew application,'
+                  ' but not outside of it for batch processing.')
+        else:
+            raise
+    else:
+        print('Successfully linked kicad-python with pcbnew')
 
 
 # Tells pcbnew application where to find this package
@@ -139,7 +163,7 @@ help_msg = """
 Create bidirectional link between kicad-python and pcbnew.
 To get the arguments correct, copy this and run it in pcbnew application console:
 
-  import pcbnew; print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
+  import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.GetKicadConfigPath())
 
 Copy the output of that and paste it back into this console.
 """
