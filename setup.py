@@ -16,4 +16,5 @@ setuptools.setup(
         packages=setuptools.find_packages(exclude=['ez_setup']),
         zip_safe=False,
         install_requires=reqs,
+        entry_points={'console_scripts': 'link_kicad_python_to_pcbnew=kicad.environment:cl_main'},
         test_suite='kicad.test.unit')

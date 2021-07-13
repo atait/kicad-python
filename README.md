@@ -40,51 +40,61 @@ class Track(HasConnection, object)
 ### pykicad
 [pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is fully transparent, while `kicad-python` is not, but it works within the pcbnew GUI with abilities to refresh and move the view window.
 
-## How to Use
+## Installation
 
-### Quick start
+### Automatic version
 
-1. Clone this repository to any location
+<!-- 1. Users: 
+```bash
+pip install kicad
+```
+ 
+For developers: Clone this repository to any location, and run `pip install kicad-python/.` -->
 
-2. Add these lines to kicad python shell startup file
-   (PyShell_pcbnew_startup.py) with correct path to 'kicad-python'
+1. 
+```
+git clone git@github.com:atait/kicad-python
+pip install kicad-python/.
+```
 
+2. Open the pcbnew application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run
+```python
+import pcbnew
+print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
+```
+which will give you something like this
+```
+link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
+```
+Copy that *entire* last line.
+
+3. From any command line interpreter, paste that thing and run it.
+
+\[**fallback**\] If that fails because you don't have file permissions or something, you can instead set the environment variable "PCBNEW_PATH" to the first path that comes out of that command. Put this line in your .bashrc or .zshrc
+```bash
+export PCBNEW_PATH=/usr/lib/...
+```
+
+4. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
+```python
+pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()
+```
+
+#### What is `link_kicad_python_to_pcbnew`?
+This command creates a bidirectional link, telling `kicad` (this package) and `pcbnew` (their builtin GUI-based package) where to find each other. First, it writes a pcbnew plugin that runs automatically when the application starts. It looks like this
 ```python
 import sys
-sys.path.append("/path/to/kicad-python/")
+sys.path.append("/path/to/your/kicad-python/")
 from kicad.pcbnew.board import Board
-
-board = Board.from_editor()
+pcb = Board.from_editor()
 ```
+The plugin *must* go in /home/myself/.config/kicad/scripting/plugins (depending on your system), and you have to tell it where that is in step #2.
 
-3. Launch the python shell from kicad and access the board components
-   via the global object `board`.
+This first step is crucial for using kicad-python in the pcbnew application and action plugins.
 
-### From outside of pcbnew GUI
-The SWIG bindings are exposed in the file `pcbnew.py`, which is installed with KiCAD. The problem is that nobody knows where it is, especially not your python installation. To find it, open the pcbnew application. Open its terminal and run
-```python
->>> import pcbnew
->>> print(pcbnew.__file__)
-/usr/lib/python3/pcbnew.py  # for example
-```
-For `kicad-python` to find it, set the environment variable
-```bash
-export PCBNEW_PATH=/usr/lib/python3/pcbnew.py
-```
-according to the output of the prior command. Put this line in your .bashrc or .zshrc or conda using these commands
-```bash
-conda create -n pcb-development  # you might have done this already
-conda activate pcb-development
+Then, it creates a link from your non-GUI python interpreter. This is stored in a file called `.path_to_pcbnew_module`, which is located in the package installation. Since it is a file, it persists after the first time. You can override this in an environment variable. Again, you have to give it some help to find it the first time in step #2.
 
-mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d
-echo "export PCBNEW_PATH=/usr/lib/python3/pcbnew.py" > ${CONDA_PREFIX}/etc/conda/activate.d/find_pcbnew.sh
-```
-
-Finally, make `kicad-python` visible system-wide with
-```bash
-cd /path/to/kicad-python
-pip install .
-```
+This second step is crucial for using kicad-python outside of the pcbnew application: batch processing, cloud computers, or any other applications (like FreeCAD!)
 
 ## Examples
 
