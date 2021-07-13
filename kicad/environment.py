@@ -16,14 +16,7 @@
 import os, sys
 import argparse
 
-# Tells pcbnew application where to find this package
-plugin_script = """
-''' Initialization plugin '''
-import sys, pcbnew
-sys.path.append("{}")
-from kicad.pcbnew.board import Board
-pcb = Board.from_editor()
-"""
+
 
 # Tells this package where to find pcbnew module
 pcbnew_path_store = os.path.join(os.path.dirname(__file__), '.path_to_pcbnew_module')
@@ -81,19 +74,42 @@ def get_pcbnew_module():
     return pcbnew_bare
 
 
-def create_link(kicad_config_path, pcbnew_module_path):
-    # Determine what to put in the plugin
+# Tells pcbnew application where to find this package
+startup_script = """### Auto generated kicad-python initialization script
+import sys, pcbnew
+sys.path.append("{}")
+from kicad.pcbnew.board import Board
+pcb = Board.from_editor()
+"""
+
+
+def create_link(pcbnew_module_path, kicad_config_path):
+    # Determine what to put in the startup script
     my_package_path = os.path.dirname(__file__)
     my_search_path = os.path.dirname(my_package_path)
-    plugin_contents = plugin_script.format(my_search_path)
-    # Determine where to put the plugin
-    plugin_dir = os.path.join(kicad_config_path.strip(), 'scripting', 'plugins')
-    os.makedirs(plugin_dir, exist_ok=True)
-    plugin_file = os.path.join(plugin_dir, 'initialize_kicad_python_plugin.py')
-    # Write the plugin
-    print('Writing plugin to', plugin_file)
-    with open(plugin_file, 'w') as fx:
-        fx.write(plugin_contents)
+    startup_contents = startup_script.format(my_search_path)
+    # Determine where to put the startup script
+    startup_file = os.path.join(kicad_config_path.strip(), 'PyShell_pcbnew_startup.py')
+    # Check that we are not overwriting something
+    write_is_safe = True
+    if os.path.isfile(startup_file):
+        with open(startup_file) as fx:
+            line = fx.readline()
+        if line.startswith('### DEFAULT STARTUP FILE'):
+            pass
+        elif line.startswith('### Auto generated kicad-python'):
+            pass
+        else:
+            write_is_safe = False
+
+    # Write the startup script
+    if write_is_safe:
+        print('Writing startup script to', startup_file)
+        with open(startup_file, 'w') as fx:
+            fx.write(startup_contents)
+    else:
+        print('Warning: Startup file is not empty:\n', startup_file)
+        print('It is safer to do this manually by inserting these lines into that file:\n\n', startup_script)
 
     # Store the location of pcbnew module
     print('Writing pcbnew path to', pcbnew_path_store)
@@ -105,10 +121,18 @@ def create_link(kicad_config_path, pcbnew_module_path):
     print('Successfully linked kicad-python with pcbnew')
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('kicad_config_path', type=str)
+help_msg = """
+Create bidirectional link between kicad-python and pcbnew.
+To get the arguments correct, copy this and run it in pcbnew application console:
+
+  import pcbnew; print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
+
+Copy the output of that and paste it back into this console.
+"""
+parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=help_msg)
 parser.add_argument('pcbnew_module_path', type=str)
+parser.add_argument('kicad_config_path', type=str)
 
 def cl_main():
     args = parser.parse_args()
-    create_link(args.kicad_config_path, args.pcbnew_module_path)
+    create_link(args.pcbnew_module_path, args.kicad_config_path)
