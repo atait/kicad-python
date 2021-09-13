@@ -84,19 +84,6 @@ def get_pcbnew_module():
             pcbnew_bare = None
     return pcbnew_bare
 
-try:
-        get_pcbnew_path()
-    except ImportError as err:
-        if err.args[0].startswith('dynamic module does not define'):
-            print('You are likely using Mac or Windows,'
-                  ' which means kicad does not yet support python 3 on your system.'
-                  ' You will be able to use kicad-python in the pcbnew application,'
-                  ' but not outside of it for batch processing.')
-        else:
-            raise
-    else:
-        print('Successfully linked kicad-python with pcbnew')
-
 
 # Tells pcbnew application where to find this package
 startup_script = """### Auto generated kicad-python initialization for pcbnew console
