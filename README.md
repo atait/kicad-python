@@ -45,7 +45,7 @@ pip install kicad-python/.
 
 2. Open the pcbnew application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run
 ```python
-import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.GetKicadConfigPath())
+import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.SETTINGS_MANAGER_GetUserSettingsPath())
 ```
 which will give you something like this
 ```

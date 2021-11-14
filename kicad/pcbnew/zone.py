@@ -1,5 +1,4 @@
-#  Copyright 2014 Piers Titus van der Torren <pierstitus@gmail.com>
-#  Copyright 2015 Miguel Angel Ajo <miguelangel@ajo.es>
+#  Copyright 2020 Alexander Tait <atait@ieee.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

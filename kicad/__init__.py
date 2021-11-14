@@ -23,7 +23,12 @@
 import os, sys
 from kicad.environment import get_pcbnew_module
 
-pcbnew_bare = get_pcbnew_module()
+try:
+    pcbnew_bare = get_pcbnew_module()
+except EnvironmentError:
+    print('Warning: pcbnew.py is not found or PCBNEW_PATH is corrupted. '
+        'Only environment commands will be available')
+    pcbnew_bare = None
 if pcbnew_bare:
     from .units import *
     from .point import Point
