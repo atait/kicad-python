@@ -36,6 +36,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
 ]
+# Make kicad the python package visible
+sys.path.insert(0, os.path.abspath('../..'))
 
 # Make kicad the python package visible and spoof pcbnew
 sys.path.insert(0, os.path.abspath('../..'))
