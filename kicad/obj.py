@@ -18,14 +18,15 @@
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
+from kicad import SWIGtype
 from kicad.pcbnew import board
 from kicad.pcbnew import drawing
 from kicad.pcbnew import module
 
 
 _WRAPPERS = {pcbnew.BOARD: board.Board,
-             pcbnew.DRAWSEGMENT: drawing.Drawing,
-             pcbnew.MODULE: module.Module,
+             SWIGtype.Shape: drawing.Drawing,
+             SWIGtype.Footprint: module.Module,
              pcbnew.wxPoint: kicad.Point,
              pcbnew.wxSize: kicad.Size}
 

@@ -20,17 +20,16 @@
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
-from kicad import Point
-from kicad import Size
-from kicad import DEFAULT_UNIT_IUS
+from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype
 from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
+
 class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl, Selectable):
     """wrapper for `TEXTE_MODULE`"""
     def __init__(self, mod, text=None, layer=None):
-        self._obj = pcbnew.TEXTE_MODULE(mod.native_obj)
+        self._obj = SWIGtype.FpText(mod.native_obj)
         mod.native_obj.Add(self._obj)
         if text:
             self.text = text
@@ -77,8 +76,9 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl, Selectable):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) is pcbnew.TEXTE_MODULE:
+        if type(instance) is SWIGtype.FpText:
             return kicad.new(ModuleLabel, instance)
+
 
 class ModuleLine(HasLayerStrImpl, Selectable):
     """Wrapper for `EDGE_MODULE`"""
@@ -88,14 +88,13 @@ class ModuleLine(HasLayerStrImpl, Selectable):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) is pcbnew.EDGE_MODULE:
+        if type(instance) is SWIGtype.FpShape:
             return kicad.new(ModuleLine, instance)
 
+
 class Module(HasPosition, HasRotation, Selectable):
-
-
     def __init__(self, ref=None, pos=None, board=None):
-        self._obj = pcbnew.MODULE(board.native_obj)
+        self._obj = SWIGtype.Footprint(board.native_obj)
         if ref:
             self.reference = ref
         if pos:
@@ -109,7 +108,7 @@ class Module(HasPosition, HasRotation, Selectable):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) is pcbnew.MODULE:
+        if type(instance) is SWIGtype.Footprint:
             return kicad.new(Module, instance)
 
     @property
@@ -142,9 +141,9 @@ class Module(HasPosition, HasRotation, Selectable):
     def graphicalItems(self):
         """Text and drawings of module iterator."""
         for item in self._obj.GraphicalItems():
-            if type(item) == pcbnew.EDGE_MODULE:
+            if type(item) == SWIGtype.FpShape:
                 yield ModuleLine.wrap(item)
-            elif type(item) == pcbnew.TEXTE_MODULE:
+            elif type(item) == SWIGtype.FpText:
                 yield ModuleLabel.wrap(item)
             else:
                 raise Exception("Unknown module item type: %s" % type(item))
@@ -173,7 +172,7 @@ class Module(HasPosition, HasRotation, Selectable):
 
     def copy(self, ref, pos=None, board=None):
         """Create a copy of an existing module on the board"""
-        _module = pcbnew.MODULE(board and board._obj)
+        _module = SWIGtype.Footprint(board and board._obj)
         _module.Copy(self._obj)
         module = Module.wrap(_module)
         module.reference = ref

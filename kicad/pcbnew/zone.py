@@ -20,7 +20,7 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
-from kicad import units
+from kicad import units, SWIGtype
 from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
 
 
@@ -77,7 +77,7 @@ class KeepoutAllowance(object):
 
 class Zone(HasConnection, HasLayerStrImpl, Selectable):
     def __init__(self, layer='F.Cu', board=None):
-        self._obj = pcbnew.ZONE_CONTAINER(board and board.native_obj)
+        self._obj = SWIGtype.Zone(board and board.native_obj)
         self.layer = layer
         raise NotImplementedError('Constructor not supported yet')
 

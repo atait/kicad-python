@@ -25,7 +25,8 @@ from kicad.pcbnew.track import Track
 from kicad.pcbnew.via import Via
 from kicad.pcbnew.drawing import Drawing
 from kicad.pcbnew.zone import Zone
-from kicad import units
+from kicad import units, SWIGtype
+
 
 class _ModuleList(object):
     """Internal class to represent `Board.modules`"""
@@ -94,7 +95,7 @@ class Board(object):
     def vias(self):
         """An iterator over via objects"""
         for t in self._obj.GetTracks():
-            if type(t) == pcbnew.VIA:
+            if type(t) == SWIGtype.Via:
                 yield Via.wrap(t)
             else:
                 continue
@@ -103,7 +104,7 @@ class Board(object):
     def tracks(self):
         """An iterator over track objects"""
         for t in self._obj.GetTracks():
-            if type(t) == pcbnew.TRACK:
+            if type(t) == SWIGtype.Track:
                 yield Track.wrap(t)
             else:
                 continue
@@ -117,7 +118,7 @@ class Board(object):
         """
         builder = list()
         for t in self._obj.Zones():
-            if type(t) == pcbnew.ZONE_CONTAINER:
+            if type(t) == SWIGtype.Zone:
                 builder.append(Zone.wrap(t))
             else:
                 continue
@@ -128,7 +129,7 @@ class Board(object):
     def drawings(self):
         all_drawings = []
         for drawing in self._obj.GetDrawings():
-            if isinstance(drawing, (pcbnew.DRAWSEGMENT, pcbnew.TEXTE_PCB)):
+            if isinstance(drawing, (SWIGtype.Shape, SWIGtype.Text)):
                 yield Drawing.wrap(drawing)
 
     @staticmethod

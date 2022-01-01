@@ -21,12 +21,24 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
-from kicad import units
+from kicad import units, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasPosition, HasConnection, Selectable
+from enum import IntEnum
+
+if SWIG_version == 6:
+    class ViaType(IntEnum):
+        Through = pcbnew.VIATYPE_THROUGH
+        Micro = pcbnew.VIATYPE_MICROVIA
+        Blind = pcbnew.VIATYPE_BLIND_BURIED
+else:
+    class ViaType(IntEnum):
+        Through = pcbnew.VIA_THROUGH
+        Micro = pcbnew.VIA_MICROVIA
+        Blind = pcbnew.VIA_BLIND_BURIED
 
 class Via(HasPosition, HasConnection, Selectable):
     def __init__(self, coord, layer_pair, diameter, drill, board=None):
-        self._obj = pcbnew.VIA(board and board.native_obj)
+        self._obj = SWIGtype.Via(board and board.native_obj)
         self.diameter = diameter
         coord_point = Point.build_from(coord)
         self._obj.SetEnd(coord_point.native_obj)
@@ -110,5 +122,5 @@ class Via(HasPosition, HasConnection, Selectable):
 
     @property
     def is_through(self):
-        return self._obj.GetViaType() == pcbnew.VIA_THROUGH
-        # self._obj.GetViaType() in [pcbnew.VIA_MICROVIA, pcbnew.VIA_BLIND_BURIED]
+        return self._obj.GetViaType() == ViaType.Through
+        # self._obj.GetViaType() in [ViaType.Micro, ViaType.Blind]
