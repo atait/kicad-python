@@ -22,7 +22,9 @@
 
     1. Run this in pcbnew's terminal window::
 
-    print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
+    # (OLD VERSION): print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
+    import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.SETTINGS_MANAGER_GetUserSettingsPath())
+
 
     Copy the output. It should look something like::
 

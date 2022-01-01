@@ -34,7 +34,7 @@ class _ModuleList(object):
         self._board = board
 
     def __getitem__(self, key):
-        found = self._board._obj.FindModuleByReference(key)
+        found = self._board._obj.FindFootprintByReference(key)
         if found:
             return module.Module.wrap(found)
         else:
@@ -46,11 +46,11 @@ class _ModuleList(object):
         # over keys ('reference' in our case). See:
         # https://docs.python.org/2.7/reference/datamodel.html?emulating-container-types#object.__iter__
         # But in my opinion `_ModuleList` is a list then mapping.
-        for m in self._board._obj.GetModules():
+        for m in self._board._obj.GetFootprints():
             yield module.Module.wrap(m)
 
     def __len__(self):
-        return self._board._obj.GetModules().GetCount()
+        return len(self._board._obj.GetFootprints())
 
 class Board(object):
     def __init__(self, wrap=None):
@@ -87,7 +87,7 @@ class Board(object):
     def moduleByRef(self, ref):
         """Returns the module that has the reference `ref`. Returns `None` if
         there is no such module."""
-        found = self._obj.FindModuleByReference(ref)
+        found = self._obj.FindFootprintByReference(ref)
         if found:
             return module.Module.wrap(found)
 
