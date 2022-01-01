@@ -124,3 +124,10 @@ class Via(HasPosition, HasConnection, Selectable):
     def is_through(self):
         return self._obj.GetViaType() == ViaType.Through
         # self._obj.GetViaType() in [ViaType.Micro, ViaType.Blind]
+
+    @is_through.setter
+    def is_through(self, value):
+        if value:
+            self._obj.SetViaType(ViaType.Through)
+        else:
+            self._obj.SetViaType(ViaType.Blind)
