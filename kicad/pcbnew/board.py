@@ -262,11 +262,6 @@ class Board(object):
                 self._obj.Add(element._obj)
         self._removed_elements = []
 
-    def restore_removed(self):
-        for element in self._removed_elements:
-            self._obj.Add(element._obj)
-        self._removed_elements = []
-
     def deselect_all(self):
         self._obj.ClearSelected()
 

@@ -118,7 +118,8 @@ class Circle(Drawing, HasWidth):
         start_coord = Point.native_from(
             (center[0], center[1] + radius))
         if SWIG_version == 6:
-            circle.SetStart(start_coord)
+            circle.SetEnd(start_coord)
+            circle.SetModified()
         else:
             circle.SetArcStart(start_coord)
         circle.SetLayer(pcbnew_layer.get_board_layer(board, layer))
@@ -135,12 +136,15 @@ class Circle(Drawing, HasWidth):
 
     @property
     def start(self):
-        return Point.wrap(self._obj.GetArcStart())
+        if SWIG_version == 6:
+            return Point.wrap(self._obj.GetEnd())
+        else:
+            return Point.wrap(self._obj.GetArcStart())
 
     @start.setter
     def start(self, value):
         if SWIG_version == 6:
-            self._obj.SetStart(Point.native_from(value))
+            self._obj.SetEnd(Point.native_from(value))
         else:
             self._obj.SetArcStart(Point.native_from(value))
 
