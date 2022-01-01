@@ -23,9 +23,15 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
-from kicad import units, Size
+from kicad import units, Size, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition
+from enum import IntEnum
 
+class ShapeType(IntEnum):
+    Segment = pcbnew.S_SEGMENT
+    Circle = pcbnew.S_CIRCLE
+    Arc = pcbnew.S_ARC
+    Polygon = pcbnew.S_POLYGON
 
 class Drawing(HasLayerStrImpl, Selectable):
     @property
@@ -34,9 +40,9 @@ class Drawing(HasLayerStrImpl, Selectable):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) is pcbnew.DRAWSEGMENT:
+        if type(instance) == SWIGtype.Shape:
             return Drawing._wrap_drawsegment(instance)
-        elif type(instance) is pcbnew.TEXTE_PCB:
+        elif type(instance) == SWIGtype.Text:
             return kicad.new(TextPCB, instance)
 
     @staticmethod
@@ -75,10 +81,11 @@ class HasWidth(object):
     def width(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
 
+
 class Segment(Drawing, HasWidth):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
-        line = pcbnew.DRAWSEGMENT(board and board.native_obj)
-        line.SetShape(pcbnew.S_SEGMENT)
+        line = SWIGtype.Shape(board and board.native_obj)
+        line.SetShape(ShapeType.Segment)
         line.SetStart(Point.native_from(start))
         line.SetEnd(Point.native_from(end))
         line.SetLayer(pcbnew_layer.get_board_layer(board, layer))
@@ -105,12 +112,15 @@ class Segment(Drawing, HasWidth):
 class Circle(Drawing, HasWidth):
     def __init__(self, center, radius, layer='F.SilkS', width=0.15,
                  board=None):
-        circle = pcbnew.DRAWSEGMENT(board and board.native_obj)
-        circle.SetShape(pcbnew.S_CIRCLE)
+        circle = SWIGtype.Shape(board and board.native_obj)
+        circle.SetShape(ShapeType.Circle)
         circle.SetCenter(Point.native_from(center))
         start_coord = Point.native_from(
             (center[0], center[1] + radius))
-        circle.SetArcStart(start_coord)
+        if SWIG_version == 6:
+            circle.SetStart(start_coord)
+        else:
+            circle.SetArcStart(start_coord)
         circle.SetLayer(pcbnew_layer.get_board_layer(board, layer))
         circle.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = circle
@@ -129,7 +139,10 @@ class Circle(Drawing, HasWidth):
 
     @start.setter
     def start(self, value):
-        self._obj.SetArcStart(Point.native_from(value))
+        if SWIG_version == 6:
+            self._obj.SetStart(Point.native_from(value))
+        else:
+            self._obj.SetArcStart(Point.native_from(value))
 
     @property
     def radius(self):
@@ -140,7 +153,8 @@ class Circle(Drawing, HasWidth):
         self._obj.SetRadius(int(value * units.DEFAULT_UNIT_IUS))
 
 
-class Arc(Drawing, HasWidth):
+# --- Logic for Arc changed a lot in version 6, so there are two classes
+class Arc_v5(Drawing, HasWidth):
     def __init__(self, center, radius, start_angle, stop_angle,
                  layer='F.SilkS', width=0.15, board=None):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
@@ -149,8 +163,8 @@ class Arc(Drawing, HasWidth):
         start_coord += center_coord
 
         angle = stop_angle - start_angle
-        arc = pcbnew.DRAWSEGMENT(board and board.native_obj)
-        arc.SetShape(pcbnew.S_ARC)
+        arc = SWIGtype.Shape(board and board.native_obj)
+        arc.SetShape(ShapeType.Arc)
         arc.SetCenter(center_coord)
         arc.SetArcStart(start_coord)
         arc.SetAngle(angle * 10)
@@ -191,6 +205,64 @@ class Arc(Drawing, HasWidth):
         self._obj.SetAngle(value * 10)
 
 
+class Arc_v6(Drawing, HasWidth):
+    def __init__(self, center, radius, start_angle, stop_angle,
+                 layer='F.SilkS', width=0.15, board=None):
+        start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
+        start_coord = Point.native_from((start_coord.real, start_coord.imag))
+        center_coord = Point.native_from(center)
+        start_coord += center_coord
+
+        angle = stop_angle - start_angle
+        arc = SWIGtype.Shape(board and board.native_obj)
+        arc.SetShape(ShapeType.Arc)
+        arc.SetCenter(center_coord)
+        arc.SetStart(start_coord)
+        arc.SetArcAngleAndEnd(angle * 10)
+        arc.SetLayer(pcbnew_layer.get_board_layer(board, layer))
+        arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
+        self._obj = arc
+
+    @property
+    def center(self):
+        return Point.wrap(self._obj.GetCenter())
+
+    @center.setter
+    def center(self, value):
+        self._obj.SetCenter(Point.native_from(value))
+
+    @property
+    def start(self):
+        return Point.wrap(self._obj.GetStart())
+
+    @start.setter
+    def start(self, value):
+        self._obj.SetStart(Point.native_from(value))
+
+    @property
+    def end(self):
+        return Point.wrap(self._obj.GetEnd())
+
+    @end.setter
+    def end(self, value):
+        start = self._obj.GetStart()
+        mid = self._obj.GetArcMid()
+        self._obj.SetArcGeometry(start, mid, Point.native_from(value))
+
+    @property
+    def angle(self):
+        return float(self._obj.GetArcAngle()) / 10
+
+    @angle.setter
+    def angle(self, value):
+        self._obj.SetArcAngleAndEnd(value * 10)
+
+if SWIG_version == 6:
+    Arc = Arc_v6
+else:
+    Arc = Arc_v5
+
+
 class Polygon(Drawing, HasWidth):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError('Polygon direct instantiation is not supported by kicad-python')
@@ -198,7 +270,7 @@ class Polygon(Drawing, HasWidth):
 
 class TextPCB(Drawing, HasPosition):
     def __init__(self, position, text=None, layer='F.SilkS', size=1.0, thickness=0.15, board=None):
-        self._obj = pcbnew.TEXTE_PCB(board and board.native_obj)
+        self._obj = SWIGtype.Text(board and board.native_obj)
         self.position = position
         if text:
             self.text = text
