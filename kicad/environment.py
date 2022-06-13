@@ -53,7 +53,7 @@ def get_pcbnew_path():
     pcbnew_swig_path = os.environ.get('PCBNEW_PATH', get_pcbnew_path_from_file())
     if pcbnew_swig_path:
         # Validate
-        if os.path.basename(pcbnew_swig_path) != 'pcbnew.py':
+        if not os.path.basename(pcbnew_swig_path).startswith('pcbnew.py'):
             raise EnvironmentError(
                 'Incorrect location for \'PCBNEW_PATH\' ({}).'
                 ' It should point to a file called pcbnew.py'.format(pcbnew_swig_path))
@@ -161,8 +161,18 @@ def create_link(pcbnew_module_path, kicad_config_path):
         fx.write(pcbnew_module_path.strip())
 
     # Try it
-    get_pcbnew_path()
-    print('Successfully linked kicad-python with pcbnew')
+    try:
+        get_pcbnew_path()
+    except ImportError as err:
+        if err.args[0].startswith('dynamic module does not define'):
+            print('You are likely using Mac or Windows,'
+                  ' which means kicad does not yet support python 3 on your system.'
+                  ' You will be able to use kicad-python in the pcbnew application,'
+                  ' but not outside of it for batch processing.')
+        else:
+            raise
+    else:
+        print('Successfully linked kicad-python with pcbnew')
 
 
 help_msg = """

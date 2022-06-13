@@ -8,7 +8,7 @@ better documentation via sphinx.
 
 ### Warning
 
-This library and kicad API itself are under development. It has been tested for pcbnew plugins and shell with python 2 and 3. Standalone processing requires a python 3 build of kicad, which is currently only released for Linux. This has not been tested with kicad v6, although it should adapt to the v6 programming framework without modification, to the extent that v6 is backwards compatible.
+This library is under development. It has not been tested with python 2 or kicad v6, although it should work with those for the most part.
 
 ## Description
 KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty and outdated; it is a clunky SWIG/C-style API with custom datatypes for things like lists; and it exposes too much functionality on equal footing.
@@ -87,7 +87,6 @@ The path is stored in a file called `.path_to_pcbnew_module`, which is located i
 [pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI with abilities to refresh and move the view window. Both work for batch processing. 
 
 Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version works with any python3 version of kicad.
-
 
 ## Examples
 These all can be run in the pcbnew application console on Mac/Windows/Linux and python 2/3.
