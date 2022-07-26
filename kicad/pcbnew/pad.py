@@ -21,7 +21,7 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad import units
 from kicad import Size
-from kicad.pcbnew.item import HasPosition, HasConnection, Selectable
+from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable
 from enum import IntEnum
 
 class DrillShape(IntEnum):
@@ -34,8 +34,16 @@ class PadShape(IntEnum):
     Rectangle = pcbnew.PAD_SHAPE_RECT
     RoundedRectangle = pcbnew.PAD_SHAPE_ROUNDRECT
     Trapezoid = pcbnew.PAD_SHAPE_TRAPEZOID
+    Chamfered = pcbnew.PAD_SHAPE_CHAMFERED_RECT
+    Custom = pcbnew.PAD_SHAPE_CUSTOM
 
-class Pad(HasPosition, HasConnection, Selectable):
+class PadType(IntEnum):
+    Through = pcbnew.PAD_ATTRIB_PTH
+    SMD = pcbnew.PAD_ATTRIB_SMD
+    Connector = pcbnew.PAD_ATTRIB_CONN
+    NPTH = pcbnew.PAD_ATTRIB_NPTH
+
+class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable):
     def __init__(self):
         # TODO: add initialization parameters for `Pad`
         pass
@@ -48,6 +56,15 @@ class Pad(HasPosition, HasConnection, Selectable):
     def wrap(instance):
         """Wraps a C++ api PAD object, and returns a `Pad`."""
         return kicad.new(Pad, instance)
+
+    @property
+    def padType(self):
+        return PadType(self._obj.GetAttribute())
+
+    @padType.setter
+    def padType(self, value):
+        """Value should be `PadType`."""
+        self._obj.SetAttribute(value)
 
     @property
     def drillShape(self):

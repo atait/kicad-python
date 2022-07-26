@@ -32,6 +32,7 @@ class ShapeType(IntEnum):
     Circle = pcbnew.S_CIRCLE
     Arc = pcbnew.S_ARC
     Polygon = pcbnew.S_POLYGON
+    Rect = pcbnew.S_RECT
 
 class Drawing(HasLayerStrImpl, Selectable):
     @property
@@ -61,11 +62,16 @@ class Drawing(HasLayerStrImpl, Selectable):
         if obj_shape is pcbnew.S_POLYGON:
             return kicad.new(Polygon, instance)
 
+        if obj_shape is pcbnew.S_RECT:
+            return kicad.new(Rectangle, instance)
+
         # Time to fail
         layer = instance.GetLayer()
         layer_str = pcbnew.BOARD_GetStandardLayerName(layer)
-        unsupported = ['S_CURVE', 'S_RECT', 'S_LAST']
+        unsupported = ['S_CURVE', 'S_LAST']
         for unsup in unsupported:
+            if not hasattr(pcbnew, unsup):
+                continue
             if obj_shape is getattr(pcbnew, unsup):
                 raise TypeError('Unsupported shape type: pcbnew.{} on layer {}.'.format(unsup, layer_str))
 
@@ -270,6 +276,10 @@ else:
 class Polygon(Drawing, HasWidth):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError('Polygon direct instantiation is not supported by kicad-python')
+
+class Rectangle(Drawing, HasWidth):
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError('Rectangle direct instantiation is not supported by kicad-python')
 
 
 class TextPCB(Drawing, HasPosition):

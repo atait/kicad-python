@@ -20,7 +20,7 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
-from kicad import units, SWIGtype
+from kicad import units, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
 
 
@@ -109,11 +109,17 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable):
 
     @property
     def is_keepout(self):
-        return bool(self._obj.GetIsKeepout())
+        if SWIG_version == 6:
+            return bool(self._obj.GetIsRuleArea())
+        else:
+            return bool(self._obj.GetIsKeepout())
 
     @is_keepout.setter
     def is_keepout(self, value):
-        self._obj.SetIsKeepout(bool(value))
+        if SWIG_version == 6:
+            self._obj.SetIsRuleArea(bool(value))
+        else:
+            self._obj.SetIsKeepout(bool(value))
 
     @property
     def allow(self):

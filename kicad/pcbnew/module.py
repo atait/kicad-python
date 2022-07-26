@@ -18,6 +18,7 @@
 #  MA 02110-1301, USA.
 #
 from kicad import pcbnew_bare as pcbnew
+from atait_scripting_support import reload, notify
 
 import kicad
 from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype
@@ -26,7 +27,7 @@ from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
 
-class ModuleLabel(HasPosition, HasRotation, HasLayerEnumImpl, Selectable):
+class ModuleLabel(HasPosition, HasRotation, HasLayerStrImpl, Selectable):
     """wrapper for `TEXTE_MODULE`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = SWIGtype.FpText(mod.native_obj)
