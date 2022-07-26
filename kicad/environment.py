@@ -72,6 +72,9 @@ def get_pcbnew_module():
 
     pcbnew_swig_path = get_pcbnew_path()
     if pcbnew_swig_path:
+        # if 'Frameworks' in pcbnew_swig_path:
+        #     dynlib_path = pcbnew_swig_path.split('Frameworks')[0] + 'Frameworks'
+        #     sys.path.insert(0, dynlib_path)
         sys.path.insert(0, os.path.dirname(pcbnew_swig_path))
         try:
             pcbnew_bare = __import__('pcbnew')

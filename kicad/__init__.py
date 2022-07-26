@@ -62,28 +62,32 @@ def new(class_type, instance):
 
 
 # Determine version
-if hasattr(pcbnew_bare, 'PCB_TRACK'):
-    SWIG_version = 6
+if pcbnew_bare is None:
+    SWIG_version = None
+    class SWIGtype: pass
 else:
-    SWIG_version = 5
+    if hasattr(pcbnew_bare, 'PCB_TRACK'):
+        SWIG_version = 6
+    else:
+        SWIG_version = 5
 
-if SWIG_version == 6:
-    class SWIGtype:
-        Zone = pcbnew_bare.ZONE
-        Track = pcbnew_bare.PCB_TRACK
-        Via = pcbnew_bare.PCB_VIA
-        Shape = pcbnew_bare.PCB_SHAPE
-        Text = pcbnew_bare.PCB_TEXT
-        Footprint = pcbnew_bare.FOOTPRINT
-        FpText = pcbnew_bare.FP_TEXT
-        FpShape = pcbnew_bare.FP_SHAPE
-else:
-    class SWIGtype:
-        Zone = pcbnew_bare.ZONE_CONTAINER
-        Track = pcbnew_bare.TRACK
-        Via = pcbnew_bare.VIA
-        Shape = pcbnew_bare.DRAWSEGMENT
-        Text = pcbnew_bare.TEXTE_PCB
-        Footprint = pcbnew_bare.MODULE
-        FpText = pcbnew_bare.TEXTE_MODULE
-        FpShape = pcbnew_bare.EDGE_MODULE
+    if SWIG_version == 6:
+        class SWIGtype:
+            Zone = pcbnew_bare.ZONE
+            Track = pcbnew_bare.PCB_TRACK
+            Via = pcbnew_bare.PCB_VIA
+            Shape = pcbnew_bare.PCB_SHAPE
+            Text = pcbnew_bare.PCB_TEXT
+            Footprint = pcbnew_bare.FOOTPRINT
+            FpText = pcbnew_bare.FP_TEXT
+            FpShape = pcbnew_bare.FP_SHAPE
+    else:
+        class SWIGtype:
+            Zone = pcbnew_bare.ZONE_CONTAINER
+            Track = pcbnew_bare.TRACK
+            Via = pcbnew_bare.VIA
+            Shape = pcbnew_bare.DRAWSEGMENT
+            Text = pcbnew_bare.TEXTE_PCB
+            Footprint = pcbnew_bare.MODULE
+            FpText = pcbnew_bare.TEXTE_MODULE
+            FpShape = pcbnew_bare.EDGE_MODULE
