@@ -6,12 +6,8 @@ feedback to create a less C++ tied API.
 A second intention of this new API is also to provide
 better documentation via sphinx.
 
-### Warning
-
-This library is under development. It has not been tested with python 2 or kicad v6, although it should work with those for the most part.
-
 ## Description
-KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty and outdated; it is a clunky SWIG/C-style API with custom datatypes for things like lists; and it exposes too much functionality on equal footing.
+KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty; it is a clunky SWIG/C-style API with custom datatypes for things like lists; and it exposes too much functionality on equal footing.
 
 This package is a more pythonic wrapper around the `pcbnew` API. It implements patterns such as objects, properties, and iterables. It performs more intuitive unit and layer handling. It only exposes functionality most relevant to editing boards, the idea being that native functionality can always be accessed through the wrapped objects if needed.
 
@@ -43,21 +39,29 @@ git clone git@github.com:atait/kicad-python
 pip install kicad-python/.
 ```
 
-2. Open the pcbnew application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run
+2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run these commands in kicad 6
 ```python
-import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
+>>> import pcbnew
+>>> pcbnew.__file__
+# [Path A]: This will give something like "/usr/lib/python3/dist-packages/pcbnew.py"
+>>> pcbnew.SETTINGS_MANAGER.GetUserSettingsPath()
+# [Path B]: This will give something like "home/username/.config/kicad"
 ```
-(For kicad 5, replace that last "." with a "\_"). This will give you something like this
+For kicad 5, replace that last command with `pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()` (note the last underscore).
+
+3. Go back to your external command line or Terminal shell, and run this command, replacing Path A and Path B with what you got above.
+```bash
+link_kicad_python_to_pcbnew [Path A] [Path B]
 ```
+For example,
+```bash
 link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
 ```
-Copy that *entire* last line.
-
-3. From any command line shell, paste that thing and run it.
 
 \[**fallback**\] If that fails because you don't have file permissions or something, you can instead set the environment variable "PCBNEW_PATH" to the first path that comes out of that command. Put this line in your .bashrc or .zshrc
 ```bash
-export PCBNEW_PATH=/usr/lib/python3/dist-packages/pcbnew.py
+# In general: export PCBNEW_PATH="[Path A]"
+export PCBNEW_PATH=/usr/lib/python3/dist-packages/pcbnew.py  # For example
 ```
 
 4. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
@@ -65,31 +69,38 @@ export PCBNEW_PATH=/usr/lib/python3/dist-packages/pcbnew.py
 pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()
 ```
 
-#### What is `link_kicad_python_to_pcbnew`?
-This command creates a bidirectional link, telling `kicad` (this package) and `pcbnew` (their builtin C++ wrapper) where to find each other. 
+#### What is `link_kicad_python_to_pcbnew` doing for you?
+As long as the above procedure works, you do not have to read this part.
 
-First, it writes a script for the pcbnew application shell. This first step is crucial for using kicad-python for on-the-fly macros and plugin development. It runs automatically when the shell opens. It looks like this
+The KiCad application comes with its own isolated version of python. It is not designed to install any new packages like this one. Furthermore, its python API is not installed in a place that your external python or pip can find.
+
+`link_kicad_python_to_pcbnew` creates a bidirectional link, telling `kicad-python` (this package) and `pcbnew.py` (their builtin C++ wrapper) where to find each other. The script all does this for you.
+
+First, it writes an initialization script for the pcbnew GUI's application terminal. It runs automatically when the shell opens and looks like this
 ```python
+# File (for example): /home/myself/.config/kicad/PyShell_pcbnew_startup.py
 import sys
 sys.path.append("/path/to/your/kicad-python/")
 from kicad.pcbnew.board import Board
-pcb = Board.from_editor()  # pcb is now a global variable
+pcb = Board.from_editor()  # pcb is now a global variable in the terminal
 ```
-The script *must* go in /home/myself/.config/kicad/PyShell_pcbnew_startup.py (depending on your system).
+**Effect:** You can now use `kicad-python` features in your GUI terminal. Quick 3-line scripts can be quite useful (examples below).
 
-Second, it exposes kicad-python to the pcbnew action plugin environment. This is a script that goes in the "scripting/plugins" directory and is imported automatically when the application opens. It is crucial in order to use kicad-python in your action plugins.
+Second, the script exposes `kicad-python` to the pcbnew GUI action plugin environment. It does this by linking this package into the "kicad/scripting/plugins" directory.
 
-Third, it exposes `pcbnew` to this pythonic package. This is crucial for using kicad-python outside of the pcbnew application: batch processing, cloud computers, or any other applications (like FreeCAD!)
+**Effect:** You can now use `kicad-python` when developing action plugins.
 
-The path is stored in a file called `.path_to_pcbnew_module`, which is located in the package installation. Since it is a file, it persists after the first time. You can override this in an environment variable `PCBNEW_PATH`.
+Third, it exposes KiCad's `pcbnew.py` to your external python environment. The path is stored in a file called `.path_to_pcbnew_module`, which is located in the `kicad-python` package installation. Since it is a file, it persists after the first time. You can override this in an environment variable `PCBNEW_PATH`.
+
+**Effect:** You can now use the full KiCad built-in SWIG wrapper, the `kicad-python` package, and any non-GUI plugins you are developing *outside of the pcbnew application*. It is useful for batch processing, remote computers, procedural layout, continuous integration, and use in other software such as FreeCAD and various autorouters.
 
 ### pykicad
-[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI with abilities to refresh and move the view window. Both work for batch processing. 
+[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI terminal. It can also control GUI features, such as refreshing display, processing based on selections, and moving the view window. Both work for batch processing.
 
-Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version works with any python3 version of kicad.
+Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version should (in theory) work with any version of KiCad 5 or 6.
 
 ## Examples
-These all can be run in the pcbnew application console on Mac/Windows/Linux and python 2/3.
+These all should work in the pcbnew 5 or 6 GUI terminal on Mac/Windows/Linux.
 
 ### Hide silkscreen labels of selected footprints
 ```python
@@ -158,4 +169,4 @@ for w in widths:
     y += 20
 pcbnew.Refresh()
 ```
-Go ahead and try this out in the pcbnew console. The sky is the limit when it comes to procedural layout.
+Go ahead and try this out in the pcbnew terminal. The sky is the limit when it comes to procedural layout.
