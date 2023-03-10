@@ -18,7 +18,6 @@
 #  MA 02110-1301, USA.
 #
 from kicad import pcbnew_bare as pcbnew
-from atait_scripting_support import reload, notify
 
 import kicad
 from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype
