@@ -64,7 +64,7 @@ link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/usern
 export PCBNEW_PATH=/usr/lib/python3/dist-packages/pcbnew.py  # For example
 ```
 
-4. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
+3. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
 ```python
 pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()
 ```
