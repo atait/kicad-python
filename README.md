@@ -1,10 +1,13 @@
-# kicad-python
+# kicad-python: atait fork
 Development of a new Python scripting API for KiCad
 based on Piers Titus van der Torren work and comunity
 feedback to create a less C++ tied API.
 
 A second intention of this new API is also to provide
 better documentation via sphinx.
+
+This repo has been fully tested with KiCAD 5/6 and partially tested with KiCAD 7.
+Note: the KiCAD/kicad-python and pointhi/kicad-python and PyPI:kicad-python are not working with KiCAD versions 5, 6, or 7.
 
 ## Description
 KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty; it is a clunky SWIG/C-style API with custom datatypes for things like lists; and it exposes too much functionality on equal footing.
