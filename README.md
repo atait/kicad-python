@@ -114,12 +114,21 @@ Third, it exposes KiCad's `pcbnew.py` to your external python environment. The p
 **Effect:** You can now use the full KiCad built-in SWIG wrapper, the `kicad-python` package, and any non-GUI plugins you are developing *outside of the pcbnew application*. It is useful for batch processing, remote computers, procedural layout, continuous integration, and use in other software such as FreeCAD and various autorouters.
 
 ### pykicad
-[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI terminal. It can also control GUI features, such as refreshing display, processing based on selections, and moving the view window. 
+[pykicad](https://github.com/dvc94ch/pykicad) and various other packages use an approach of parsing ".kicad_pcb" files directly, without involvement of the KiCad's `pcbnew.py` library. In contrast, `kicad-python` wraps that SWIG library provided by KiCAD devs. Both packages work for batch processing but have complementary strengths appropriate for different use cases.
 
-Both packages work for batch processing; however, ".kicad_pcb" format changed between versions. Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version should work with any version of KiCad 5/6/7/(8?)
+`pykicad` strengths
+- pure python
+- works out of the box without configuring environment
+- no KiCad installation required
+
+`kicad-python` strengths
+- compatible with KiCad v5/6/7/(8?) and associated file standards
+- exposes all `pcbnew.py` functionality in headless environments
+- works within KiCad GUI terminal and Action Plugins
+- can interact with GUI states, such as selection/highlighting
 
 ## Examples
-These all should work in the pcbnew 5 or 6 GUI terminal on Mac/Windows/Linux.
+These all should work in the pcbnew 5, 6, or 7 GUI terminal on Mac/Windows/Linux.
 
 ### Hide silkscreen labels of selected footprints
 ```python
