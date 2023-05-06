@@ -182,9 +182,16 @@ class Module(HasPosition, HasRotation, Selectable):
         return self._obj.GetFPID().GetLibItemName().GetChars()
 
     def copy(self, ref, pos=None, board=None):
-        """Create a copy of an existing module on the board"""
-        _module = SWIGtype.Footprint(board and board._obj)
-        _module.Copy(self._obj)
+        """Create a copy of an existing module on the board
+            A new reference designator is required, example:
+                mod2 = mod1.copy('U2')
+                mod2.reference == 'U2'  # True
+        """
+        if SWIG_version >= 7:
+            _module = SWIGtype.Footprint(self._obj)
+        else:
+            _module = SWIGtype.Footprint(board and board._obj)
+            _module.Copy(self._obj)
         module = Module.wrap(_module)
         module.reference = ref
         if pos:

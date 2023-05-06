@@ -20,3 +20,6 @@ class TestPcbnewDrawing(unittest.TestCase):
         native_arc = Arc((0, 0), 10.0, -90, 90)._obj
         new_arc = obj.wrap(native_arc)
         self.assertEqual(Arc, type(new_arc))
+        self.assertEqual(new_arc.angle, 180)
+        new_arc.angle = 40  # This will be rounded within 1e-3
+        self.assertTrue(abs(new_arc.angle - 40) < 0.001)

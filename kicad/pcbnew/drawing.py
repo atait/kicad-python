@@ -259,11 +259,18 @@ class Arc_v6(Drawing, HasWidth):
 
     @property
     def angle(self):
-        return float(self._obj.GetArcAngle()) / 10
+        if SWIG_version >= 7:
+            return float(self._obj.GetArcAngle().AsDegrees())
+        else:
+            return float(self._obj.GetArcAngle()) / 10
 
     @angle.setter
     def angle(self, value):
-        self._obj.SetArcAngleAndEnd(value * 10)
+        if SWIG_version >= 7:
+            val_obj = pcbnew.EDA_ANGLE(value, pcbnew.EDA_UNITS_DEGREES)
+            self._obj.SetArcAngleAndEnd(val_obj)
+        else:
+            self._obj.SetArcAngleAndEnd(value * 10)
 
 if SWIG_version >= 6:
     Arc = Arc_v6

@@ -57,6 +57,12 @@ def load_std_layers():
     if _std_layer_dict is None:
         _std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
                            for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
+        # For backwards compatibility with silkscreen renames
+        try:
+            _std_layer_dict['F.SilkS'] = _std_layer_dict['F.Silkscreen']
+            _std_layer_dict['B.SilkS'] = _std_layer_dict['B.Silkscreen']
+        except KeyError:
+            pass
     if _std_layer_names is None:
         _std_layer_names = {s: n for n, s in _std_layer_dict.items()}
 
