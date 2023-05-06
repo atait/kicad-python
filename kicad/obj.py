@@ -27,8 +27,8 @@ from kicad.pcbnew import module
 _WRAPPERS = {pcbnew.BOARD: board.Board,
              SWIGtype.Shape: drawing.Drawing,
              SWIGtype.Footprint: module.Module,
-             pcbnew.wxPoint: kicad.Point,
-             pcbnew.wxSize: kicad.Size}
+             SWIGtype.Point: kicad.Point,
+             SWIGtype.Size: kicad.Size}
 
 
 def wrap(instance):

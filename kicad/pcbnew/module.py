@@ -20,7 +20,7 @@
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
-from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype
+from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad

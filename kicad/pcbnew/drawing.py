@@ -123,7 +123,7 @@ class Circle(Drawing, HasWidth):
         circle.SetCenter(Point.native_from(center))
         start_coord = Point.native_from(
             (center[0], center[1] + radius))
-        if SWIG_version == 6:
+        if SWIG_version >= 6:
             circle.SetEnd(start_coord)
             circle.SetModified()
         else:
@@ -142,14 +142,14 @@ class Circle(Drawing, HasWidth):
 
     @property
     def start(self):
-        if SWIG_version == 6:
+        if SWIG_version >= 6:
             return Point.wrap(self._obj.GetEnd())
         else:
             return Point.wrap(self._obj.GetArcStart())
 
     @start.setter
     def start(self, value):
-        if SWIG_version == 6:
+        if SWIG_version >= 6:
             self._obj.SetEnd(Point.native_from(value))
         else:
             self._obj.SetArcStart(Point.native_from(value))
@@ -267,7 +267,7 @@ class Arc_v6(Drawing, HasWidth):
     def angle(self, value):
         self._obj.SetArcAngleAndEnd(value * 10)
 
-if SWIG_version == 6:
+if SWIG_version >= 6:
     Arc = Arc_v6
 else:
     Arc = Arc_v5

@@ -20,6 +20,7 @@
 #                 or make the wx* objects compatible across bindings
 from kicad import pcbnew_bare
 import kicad
+from kicad import SWIGtype
 
 from kicad.units import *
 
@@ -28,8 +29,8 @@ class Size(BaseUnitTuple):
 
     def __init__(self, width, height):
         self._class = Size
-        self._obj = pcbnew_bare.wxSize(width * DEFAULT_UNIT_IUS,
-                                  height * DEFAULT_UNIT_IUS)
+        self._obj = SWIGtype.Size(int(width * DEFAULT_UNIT_IUS),
+                                  int(height * DEFAULT_UNIT_IUS))
 
     @staticmethod
     def wrap(instance):

@@ -23,17 +23,14 @@
 import os, sys
 from kicad.environment import get_pcbnew_module
 
+# Find SWIG pcbnew
 try:
     pcbnew_bare = get_pcbnew_module()
 except EnvironmentError:
     print('Warning: pcbnew.py is not found or PCBNEW_PATH is corrupted. '
         'Only environment commands will be available')
     pcbnew_bare = None
-if pcbnew_bare:
-    from .units import *
-    from .point import Point
-    from .size import Size
-    import kicad.pcbnew
+
 
 # if `enum` cannot be imported (windoze!) we provide our own copy
 try:
@@ -43,6 +40,8 @@ except ImportError:
     module_dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(os.path.join(module_dir,'3rdparty'))
 
+
+# Low-level "new" function that avoids initializer
 class BareClass(object):
     pass
 
@@ -61,17 +60,24 @@ def new(class_type, instance):
     return obj
 
 
-# Determine version
+# Unify v5/6/7 APIs
 if pcbnew_bare is None:
     SWIG_version = None
     class SWIGtype: pass
 else:
-    if hasattr(pcbnew_bare, 'PCB_TRACK'):
+    # Determine version and map equivalent objects into consistent names
+    ver = [int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.')]
+    if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
+        SWIG_version = 7
+    elif ver[0] == 6 or (ver[0] == 5 and ver[1] == 99):
         SWIG_version = 6
-    else:
+    elif ver[0] == 5 or (ver[0] == 4 and ver[1] == 99):
         SWIG_version = 5
+    else:
+        print('Version {} not supported by kicad-python. Some functionality might not work')
+        SWIG_version = 7 if ver[0] > 7 else 5
 
-    if SWIG_version == 6:
+    if SWIG_version == 7:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE
             Track = pcbnew_bare.PCB_TRACK
@@ -81,6 +87,26 @@ else:
             Footprint = pcbnew_bare.FOOTPRINT
             FpText = pcbnew_bare.FP_TEXT
             FpShape = pcbnew_bare.FP_SHAPE
+            # Changed in v7
+            Point = pcbnew_bare.VECTOR2I
+            Size = pcbnew_bare.VECTOR2I
+            Rect = pcbnew_bare.BOX2I
+            # End v7 changes
+    elif SWIG_version == 6:
+        class SWIGtype:
+            # Changed in v6
+            Zone = pcbnew_bare.ZONE
+            Track = pcbnew_bare.PCB_TRACK
+            Via = pcbnew_bare.PCB_VIA
+            Shape = pcbnew_bare.PCB_SHAPE
+            Text = pcbnew_bare.PCB_TEXT
+            Footprint = pcbnew_bare.FOOTPRINT
+            FpText = pcbnew_bare.FP_TEXT
+            FpShape = pcbnew_bare.FP_SHAPE
+            # End v6 changes
+            Point = pcbnew_bare.wxPoint
+            Size = pcbnew_bare.wxSize
+            Rect = pcbnew_bare.EDA_RECT
     else:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE_CONTAINER
@@ -91,3 +117,14 @@ else:
             Footprint = pcbnew_bare.MODULE
             FpText = pcbnew_bare.TEXTE_MODULE
             FpShape = pcbnew_bare.EDGE_MODULE
+            Point = pcbnew_bare.wxPoint
+            Size = pcbnew_bare.wxSize
+            Rect = pcbnew_bare.EDA_RECT
+
+
+# Expose the basic classes to this package's top level
+if pcbnew_bare:
+    from .units import *
+    from .point import Point
+    from .size import Size
+    import kicad.pcbnew

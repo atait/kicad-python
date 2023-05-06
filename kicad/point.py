@@ -23,6 +23,7 @@ import cmath
 
 import kicad
 from kicad import units
+from kicad import SWIGtype
 
 
 class Point(units.BaseUnitTuple):
@@ -34,8 +35,8 @@ class Point(units.BaseUnitTuple):
         :param y: y coordinate.
         """
         self._class = Point
-        self._obj = pcbnew_bare.wxPoint(x * units.DEFAULT_UNIT_IUS,
-                                   y * units.DEFAULT_UNIT_IUS)
+        self._obj = SWIGtype.Point(int(x * units.DEFAULT_UNIT_IUS),
+                                   int(y * units.DEFAULT_UNIT_IUS))
 
     def __str__(self):
         return self.__repr__()
@@ -50,7 +51,7 @@ class Point(units.BaseUnitTuple):
         This function should not be generally used, but it's provided as
         a helper when migrating old API code.
 
-        :param instance: input wxPoint to wrap.
+        :param instance: input wxPoint or VECTOR2I to wrap.
         :type instance: wxPoint
         :return: Point
         """

@@ -25,7 +25,7 @@ from kicad import units, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasPosition, HasConnection, Selectable
 from enum import IntEnum
 
-if SWIG_version == 6:
+if SWIG_version >= 6:
     class ViaType(IntEnum):
         Through = pcbnew.VIATYPE_THROUGH
         Micro = pcbnew.VIATYPE_MICROVIA
