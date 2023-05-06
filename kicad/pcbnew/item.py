@@ -20,7 +20,8 @@
 
 from math import radians, degrees
 from kicad.point import Point
-from kicad.pcbnew.layer import Layer
+import kicad.pcbnew.layer as pcbnew_layer
+
 
 class HasPosition(object):
     """Board items that has valid position property should inherit
@@ -76,7 +77,7 @@ class HasLayerEnumImpl(object):
 
     @property
     def layer(self):
-        return Layer(self._obj.GetLayer())
+        return pcbnew_layer.Layer(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):
@@ -95,7 +96,7 @@ class HasLayer(HasLayerEnumImpl):
     @property
     def layer(self):
         self.print_warning()
-        return Layer(self._obj.GetLayer())
+        return pcbnew_layer.Layer(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):

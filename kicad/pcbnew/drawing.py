@@ -151,6 +151,7 @@ class Circle(Drawing, HasWidth):
     def start(self, value):
         if SWIG_version >= 6:
             self._obj.SetEnd(Point.native_from(value))
+            self._obj.SetModified()
         else:
             self._obj.SetArcStart(Point.native_from(value))
 
@@ -219,19 +220,16 @@ class Arc_v6(Drawing, HasWidth):
     def __init__(self, center, radius, start_angle, stop_angle,
                  layer='F.SilkS', width=0.15, board=None):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
-        start_coord = Point.native_from((start_coord.real, start_coord.imag))
-        center_coord = Point.native_from(center)
-        start_coord += center_coord
+        abs_start = (start_coord.real + center[0], start_coord.imag + center[1])
 
-        angle = stop_angle - start_angle
         arc = SWIGtype.Shape(board and board.native_obj)
         arc.SetShape(ShapeType.Arc)
-        arc.SetCenter(center_coord)
-        arc.SetStart(start_coord)
-        arc.SetArcAngleAndEnd(angle * 10)
-        arc.SetLayer(pcbnew_layer.get_board_layer(board, layer))
-        arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = arc
+        self.center = center
+        self.start = abs_start
+        self.angle = stop_angle - start_angle
+        self.layer = layer
+        self.width = width
 
     @property
     def center(self):

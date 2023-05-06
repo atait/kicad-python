@@ -94,6 +94,12 @@ class ModuleLine(HasLayerStrImpl, Selectable):
 
 class Module(HasPosition, HasRotation, Selectable):
     def __init__(self, ref=None, pos=None, board=None):
+        if not board:
+            from kicad.pcbnew.board import Board
+            try:
+                board = Board.from_editor()
+            except:
+                board = None
         self._obj = SWIGtype.Footprint(board.native_obj)
         if ref:
             self.reference = ref
@@ -110,6 +116,11 @@ class Module(HasPosition, HasRotation, Selectable):
     def wrap(instance):
         if type(instance) is SWIGtype.Footprint:
             return kicad.new(Module, instance)
+
+    @property
+    def board(self):
+        from kicad.pcbnew.board import Board
+        return Board.wrap(self._obj.GetBoard())
 
     @property
     def reference(self):
@@ -180,6 +191,8 @@ class Module(HasPosition, HasRotation, Selectable):
             module.position = pos
         if board:
             board.add(module)
+        elif self.board:
+            self.board.add(module)
         return module
 
     @property

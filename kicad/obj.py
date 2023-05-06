@@ -15,7 +15,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-from kicad import pcbnew_bare as pcbnew
+from kicad import pcbnew_bare
 
 import kicad
 from kicad import SWIGtype
@@ -24,7 +24,7 @@ from kicad.pcbnew import drawing
 from kicad.pcbnew import module
 
 
-_WRAPPERS = {pcbnew.BOARD: board.Board,
+_WRAPPERS = {pcbnew_bare.BOARD: board.Board,
              SWIGtype.Shape: drawing.Drawing,
              SWIGtype.Footprint: module.Module,
              SWIGtype.Point: kicad.Point,
