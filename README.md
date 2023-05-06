@@ -42,7 +42,7 @@ git clone git@github.com:atait/kicad-python
 pip install kicad-python/.
 ```
 
-2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run these commands in kicad 6
+2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run these commands in kicad 6 or 7
 ```python
 >>> import pcbnew
 >>> pcbnew.__file__
@@ -61,18 +61,34 @@ For example,
 link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
 ```
 
-\[**fallback**\] If that fails because you don't have file permissions or something, you can instead set the environment variable "PCBNEW_PATH" to the first path that comes out of that command. Put this line in your .bashrc or .zshrc
+4. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
+```python
+pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()  # Works in anything (F.SilkS > alias to -> F.Silkscreen)
+# or
+pcb.add_circle((100, 100), 20, 'F.Silkscreen'); pcbnew.Refresh()  # Works in 6/7 only
+```
+
+### Troubleshooting
+\[**cannot write to package directory**\] Step 3 attempts to write a file in the installation of `kicad-python`. If that fails because you don't have file permissions or something, you can instead set the environment variable "PCBNEW_PATH" to the first path to Path A. Put this line in your .bashrc or .zshrc
 ```bash
 # In general: export PCBNEW_PATH="[Path A]"
 export PCBNEW_PATH=/usr/lib/python3/dist-packages/pcbnew.py  # For example
 ```
 
-3. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
+\[**python version errors**\] Some external libraries might be compiled. `pcbnew.py` does depend on compiled code (called `_pcbnew.so`). That means not all versions of python work. You may get errors in your terminal that say "version `GLIBCXX_3.4.30' not found". To fix this, determine the version used in KiCad with this command in the GUI terminal
 ```python
-pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()
+>>> import sys; sys.version_info
+# sys.version_info(major=3, minor=10, ...)
 ```
+Then, in your external terminal, create a conda environment with that same python version. Run the shell commands again, and do the rest of your batch processing within this conda environment. Note, sometimes python 3.8 so-files will work with 3.10, but matching these versions is the best way to guarantee compatibility.
 
-#### What is `link_kicad_python_to_pcbnew` doing for you?
+\[**Upgrading kicad**\] User configuration directories are different for versions 6 and 7. You may not want to keep multiple copies of script code. One approach is to keep all 3rd party code in `~/.config/kicad/scripting` (Linux), and then symbolic link that into the specific version directory.
+```bash
+ln -s ~/.config/kicad/scripting ~/.config/kicad/7.0/scripting
+```
+In *Step 3* above, you can then use either path for Path B: ".../kicad" or ".../kicad/7.0".
+
+### What is `link_kicad_python_to_pcbnew` doing for you?
 As long as the above procedure works, you do not have to read this part.
 
 The KiCad application comes with its own isolated version of python. It is not designed to install any new packages like this one. Furthermore, its python API is not installed in a place that your external python or pip can find.
@@ -98,9 +114,9 @@ Third, it exposes KiCad's `pcbnew.py` to your external python environment. The p
 **Effect:** You can now use the full KiCad built-in SWIG wrapper, the `kicad-python` package, and any non-GUI plugins you are developing *outside of the pcbnew application*. It is useful for batch processing, remote computers, procedural layout, continuous integration, and use in other software such as FreeCAD and various autorouters.
 
 ### pykicad
-[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI terminal. It can also control GUI features, such as refreshing display, processing based on selections, and moving the view window. Both work for batch processing.
+[pykicad](https://github.com/dvc94ch/pykicad) is an excellent package written by David Craven. It is complementary to this one. `kicad-python` wraps the SWIG library provided by KiCAD devs, while `pykicad` works independently by implementing its own parser of ".kicad_pcb" files. This means that `pykicad` is pure python, while `kicad-python` is not. It also means that `kicad-python` can work within the pcbnew GUI terminal. It can also control GUI features, such as refreshing display, processing based on selections, and moving the view window. 
 
-Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version should (in theory) work with any version of KiCad 5 or 6.
+Both packages work for batch processing; however, ".kicad_pcb" format changed between versions. Because it wraps the official kicad API, `kicad-python` can also adapt to file format updates - this version should work with any version of KiCad 5/6/7/(8?)
 
 ## Examples
 These all should work in the pcbnew 5 or 6 GUI terminal on Mac/Windows/Linux.

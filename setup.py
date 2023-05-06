@@ -8,7 +8,7 @@ except IOError:
 
 setuptools.setup(
         name='kicad',
-        version='0.2',
+        version='0.3.0',
         description='KiCad python API',
         author='Piers Titus van der Torren, KiCad Developers, Hasan Yavuz Ozderya, Alex Tait',
         author_email='kicad-developers@lists.launchpad.net',

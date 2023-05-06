@@ -30,6 +30,7 @@ import cmath
 
 from kicad import pcbnew_bare as pcbnew
 
+print('pcbnew_easy is not supported in KiCad >= 5.99\nUse the universal interface with "from kicad import pcbnew"')
 
 # helper functions
 def _from_mm(val):
