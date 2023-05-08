@@ -22,7 +22,7 @@ from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
-
+from kicad.pcbnew.layer import LayerSet
 
 class KeepoutAllowance(object):
     """ Gives key-value interface of the form
@@ -128,6 +128,22 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable):
     def delete(self):
         self._obj.DeleteStructure()
 
+    @property
+    def layerset(self):
+        ''' For zones with multiple layers
+            Changing this layerset will not propagate back to this zone
+            until you set layerset again. Common pattern:
+                zone.layerset = zone.layerset.add_layer('F.Cu')
+        '''
+        from kicad.pcbnew.board import Board
+        layers_native = self._obj.GetLayerSet()
+        lset = LayerSet.wrap(layers_native)
+        lset._board = Board.wrap(self._obj.GetBoard())
+        return lset
+
+    @layerset.setter
+    def layerset(self, new_lset):
+        self._obj.SetLayerSet(new_lset._obj)
 
 # GetCornerSmoothingType
 # GetDefaultHatchPitch

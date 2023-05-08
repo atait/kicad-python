@@ -134,3 +134,13 @@ class LayerSet:
     def layers(self):
         """Returns the list of Layer IDs in this LayerSet."""
         return [l for l in self._obj.Seq()]
+
+    def add_layer(self, layer_name):
+        self._obj.AddLayer(get_board_layer(self._board, layer_name))
+        return self
+
+    def remove_layer(self, layer_name):
+        if layer_name not in self.layer_names:
+            raise KeyError('Layer {} not present in {}'.format(layer_name, self.layer_names))
+        self._obj.RemoveLayer(get_board_layer(self._board, layer_name))
+        return self
