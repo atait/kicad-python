@@ -109,14 +109,14 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable):
 
     @property
     def is_keepout(self):
-        if SWIG_version == 6:
+        if SWIG_version >= 6:
             return bool(self._obj.GetIsRuleArea())
         else:
             return bool(self._obj.GetIsKeepout())
 
     @is_keepout.setter
     def is_keepout(self, value):
-        if SWIG_version == 6:
+        if SWIG_version >= 6:
             self._obj.SetIsRuleArea(bool(value))
         else:
             self._obj.SetIsKeepout(bool(value))
