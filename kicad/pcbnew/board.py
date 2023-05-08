@@ -132,6 +132,20 @@ class Board(object):
             if isinstance(drawing, (SWIGtype.Shape, SWIGtype.Text)):
                 yield Drawing.wrap(drawing)
 
+    @property
+    def items(self):
+        ''' Everything on the board '''
+        for item in self.modules:
+            yield item
+        for item in self.vias:
+            yield item
+        for item in self.tracks:
+            yield item
+        for item in self.zones:
+            yield item
+        for item in self.drawings:
+            yield item
+
     @staticmethod
     def from_editor():
         """Provides the board object from the editor."""
@@ -181,6 +195,9 @@ class Board(object):
 
     def get_layer(self, name):
         return self._obj.GetLayerID(name)
+
+    def get_layer_name(self, layer_id):
+        return self._obj.GetLayerName(layer_id)
 
     def add_track(self, coords, layer='F.Cu', width=None):
         """Create a track polyline.
@@ -264,6 +281,21 @@ class Board(object):
 
     def deselect_all(self):
         self._obj.ClearSelected()
+
+    @property
+    def selected_items(self):
+        ''' This useful for duck typing in the interactive terminal
+            Suppose you want to set some drill radii. Iterating everything would cause attribute errors,
+            so it is easier to just select the vias you want, then use this method for convenience.
+            To get one item that you selected, use
+                xx = next(pcb.selected_items)
+        '''
+        for item in self.items:
+            try:
+                if item.is_selected():
+                    yield item
+            except AttributeError:
+                continue
 
     def fill_zones(self, zone_to_fill=None):
         ''' zone_to_fill=None fills all zones in this board '''
