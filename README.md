@@ -143,10 +143,10 @@ Instead, we can keep them on Fab layers so we can still see them while designing
 ```python
 for m in pcb.modules:
     ref = m.referenceLabel
-    if ref.layer == Layer.FrontSilkScreen:
-        ref.layer = Layer.FrontFab
-    elif ref.layer == Layer.BackSilkScreen:
-        ref.layer = Layer.BackFab
+    if ref.layer == 'F.Silkscreen':
+        ref.layer = 'F.Fab'
+    elif ref.layer == 'B.Silkscreen':
+        ref.layer = 'B.Fab'
 pcbnew.Refresh()
 ```
 

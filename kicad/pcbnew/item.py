@@ -163,6 +163,7 @@ class Selectable(object):
     def __init__(self):
         raise NotImplementedError("This is an abstract class!")
 
+    @property
     def is_selected(self):
         return bool(self._obj.IsSelected())
 
