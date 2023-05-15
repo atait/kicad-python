@@ -292,7 +292,7 @@ class Board(object):
         '''
         for item in self.items:
             try:
-                if item.is_selected():
+                if item.is_selected:
                     yield item
             except AttributeError:
                 continue
