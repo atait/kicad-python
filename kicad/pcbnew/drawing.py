@@ -19,7 +19,7 @@
 import cmath
 import math
 
-from kicad import pcbnew_bare as pcbnew
+from kicad import pcbnew_bare as pcbnew, instanceof
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
@@ -41,10 +41,12 @@ class Drawing(HasLayerStrImpl, Selectable):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) == SWIGtype.Shape:
+        if instanceof(instance, SWIGtype.Shape):
             return Drawing._wrap_drawsegment(instance)
-        elif type(instance) == SWIGtype.Text:
+        elif instanceof(instance, SWIGtype.Text):
             return kicad.new(TextPCB, instance)
+        else:
+            raise TypeError('Invalid drawing class: {}'.format(type(instance)))
 
     @staticmethod
     def _wrap_drawsegment(instance):

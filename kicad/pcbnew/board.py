@@ -25,7 +25,7 @@ from kicad.pcbnew.track import Track
 from kicad.pcbnew.via import Via
 from kicad.pcbnew.drawing import Drawing
 from kicad.pcbnew.zone import Zone
-from kicad import units, SWIGtype
+from kicad import units, SWIGtype, instanceof
 
 
 class _ModuleList(object):
@@ -129,7 +129,7 @@ class Board(object):
     def drawings(self):
         all_drawings = []
         for drawing in self._obj.GetDrawings():
-            if isinstance(drawing, (SWIGtype.Shape, SWIGtype.Text)):
+            if instanceof(drawing, (SWIGtype.Shape, SWIGtype.Text)):
                 yield Drawing.wrap(drawing)
 
     @property

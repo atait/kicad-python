@@ -123,6 +123,22 @@ else:
             Rect = pcbnew_bare.EDA_RECT
 
 
+# Broken isinstance detection of inheritance in v7
+def instanceof(item, klass):
+    if isinstance(klass, (tuple, list)):
+        for kls in klass:
+            if instanceof(item, kls):
+                return True
+    if isinstance(item, klass):  # This should hit in v6
+        return True
+    class_of_name = klass.__name__ + '_ClassOf'
+    try:
+        class_of_fun = getattr(pcbnew_bare, class_of_name)
+        return class_of_fun(item)
+    except AttributeError:
+        return False
+
+
 # Expose the basic classes to this package's top level
 if pcbnew_bare:
     from .units import *
