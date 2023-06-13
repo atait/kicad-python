@@ -265,7 +265,7 @@ class TextEsque(GeoHashable):
 
     @property
     def thickness(self) -> float:
-        if SWIG_version >= 7:
+        if SWIG_version >= 6:
             return float(self._obj.GetTextThickness()) / DEFAULT_UNIT_IUS
         else:
             return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
@@ -273,10 +273,18 @@ class TextEsque(GeoHashable):
     @thickness.setter
     def thickness(self, value: float) -> None:
         assert value > 0, "Thickness must be positive"
-        if SWIG_version >= 7:
+        if SWIG_version >= 6:
             return self._obj.SetTextThickness(int(value * DEFAULT_UNIT_IUS))
         else:
             return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
+
+    @property
+    def mirrored(self) -> bool:
+        return self._obj.IsMirrored()
+
+    @mirrored.setter
+    def mirrored(self, value: bool) -> None:
+        self._obj.SetMirrored(value)
 
     @property
     def size(self) -> Size:
