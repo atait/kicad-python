@@ -258,9 +258,9 @@ class Board(object):
             drawing.Arc(center, radius, start_angle, stop_angle,
                         layer, width, board=self))
 
-    def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15):
+    def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15, mirrored=False):
         return self.add(
-            drawing.TextPCB(position, text, layer, size, thickness, board=self))
+            drawing.TextPCB(position, text, layer, size, thickness, mirrored=mirrored, board=self))
 
     def remove(self, element, permanent=False):
         ''' Makes it so Ctrl-Z works.
