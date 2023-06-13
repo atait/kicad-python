@@ -493,7 +493,8 @@ class TextPCB(HasLayer, HasPosition, Selectable, BoardItem, TextEsque):
 
     def __init__(
         self, position: CoordinateLike, text: Optional[str] = None, layer: str = "F.SilkS",
-        size: float = 1.0, thickness: float = 0.15, justification: Optional[Union[str, Tuple[str, str]]] = None, board: Optional['Board'] = None
+        size: float = 1.0, thickness: float = 0.15, justification: Optional[Union[str, Tuple[str, str]]] = None,
+        mirrored: bool = False, board: Optional['Board'] = None
     ) -> None:
         self._obj = self._wraps_native_cls(board and board.native_obj)
         self.position = position
@@ -504,3 +505,4 @@ class TextPCB(HasLayer, HasPosition, Selectable, BoardItem, TextEsque):
         self.layer = layer
         self.size = size
         self.thickness = thickness
+        self.mirrored = mirrored

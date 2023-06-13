@@ -240,8 +240,8 @@ class Board(object):
         """Create a graphic arc on the board"""
         return self.add(Arc(center, radius, start_angle, stop_angle, layer, width, board=self))
 
-    def add_text(self, position, text, layer="F.SilkS", size=1.0, thickness=0.15):
-        return self.add(TextPCB(position, text, layer, size, thickness, board=self))
+    def add_text(self, position, text, layer="F.SilkS", size=1.0, thickness=0.15, mirrored=False):
+        return self.add(TextPCB(position, text, layer, size, thickness, mirrored=mirrored, board=self))
 
     def remove(self, element, permanent=False):
         """Makes it so Ctrl-Z works.
