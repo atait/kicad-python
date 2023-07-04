@@ -117,6 +117,14 @@ class Module(HasPosition, HasRotation, Selectable):
         if type(instance) is SWIGtype.Footprint:
             return kicad.new(Module, instance)
 
+    @staticmethod
+    def load_from_library(library_path, name):
+        m = pcbnew.FootprintLoad(library_path, name)
+        if m is None:
+            return None
+        else:
+            return Module.wrap(m)
+
     @property
     def board(self):
         from kicad.pcbnew.board import Board
