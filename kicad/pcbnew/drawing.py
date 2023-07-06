@@ -322,7 +322,7 @@ class TextPCB(Drawing, HasPosition):
             thickness = self._obj.GetTextThickness()
         else:
             thickness = self._obj.GetThickness()
-        return float() / units.DEFAULT_UNIT_IUS
+        return float(thickness) / units.DEFAULT_UNIT_IUS
 
     @thickness.setter
     def thickness(self, value):
