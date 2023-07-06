@@ -290,7 +290,7 @@ class Rectangle(Drawing, HasWidth):
 
 
 class TextPCB(Drawing, HasPosition):
-    def __init__(self, position, text=None, layer='F.SilkS', size=1.0, thickness=0.15, board=None):
+    def __init__(self, position, text=None, layer='F.SilkS', size=1.0, thickness=0.15, mirrored=False, board=None):
         self._obj = SWIGtype.Text(board and board.native_obj)
         self.position = position
         if text:
@@ -298,6 +298,7 @@ class TextPCB(Drawing, HasPosition):
         self.layer = layer
         self.size = size
         self.thickness = thickness
+        self.mirrored = mirrored
 
     @property
     def text(self):
@@ -308,12 +309,28 @@ class TextPCB(Drawing, HasPosition):
         return self._obj.SetText(value)
 
     @property
+    def mirrored(self):
+        return self._obj.IsMirrored()
+
+    @mirrored.setter
+    def mirrored(self, value):
+        return self._obj.SetMirrored(value)
+
+    @property
     def thickness(self):
-        return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
+        if SWIG_version >= 7:
+            thickness = self._obj.GetTextThickness()
+        else:
+            thickness = self._obj.GetThickness()
+        return float(thickness) / units.DEFAULT_UNIT_IUS
 
     @thickness.setter
     def thickness(self, value):
-        return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
+        thickness = int(value * units.DEFAULT_UNIT_IUS)
+
+        if SWIG_version >= 7:
+            return self._obj.SetTextThickness(thickness)
+        return self._obj.SetThickness(thickness)
 
     @property
     def size(self):
