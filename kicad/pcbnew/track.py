@@ -22,24 +22,15 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, SWIGtype
-from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
+from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
 
-class Track(HasConnection, HasLayerStrImpl, Selectable):
+class Track(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     def __init__(self, width, start, end, layer='F.Cu', board=None):
         self._obj = SWIGtype.Track(board and board.native_obj)
         self._obj.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self.layer = layer
         self._obj.SetStart(Point.native_from(start))
         self._obj.SetEnd(Point.native_from(end))
-
-    @property
-    def native_obj(self):
-        return self._obj
-
-    @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board(self._obj.GetBoard())
 
     @staticmethod
     def wrap(instance):

@@ -21,7 +21,7 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad import units
 from kicad import Size
-from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable
+from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
 from enum import IntEnum
 
 class DrillShape(IntEnum):
@@ -43,19 +43,9 @@ class PadType(IntEnum):
     Connector = pcbnew.PAD_ATTRIB_CONN
     NPTH = pcbnew.PAD_ATTRIB_NPTH
 
-class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable):
+class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     def __init__(self):
-        # TODO: add initialization parameters for `Pad`
-        pass
-
-    @property
-    def native_obj(self):
-        return self._obj
-
-    @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board(self._obj.GetBoard())
+        raise NotImplementedError('Direct instantiation of Pad is not supported')
 
     @staticmethod
     def wrap(instance):

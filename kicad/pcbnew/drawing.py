@@ -24,7 +24,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, Size, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition
+from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, BoardItem
 from enum import IntEnum
 
 class ShapeType(IntEnum):
@@ -34,16 +34,7 @@ class ShapeType(IntEnum):
     Polygon = pcbnew.S_POLYGON
     Rect = pcbnew.S_RECT
 
-class Drawing(HasLayerStrImpl, Selectable):
-    @property
-    def native_obj(self):
-        return self._obj
-
-    @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board(self._obj.GetBoard())
-
+class Drawing(HasLayerStrImpl, Selectable, BoardItem):
     @staticmethod
     def wrap(instance):
         if instanceof(instance, SWIGtype.Shape):

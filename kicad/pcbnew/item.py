@@ -18,9 +18,28 @@
 #  MA 02110-1301, USA.
 #
 
+# TODO: Mixins
+
 from math import radians, degrees
 from kicad.point import Point
 import kicad.pcbnew.layer as pcbnew_layer
+
+
+class BoardItem(object):
+    _obj = None
+
+    @property
+    def native_obj(self):
+        return self._obj
+
+    @property
+    def board(self):
+        from kicad.pcbnew.board import Board
+        brd_native = self._obj.GetBoard()
+        if brd_native:
+            return Board(brd_native)
+        else:
+            return None
 
 
 class HasPosition(object):

@@ -22,7 +22,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasPosition, HasConnection, Selectable
+from kicad.pcbnew.item import HasPosition, HasConnection, Selectable, BoardItem
 from enum import IntEnum
 
 if SWIG_version >= 6:
@@ -36,7 +36,7 @@ else:
         Micro = pcbnew.VIA_MICROVIA
         Blind = pcbnew.VIA_BLIND_BURIED
 
-class Via(HasPosition, HasConnection, Selectable):
+class Via(HasPosition, HasConnection, Selectable, BoardItem):
     def __init__(self, coord, layer_pair, diameter, drill, board=None):
         self._obj = SWIGtype.Via(board and board.native_obj)
         self.diameter = diameter
@@ -49,17 +49,7 @@ class Via(HasPosition, HasConnection, Selectable):
         else:
             self._obj.SetLayerPair(pcbnew_layer.get_std_layer(layer_pair[0]),
                                    pcbnew_layer.get_std_layer(layer_pair[1]))
-
         self.drill = drill
-
-    @property
-    def native_obj(self):
-        return self._obj
-
-    @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board(self._obj.GetBoard())
 
     @staticmethod
     def wrap(instance):
@@ -95,35 +85,31 @@ class Via(HasPosition, HasConnection, Selectable):
 
     @property
     def top_layer(self):
-        brd = self._obj.GetBoard()
-        if brd:
-            return brd.GetLayerName(self._obj.TopLayer())
+        if self.board:
+            return self.board.get_layer_name(self._obj.TopLayer())
         else:
             return pcbnew_layer.get_std_layer_name(self._obj.TopLayer())
 
     @top_layer.setter
     def top_layer(self, value):
-        brd = self._obj.GetBoard()
-        if brd:
-            self._obj.SetTopLayer(brd.GetLayerID(value))
+        if self.board:
+            self._obj.SetTopLayer(self.board.get_layer(value))
         else:
             self._obj.SetTopLayer(pcbnew_layer.get_std_layer(value))
 
     @property
     def bottom_layer(self):
-        brd = self._obj.GetBoard()
-        if brd:
-            return brd.GetLayerName(self._obj.BottomLayer())
+        if self.board:
+            return self.board.get_layer_name(self._obj.BottomLayer())
         else:
             return pcbnew_layer.get_std_layer_name(self._obj.BottomLayer())
 
     @bottom_layer.setter
     def bottom_layer(self, value):
-        brd = self._obj.GetBoard()
-        if brd:
-            self._obj.SetTopLayer(brd.GetLayerID(value))
+        if self.board:
+            self._obj.SetTopLayer(self.board.get_layer(value))
         else:
-            self._obj.SetTopLayer(pcbnew_layer.get_std_layer(value))
+            self._obj.SetTopLayer(pcbnew_layer.get_std_layer_name(value))
 
     @property
     def is_through(self):

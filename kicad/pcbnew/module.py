@@ -21,7 +21,7 @@ from kicad import pcbnew_bare as pcbnew
 
 import kicad
 from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl
+from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem
 from kicad.pcbnew.layer import Layer
 from kicad.pcbnew.pad import Pad
 
@@ -88,11 +88,13 @@ class ModuleLine(HasLayerStrImpl, Selectable):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) is SWIGtype.FpShape:
-            return kicad.new(ModuleLine, instance)
+        if type(instance) is not SWIGtype.FpShape:
+            # raise TypeError()
+            return None
+        return kicad.new(ModuleLine, instance)
 
 
-class Module(HasPosition, HasRotation, Selectable):
+class Module(HasPosition, HasRotation, Selectable, BoardItem):
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
             from kicad.pcbnew.board import Board
@@ -108,24 +110,12 @@ class Module(HasPosition, HasRotation, Selectable):
         if board:
             board.add(self)
 
-    @property
-    def native_obj(self):
-        return self._obj
-
-    @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board(self._obj.GetBoard())
-
     @staticmethod
     def wrap(instance):
-        if type(instance) is SWIGtype.Footprint:
-            return kicad.new(Module, instance)
-
-    @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board.wrap(self._obj.GetBoard())
+        if type(instance) is not SWIGtype.Footprint:
+            # raise TypeError()
+            return None
+        return kicad.new(Module, instance)
 
     @property
     def reference(self):
