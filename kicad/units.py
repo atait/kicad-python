@@ -67,7 +67,7 @@ class BaseUnitTuple(object):
 
     @x.setter
     def x(self, value):
-        self.native_obj.x = value * DEFAULT_UNIT_IUS
+        self.native_obj.x = int(value * DEFAULT_UNIT_IUS)
 
     @property
     def y(self):
@@ -76,7 +76,7 @@ class BaseUnitTuple(object):
 
     @y.setter
     def y(self, value):
-        self.native_obj.y = value * DEFAULT_UNIT_IUS
+        self.native_obj.y = int(value * DEFAULT_UNIT_IUS)
 
     def __getitem__(self, index):
         return self.mm[index]
