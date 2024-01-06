@@ -36,6 +36,11 @@ class Track(HasConnection, HasLayerStrImpl, Selectable):
     def native_obj(self):
         return self._obj
 
+    @property
+    def board(self):
+        from kicad.pcbnew.board import Board
+        return Board(self._obj.GetBoard())
+
     @staticmethod
     def wrap(instance):
         """Wraps a C++ api TRACK object, and returns a `Track`."""
