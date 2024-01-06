@@ -228,3 +228,9 @@ class Module(HasPosition, HasRotation, Selectable):
             for element in self._removed_elements:
                 self._obj.Add(element._obj)
         self._removed_elements = []
+
+
+# In case new naming is used
+Footprint = Module
+FootprintLine = ModuleLine
+FootprintLabel = ModuleLabel

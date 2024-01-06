@@ -92,6 +92,15 @@ class Board(object):
             return module.Module.wrap(found)
 
     @property
+    def footprints(self):
+        """Alias footprint to module"""
+        return self.modules
+
+    def footprintByRef(self, ref):
+        """Alias footprint to module"""
+        return self.moduleByRef(ref)
+
+    @property
     def vias(self):
         """An iterator over via objects"""
         for t in self._obj.GetTracks():
