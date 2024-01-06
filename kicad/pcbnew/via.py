@@ -44,11 +44,11 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         self._obj.SetEnd(coord_point.native_obj)
         self._obj.SetStart(coord_point.native_obj)
         if board:
-            self._obj.SetLayerPair(board.get_layer(layer_pair[0]),
-                                   board.get_layer(layer_pair[1]))
+            self._obj.SetLayerPair(board.get_layer_id(layer_pair[0]),
+                                   board.get_layer_id(layer_pair[1]))
         else:
-            self._obj.SetLayerPair(pcbnew_layer.get_std_layer(layer_pair[0]),
-                                   pcbnew_layer.get_std_layer(layer_pair[1]))
+            self._obj.SetLayerPair(pcbnew_layer.get_std_layer_id(layer_pair[0]),
+                                   pcbnew_layer.get_std_layer_id(layer_pair[1]))
         self.drill = drill
 
     @staticmethod
@@ -93,9 +93,9 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
     @top_layer.setter
     def top_layer(self, value):
         if self.board:
-            self._obj.SetTopLayer(self.board.get_layer(value))
+            self._obj.SetTopLayer(self.board.get_layer_id(value))
         else:
-            self._obj.SetTopLayer(pcbnew_layer.get_std_layer(value))
+            self._obj.SetTopLayer(pcbnew_layer.get_std_layer_id(value))
 
     @property
     def bottom_layer(self):
@@ -107,7 +107,7 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
     @bottom_layer.setter
     def bottom_layer(self, value):
         if self.board:
-            self._obj.SetTopLayer(self.board.get_layer(value))
+            self._obj.SetTopLayer(self.board.get_layer_id(value))
         else:
             self._obj.SetTopLayer(pcbnew_layer.get_std_layer_name(value))
 

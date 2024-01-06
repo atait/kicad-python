@@ -202,7 +202,7 @@ class Board(object):
         self._obj.Add(track.native_obj)
         return track
 
-    def get_layer(self, name):
+    def get_layer_id(self, name):
         return self._obj.GetLayerID(name)
 
     def get_layer_name(self, layer_id):

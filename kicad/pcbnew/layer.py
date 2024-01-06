@@ -67,12 +67,12 @@ def load_std_layers():
         _std_layer_names = {s: n for n, s in _std_layer_dict.items()}
 
 
-def get_board_layer(board, layer_name):
+def get_board_layer_id(board, layer_name):
     """Get layer id for layer name in board, or std."""
     if board:
-        return board.get_layer(layer_name)
+        return board.get_layer_id(layer_name)
     else:
-        return get_std_layer(layer_name)
+        return get_std_layer_id(layer_name)
 
 
 def get_board_layer_name(board, layer_id):
@@ -89,7 +89,7 @@ def get_std_layer_name(layer_id):
     return _std_layer_names[layer_id]
 
 
-def get_std_layer(layer_name):
+def get_std_layer_id(layer_name):
     """Get layer id from layer name
 
     If it is already an int just return it.
@@ -117,9 +117,9 @@ class LayerSet:
         bit_mask = 0
         for layer_name in layers:
             if self._board:
-                bit_mask |= 1 << self._board.get_layer(layer_name)
+                bit_mask |= 1 << self._board.get_layer_id(layer_name)
             else:
-                bit_mask |= 1 << get_std_layer(layer_name)
+                bit_mask |= 1 << get_std_layer_id(layer_name)
         hex_mask = '{0:013x}'.format(bit_mask)
         self._obj = pcbnew.LSET()
         self._obj.ParseHex(hex_mask, len(hex_mask))
@@ -136,11 +136,11 @@ class LayerSet:
         return [l for l in self._obj.Seq()]
 
     def add_layer(self, layer_name):
-        self._obj.AddLayer(get_board_layer(self._board, layer_name))
+        self._obj.AddLayer(get_board_layer_id(self._board, layer_name))
         return self
 
     def remove_layer(self, layer_name):
         if layer_name not in self.layer_names:
             raise KeyError('Layer {} not present in {}'.format(layer_name, self.layer_names))
-        self._obj.RemoveLayer(get_board_layer(self._board, layer_name))
+        self._obj.RemoveLayer(get_board_layer_id(self._board, layer_name))
         return self

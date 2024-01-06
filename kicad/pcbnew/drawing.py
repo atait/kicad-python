@@ -126,7 +126,7 @@ class Circle(Drawing, HasWidth):
             circle.SetModified()
         else:
             circle.SetArcStart(start_coord)
-        circle.SetLayer(pcbnew_layer.get_board_layer(board, layer))
+        circle.SetLayer(pcbnew_layer.get_board_layer_id(board, layer))
         circle.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = circle
 
@@ -177,7 +177,7 @@ class Arc_v5(Drawing, HasWidth):
         arc.SetCenter(center_coord)
         arc.SetArcStart(start_coord)
         arc.SetAngle(angle * 10)
-        arc.SetLayer(pcbnew_layer.get_board_layer(board, layer))
+        arc.SetLayer(pcbnew_layer.get_board_layer_id(board, layer))
         arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = arc
 

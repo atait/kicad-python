@@ -145,7 +145,7 @@ class HasLayerStrImpl(object):
         if brd:
             self._obj.SetLayer(brd.GetLayerID(value))
         else:
-            self._obj.SetLayer(pcbnew_layer.get_std_layer(value))
+            self._obj.SetLayer(pcbnew_layer.get_std_layer_id(value))
 
 
 class HasConnection(object):
