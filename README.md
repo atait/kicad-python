@@ -3,46 +3,39 @@ Development of a new Python scripting API for KiCad
 based on Piers Titus van der Torren work and comunity
 feedback to create a less C++ tied API.
 
-A second intention of this new API is also to provide
-better documentation via sphinx.
-
-This repo has been fully tested with KiCAD 5/6 and partially tested with KiCAD 7.
-Note: the KiCAD/kicad-python and pointhi/kicad-python and PyPI:kicad-python are not working with KiCAD versions 5, 6, or 7.
+This repo has been fully tested with KiCAD 5, 6, 7 and partially tested with 7.99.
+Note: the KiCAD/kicad-python and pointhi/kicad-python and PyPI:kicad-python are distinct projects no longer maintained.
 
 ## Description
-KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty; it is a clunky SWIG/C-style API with custom datatypes for things like lists; and it exposes too much functionality on equal footing.
+KiCAD and `pcbnew` expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty (v7 does not exist yet); it is a clunky SWIG/C-style API with custom datatypes for things like lists; its API changes for every KiCAD version; and it exposes too much functionality on equal footing.
 
-This package is a more pythonic wrapper around the `pcbnew` API. It implements patterns such as objects, properties, and iterables. It performs more intuitive unit and layer handling. It only exposes functionality most relevant to editing boards, the idea being that native functionality can always be accessed through the wrapped objects if needed.
+Even if the perfect built-in KiCAD python API came tomorrow, new plugins written on that API would not work in v4-v7, and old plugins would no longer work. Plugins written using `kicad-python` instead will be backwards compatible, forwards compatible, and easier to understand for KiCAD newcomers.
+
+This package is a pythonic wrapper around the various `pcbnew` APIs. It implements patterns such as objects, properties, and iterables. It performs more intuitive unit and layer handling. It only exposes functionality most relevant to editing boards, the idea being that native functionality can always be accessed through the wrapped objects if needed.
 
 ### An excerpt
 A simple pythonic script might look like this
 ```python
 print([track.layer for track in board.tracks])
-print([track.width for track in board.tracks])
+print([track.width for track in board.tracks if track.is_selected])
 ```
 which produces
 ```
 [F.Cu, B.Cu, B.Cu]
-[0.8, 0.8, 0.6]
+[0.8, 0.6]
 ```
 This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern.
 
 ## Installation
-
-<!-- 1. Users: 
-```bash
-pip install kicad
-```
- 
-For developers: Clone this repository to any location, and run `pip install kicad-python/.` -->
 
 1. 
 ```
 git clone git@github.com:atait/kicad-python
 pip install kicad-python/.
 ```
+<!-- pip install kigadgets -->
 
-2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run these commands in kicad 6 or 7
+2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) and run these commands in kicad 6+
 ```python
 >>> import pcbnew
 >>> pcbnew.__file__
@@ -63,9 +56,7 @@ link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/usern
 
 4. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
 ```python
-pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()  # Works in anything (F.SilkS > alias to -> F.Silkscreen)
-# or
-pcb.add_circle((100, 100), 20, 'F.Silkscreen'); pcbnew.Refresh()  # Works in 6/7 only
+pcb.add_circle((100, 100), 20, 'F.SilkS'); pcbnew.Refresh()  # F.SilkS > alias to -> F.Silkscreen for newer versions
 ```
 
 ### Troubleshooting
@@ -151,7 +142,7 @@ pcbnew.Refresh()
 ```
 
 ### Give unique references to every footprint
-Making arrays of components can lead to massive reference conflicts. References should be unique, even if you don't care exactly what they are. Very useful for panelization.
+Making arrays of components can lead to massive reference conflicts. References should be unique, even if you don't care exactly what they are. Useful for panelization.
 ```python
 from collections import defaultdict
 counters = defaultdict(lambda: 1)
@@ -161,7 +152,7 @@ for m in pcb.modules:
     m.reference = '{}{:03d}'.format(component_class, counters[component_class])
 pcbnew.Refresh()
 ```
-The `:03d` means three decimal places like "C003". Iteration order is not guaranteed, although you could figure it out using the `Module.position` properties.
+Iteration order is not guaranteed, although you could figure it out using the `Module.position` properties.
 
 ### Change all drill sizes
 Because planning ahead doesn't always work

@@ -151,7 +151,7 @@ def create_link(pcbnew_module_path, kicad_config_path):
             fx.write(startup_contents)
     else:
         print('Warning: Startup file is not empty:\n', startup_file)
-        print('It is safer to do this manually by inserting these lines into that file:\n\n', startup_script)
+        print('It is safer to delete that file, or\ndo this manually by inserting these lines into that file:\n\n', startup_contents)
 
     # Write the plugin importer
     plugin_dir = os.path.join(kicad_config_path.strip(), 'scripting', 'plugins')

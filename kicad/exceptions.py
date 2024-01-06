@@ -28,8 +28,9 @@ class NoDefaultUnits(Exception):
 
 def notify(*args):
     ''' Show text in a popup window while in the GUI.
-        Handy for debugging action plugins
         Arguments act the same as print(*args)
+        It is not the best debugging tool ever created, but
+        it is handy for debugging action plugins
     '''
     text = ' '.join(str(arg) for arg in args)
     try:
