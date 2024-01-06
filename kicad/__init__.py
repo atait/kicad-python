@@ -23,6 +23,7 @@ __version__ = '0.3.0'
 #: from kicad import pcbnew_bare as pcbnew
 import os, sys
 from kicad.environment import get_pcbnew_module
+from kicad.exceptions import notify
 
 # Find SWIG pcbnew
 try:

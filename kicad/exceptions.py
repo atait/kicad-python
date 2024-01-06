@@ -24,3 +24,19 @@ class NoDefaultUnits(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+def notify(*args):
+    ''' Show text in a popup window while in the GUI.
+        Handy for debugging action plugins
+        Arguments act the same as print(*args)
+    '''
+    text = ' '.join(str(arg) for arg in args)
+    try:
+        import wx
+    except ImportError:
+        print(text)
+    else:
+        dialog = wx.MessageDialog(None, text, 'kicad-python debug output', wx.OK)
+        sg = dialog.ShowModal()
+        return sg
