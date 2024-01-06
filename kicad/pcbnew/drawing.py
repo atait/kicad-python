@@ -99,11 +99,11 @@ class Segment(Drawing, HasWidth):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
         line = SWIGtype.Shape(board and board.native_obj)
         line.SetShape(ShapeType.Segment)
+        self._obj = line
         line.SetStart(Point.native_from(start))
         line.SetEnd(Point.native_from(end))
-        line.SetLayer(pcbnew_layer.get_board_layer(board, layer))
-        line.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
-        self._obj = line
+        self.layer = layer
+        self.width = width
 
     @property
     def start(self):
@@ -286,12 +286,116 @@ else:
 
 
 class Polygon(Drawing, HasWidth):
-    def __init__(self, *args, **kwargs):
-        raise NotImplementedError('Polygon direct instantiation is not supported by kicad-python')
+    def __init__(self, coords,
+                 layer='F.SilkS', width=0.15, board=None):
+        poly_obj = SWIGtype.Shape(board and board.native_obj)
+        poly_obj.SetShape(ShapeType.Polygon)
+        self._obj = poly_obj
 
-class Rectangle(Drawing, HasWidth):
-    def __init__(self, *args, **kwargs):
-        raise NotImplementedError('Rectangle direct instantiation is not supported by kicad-python')
+        chain = pcbnew.SHAPE_LINE_CHAIN()
+        for coord in coords:
+            chain.Append(Point.native_from(coord))
+        chain.SetClosed(True)
+        poly_shape = pcbnew.SHAPE_POLY_SET(chain)
+        poly_obj.SetPolyShape(poly_shape)
+
+        self.layer = layer
+        self.width = width
+
+    @property
+    def filled(self):
+        return self._obj.IsFilled()
+
+    @filled.setter
+    def filled(self, value=True):
+        self._obj.SetFilled(value)
+
+    def get_vertices(self):
+        poly = self._obj.GetPolyShape()
+        noutlines = poly.OutlineCount()
+        if noutlines == 0:
+            raise RuntimeError('Polygon\'s SHAPE_POLY_SET has no Outlines')
+        elif noutlines > 1:
+            raise ValueError('Polygon contains multiple Outlines which is not supported')
+        outline = poly.Outline(0)
+        pts = []
+        for ipt in range(outline.PointCount()):
+            native = outline.GetPoint(ipt)
+            pts.append(Point.wrap(native))
+        return pts
+
+    def to_segments(self, replace=False):
+        ''' If replace is true, removes the original polygon
+        '''
+        segs = []
+        verts = self.get_vertices()
+        for iseg in range(len(verts)):
+            new_seg = Segment(verts[iseg-1], verts[iseg],
+                self.layer, self.width, self.board
+            )
+            segs.append(new_seg)
+        if replace:
+            for seg in segs:
+                self.board.add(seg)
+            self.board.remove(self)
+        return segs
+
+    def fillet(self, radius_mm, tol_mm=.01):
+        poly = self.native_obj.GetPolyShape()
+        smoothed = poly.Fillet(int(radius_mm * units.DEFAULT_UNIT_IUS), int(tol_mm * units.DEFAULT_UNIT_IUS))
+        self.native_obj.SetPolyShape(smoothed)
+
+    def contains(self, point):
+        poly = self._obj.GetPolyShape()
+        return poly.Contains(Point.native_from(point))
+
+
+class Rectangle(Polygon):
+    def __init__(self, corner_nw, corner_se,
+                 layer='F.SilkS', width=0.15, board=None):
+        rect_obj = SWIGtype.Shape(board and board.native_obj)
+        rect_obj.SetShape(ShapeType.Rect)
+        self._obj = rect_obj
+        rect_obj.SetStart(Point.native_from(corner_nw))
+        rect_obj.SetEnd(Point.native_from(corner_se))
+        self.layer = layer
+        self.width = width
+
+    @classmethod
+    def from_centersize(cls, xcent, ycent, xsize, ysize,
+                     layer='F.SilkS', width=0.15, board=None):
+        center = Point(xcent, ycent)
+        half_size = Point(xsize / 2, ysize / 2)
+        corner_nw = center - half_size
+        corner_se = center + half_size
+        return cls(corner_nw, corner_se, layer, width, board)
+
+    def get_vertices(self):
+        corners_native = self.native_obj.GetRectCorners()
+        corners = [Point.wrap(pt) for pt in corners_native]
+        return corners
+
+    # The inherited to_segments works based on overloading get_vertices
+
+    def to_polygon(self, replace=False):
+        corners_native = self.native_obj.GetRectCorners()
+        corners = [Point.wrap(pt) for pt in corners_native]
+        poly = Polygon(corners, layer=self.layer, width=self.width, board=self.board)
+        if replace:
+            self.board.add(poly)
+            self.board.remove(self)
+        return poly
+
+    def fillet(self, radius_mm, tol_mm=.01):
+        ''' Deletes the rectangle but that is ok in most situations
+            It can be undone IF it is run inside an action plugin
+        '''
+        poly = self.to_polygon(replace=True)
+        poly.fillet(radius_mm, tol_mm)
+
+    def contains(self, point):
+        poly = self.to_polygon(replace=False)
+        return poly.contains(point)
 
 
 class TextPCB(Drawing, HasPosition):
