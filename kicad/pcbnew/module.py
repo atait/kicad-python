@@ -20,6 +20,7 @@
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
+from kicad.exceptions import deprecate_member
 from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem
 from kicad.pcbnew.pad import Pad
@@ -93,6 +94,11 @@ class ModuleLine(HasLayerStrImpl, Selectable):
         return kicad.new(ModuleLine, instance)
 
 
+@deprecate_member('referenceLabel', 'reference_label')
+@deprecate_member('valueLabel', 'value_label')
+@deprecate_member('graphicalItems', 'graphical_items')
+@deprecate_member('libName', 'lib_name')
+@deprecate_member('fpName', 'fp_name')
 class Module(HasPosition, HasRotation, Selectable, BoardItem):
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
@@ -125,7 +131,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
         self._obj.SetReference(value)
 
     @property
-    def referenceLabel(self):
+    def reference_label(self):
         # TODO: not critical but always return the same wrapper object
         return ModuleLabel.wrap(self._obj.Reference())
 
@@ -138,12 +144,12 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
         self._obj.SetValue(value)
 
     @property
-    def valueLabel(self):
+    def value_label(self):
         # TODO: not critical but always return the same wrapper object
         return ModuleLabel.wrap(self._obj.Value())
 
     @property
-    def graphicalItems(self):
+    def graphical_items(self):
         """Text and drawings of module iterator."""
         for item in self._obj.GraphicalItems():
             if type(item) == SWIGtype.FpShape:
@@ -174,11 +180,11 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
         self.flip()
 
     @property
-    def libName(self):
+    def lib_name(self):
         return self._obj.GetFPID().GetLibNickname().GetChars()
 
     @property
-    def fpName(self):
+    def fp_name(self):
         return self._obj.GetFPID().GetLibItemName().GetChars()
 
     def copy(self, ref, pos=None, board=None):

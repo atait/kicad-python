@@ -21,6 +21,7 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad import units
 from kicad import Size
+from kicad.exceptions import deprecate_member
 from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
 
 class DrillShape():
@@ -42,6 +43,9 @@ class PadType():
     Connector = pcbnew.PAD_ATTRIB_CONN
     NPTH = pcbnew.PAD_ATTRIB_NPTH
 
+
+@deprecate_member('padType', 'pad_type')
+@deprecate_member('drillShape', 'drill_shape')
 class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     def __init__(self):
         raise NotImplementedError('Direct instantiation of Pad is not supported')
@@ -52,20 +56,20 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
         return kicad.new(Pad, instance)
 
     @property
-    def padType(self):
+    def pad_type(self):
         return self._obj.GetAttribute()
 
-    @padType.setter
-    def padType(self, value):
+    @pad_type.setter
+    def pad_type(self, value):
         """Value should be integer that can be found by referencing PadType.Through"""
         self._obj.SetAttribute(value)
 
     @property
-    def drillShape(self):
+    def drill_shape(self):
         return self._obj.GetDrillShape()
 
-    @drillShape.setter
-    def drillShape(self, value):
+    @drill_shape.setter
+    def drill_shape(self, value):
         """Value should be integer that can be found by referencing DrillShape.Circle"""
         self._obj.SetDrillShape(value)
 

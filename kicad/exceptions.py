@@ -15,7 +15,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-
+from functools import wraps
 
 class NoDefaultUnits(Exception):
 
@@ -37,7 +37,37 @@ def notify(*args):
         import wx
     except ImportError:
         print(text)
-    else:
+        return
+    try:
         dialog = wx.MessageDialog(None, text, 'kicad-python debug output', wx.OK)
         sg = dialog.ShowModal()
         return sg
+    except:
+        print(text)
+
+deprecate_warn_fun = notify  # print is sometimes good
+def deprecate_member(old, new, deadline='v0.5.0'):
+    def regular_decorator(klass):
+        def auto_warn(fun):
+            from_str = klass.__name__ + '.' + old
+            to_str = klass.__name__ + '.' + new
+            header = 'Deprecation warning (deadline {}): '.format(deadline)
+            map_str = '{} -> {}'.format(from_str, to_str)
+            @wraps(fun)
+            def warner(*args, **kwargs):
+                deprecate_warn_fun(header + map_str)
+                return fun(*args, **kwargs)
+            return warner
+
+        new_meth = getattr(klass, new)
+        if isinstance(new_meth, property):
+            aug_meth = property(
+                auto_warn(new_meth.fget),
+                auto_warn(new_meth.fset),
+                auto_warn(new_meth.fdel)
+            )
+        else:
+            aug_meth = auto_warn(new_meth)
+        setattr(klass, old, aug_meth)
+        return klass
+    return regular_decorator

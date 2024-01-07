@@ -22,8 +22,8 @@
 
 from math import radians, degrees
 from kicad.point import Point
+from kicad.exceptions import deprecate_member
 import kicad.pcbnew.layer as pcbnew_layer
-
 
 class BoardItem(object):
     _obj = None
@@ -148,20 +148,22 @@ class HasLayerStrImpl(object):
             self._obj.SetLayer(pcbnew_layer.get_std_layer_id(value))
 
 
+@deprecate_member('netName', 'net_name')
+@deprecate_member('netCode', 'net_code')
 class HasConnection(object):
     """All BOARD_CONNECTED_ITEMs should inherit this."""
     def __init__(self):
         raise NotImplementedError("This is an abstract class!")
 
     @property
-    def netName(self):
+    def net_name(self):
         return self._obj.GetNetname()
 
-    @netName.setter
-    def netName(self, value):
+    @net_name.setter
+    def net_name(self, value):
         """ Takes a name and attempts to look it up based on the containing board """
         if not self._obj:
-            raise TypeError("Cannot set netName without a containing Board.")
+            raise TypeError("Cannot set net_name without a containing Board.")
         try:
             new_code = self._obj.GetBoard().GetNetcodeFromNetname(value)
         except IndexError:
@@ -169,11 +171,11 @@ class HasConnection(object):
         self._obj.SetNetCode(new_code)
 
     @property
-    def netCode(self):
+    def net_code(self):
         return self._obj.GetNetCode()
 
-    @netCode.setter
-    def netCode(self, value):
+    @net_code.setter
+    def net_code(self, value):
         self._obj.SetNetCode(value)
 
 
