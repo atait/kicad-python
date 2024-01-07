@@ -6,7 +6,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, Size, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, BoardItem
+from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem
 
 class ShapeType():
     Segment = pcbnew.S_SEGMENT
@@ -15,7 +15,7 @@ class ShapeType():
     Polygon = pcbnew.S_POLYGON
     Rect = pcbnew.S_RECT
 
-class Drawing(HasLayerStrImpl, Selectable, BoardItem):
+class Drawing(HasLayerStrImpl, HasPosition, HasWidth, Selectable, BoardItem):
     @staticmethod
     def wrap(instance):
         if instanceof(instance, SWIGtype.Shape):
@@ -57,17 +57,7 @@ class Drawing(HasLayerStrImpl, Selectable, BoardItem):
         raise TypeError('Unrecognized shape type on layer {}'.format(layer_str))
 
 
-class HasWidth(object):
-    @property
-    def width(self):
-        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
-
-    @width.setter
-    def width(self, value):
-        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
-
-
-class Segment(Drawing, HasWidth):
+class Segment(Drawing):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
         line = SWIGtype.Shape(board and board.native_obj)
         line.SetShape(ShapeType.Segment)
@@ -94,7 +84,7 @@ class Segment(Drawing, HasWidth):
         self._obj.SetEnd(Point.native_from(value))
 
 
-class Circle(Drawing, HasWidth):
+class Circle(Drawing):
     def __init__(self, center, radius, layer='F.SilkS', width=0.15,
                  board=None):
         circle = SWIGtype.Shape(board and board.native_obj)
@@ -144,7 +134,7 @@ class Circle(Drawing, HasWidth):
 
 
 # --- Logic for Arc changed a lot in version 6, so there are two classes
-class Arc_v5(Drawing, HasWidth):
+class Arc_v5(Drawing):
     def __init__(self, center, radius, start_angle, stop_angle,
                  layer='F.SilkS', width=0.15, board=None):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
@@ -195,7 +185,7 @@ class Arc_v5(Drawing, HasWidth):
         self._obj.SetAngle(value * 10)
 
 
-class Arc_v6(Drawing, HasWidth):
+class Arc_v6(Drawing):
     def __init__(self, center, radius, start_angle, stop_angle,
                  layer='F.SilkS', width=0.15, board=None):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
@@ -257,7 +247,7 @@ else:
     Arc = Arc_v5
 
 
-class Polygon(Drawing, HasWidth):
+class Polygon(Drawing):
     def __init__(self, coords,
                  layer='F.SilkS', width=0.15, board=None):
         poly_obj = SWIGtype.Shape(board and board.native_obj)
@@ -323,6 +313,7 @@ class Polygon(Drawing, HasWidth):
 
 
 class Rectangle(Polygon):
+    ''' Inherits x,y get/set from HasPosition '''
     def __init__(self, corner_nw, corner_se,
                  layer='F.SilkS', width=0.15, board=None):
         rect_obj = SWIGtype.Shape(board and board.native_obj)
@@ -370,7 +361,7 @@ class Rectangle(Polygon):
         return poly.contains(point)
 
 
-class TextPCB(Drawing, HasPosition):
+class TextPCB(Drawing):
     def __init__(self, position, text=None, layer='F.SilkS', size=1.0, thickness=0.15, board=None):
         self._obj = SWIGtype.Text(board and board.native_obj)
         self.position = position

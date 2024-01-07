@@ -188,7 +188,11 @@ class Selectable(object):
             self._obj.ClearBrightened()
 
 
+class HasWidth(object):
+    @property
+    def width(self):
+        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
 
-
-
-
+    @width.setter
+    def width(self, value):
+        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
