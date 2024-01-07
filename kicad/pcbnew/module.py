@@ -154,19 +154,25 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
             else:
                 raise Exception("Unknown module item type: %s" % type(item))
 
+    def flip(self):
+        self._obj.Flip(self._obj.GetCenter())
+
     @property
     def layer(self):
-        return Layer(self._obj.GetLayer())
+        if self.board:
+            return self.board.get_layer_name(self._obj.GetLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):
-        if value != self.layer:
-            if value in [Layer.Front, Layer.Back]:
-                # this will make sure all components of the module is
-                # switched to correct layer
-                self._obj.Flip(self._obj.GetCenter())
-            else:
-                raise ValueError("You can place a module only on Front or Back layers!")
+        if value == self.layer:
+            return
+        if value not in ['F.Cu', 'B.Cu']:
+            raise ValueError("You can place a module only on 'F.Cu' or 'B.Cu' layers!")
+        # Using flip will make sure all components of the module are
+        # switched to correct layer
+        self.flip()
 
     @property
     def libName(self):
@@ -220,7 +226,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
         self._removed_elements = []
 
 
-# In case new naming is used
+# In case v6+ naming is used
 Footprint = Module
 FootprintLine = ModuleLine
 FootprintLabel = ModuleLabel
