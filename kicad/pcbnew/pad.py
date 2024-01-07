@@ -83,16 +83,13 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
         """Sets the drill size. If value is a single float or int, pad drill
         shape is set to circle, if input is a tuple of (x, y) drill
         shape is set to oval."""
-        if isinstance(value, tuple):
-            self.drillShape = DrillShape.Oval
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-
-            self._obj.SetDrillSize(value.native_obj)
-
-        else: # value is a single number/integer
-            drillShape = DrillShape.Circle
-            self._obj.SetDrillSize(Size(value, value).native_obj())
+        try:
+            size = Size.build_from(value)
+            self.drill_shape = DrillShape.Oval
+        except TypeError:
+            size = Size.build_from((value, value))
+            self.drill_shape = DrillShape.Circle
+        self._obj.SetDrillSize(size.native_obj)
 
     @property
     def shape(self):
@@ -109,10 +106,10 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
     @size.setter
     def size(self, value):
-        if isinstance(value, tuple):
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-            self._obj.SetSize(value.native_obj)
-
-        else: # value is a single number/integer
-            self._obj.SetSize(Size(value, value).native_obj)
+        try:
+            size = Size.build_from(value)
+            # self.drill_shape = DrillShape.Oval
+        except TypeError:
+            size = Size.build_from((value, value))
+            # self.drill_shape = DrillShape.Circle
+        self._obj.SetSize(size.native_obj)

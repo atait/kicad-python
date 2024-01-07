@@ -80,9 +80,9 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         """Via center"""
         return Point.wrap(self._obj.GetCenter())
 
-    # @center.setter
-    # def center(self, value):
-    #     self._obj.SetCenter(int(value * units.DEFAULT_UNIT_IUS))
+    @center.setter
+    def center(self, value):
+        self._obj.SetCenter(Point.native_from(value))
 
     @property
     def top_layer(self):

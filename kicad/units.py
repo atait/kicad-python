@@ -143,9 +143,9 @@ class BaseUnitTuple(object):
 
     @staticmethod
     def _tuple_to_class(v, cls):
-        if type(v) == cls:
+        if isinstance(v, cls):
             return v
-        elif type(v) == tuple:
+        elif isinstance(v, (tuple, list)):
             if len(v) != 2:
                 raise TypeError("A point parameter must be a 2 value tuple")
         return cls(v[0], v[1])
