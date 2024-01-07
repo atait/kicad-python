@@ -16,7 +16,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-from kicad import pcbnew_bare as pcbnew
+from kicad import pcbnew_bare as pcbnew, SWIG_version
 import kicad
 
 class Layer():
@@ -53,7 +53,11 @@ def load_std_layers():
     # lazy import for Sphinx to run properly
     global _std_layer_dict, _std_layer_names
     if _std_layer_dict is None:
-        _std_layer_dict = {pcbnew.BOARD_GetStandardLayerName(n): n
+        if SWIG_version >= 7:
+            native_get_layername = pcbnew.BOARD.GetStandardLayerName
+        else:
+            native_get_layername = pcbnew.BOARD_GetStandardLayerName
+        _std_layer_dict = {native_get_layername(n): n
                            for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
         # For backwards compatibility with silkscreen renames
         try:
