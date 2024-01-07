@@ -1,27 +1,9 @@
-# -*- coding: utf-8 -*-
-#
-# This script will put all your components on an arc path. You can
-# define the parameters of the arc in the script (see below). All
-# components will be modified but making it select desired components
-# shouldn't be hard.
-#
-# Copyright © 2015 Hasan Yavuz Özderya
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301, USA.
-#
+'''
+    This script will put all your components on an arc path. You can
+    define the parameters of the arc in the script (see below). All
+    components will be modified but making it select desired components
+    shouldn't be hard.
+'''
 
 from math import cos, sin, radians, pi
 from kicad.pcbnew.board import Board

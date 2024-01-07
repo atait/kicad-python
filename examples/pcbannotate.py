@@ -1,32 +1,14 @@
-# -*- coding: utf-8 -*-
-#
-# This script will re-annotate board companents according to their x,y
-# positions and back-annotate those changes to schematic files.
-#
-# Make sure you have backups of all your files!
-#
-# You should run the script from inside pcbnew script console. After
-# running script, re-open your schematic files, update the netlist
-# file and import net list changes to pcbnew. This should update some
-# net names, but shouldn't change any component footprints.
-#
-# Copyright © 2015 Hasan Yavuz Özderya
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301, USA.
-#
+'''
+    This script will re-annotate board companents according to their x,y
+    positions and back-annotate those changes to schematic files.
+
+    Make sure you have backups of all your files!
+
+    You should run the script from inside pcbnew script console. After
+    running script, re-open your schematic files, update the netlist
+    file and import net list changes to pcbnew. This should update some
+    net names, but shouldn't change any component footprints.
+'''
 
 from kicad.pcbnew.board import Board
 from kicad.pcbnew.layer import Layer
