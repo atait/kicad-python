@@ -42,7 +42,10 @@ if pcbnew_bare is None:
     class SWIGtype: pass
 else:
     # Determine version and map equivalent objects into consistent names
-    ver = [int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.')]
+    try:
+        ver = (int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
+    except AttributeError:
+        ver = (5, 0)
     if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
         SWIG_version = 7
     elif ver[0] == 6 or (ver[0] == 5 and ver[1] == 99):
@@ -112,6 +115,19 @@ def instanceof(item, klass):
         return class_of_fun(item)
     except AttributeError:
         return False
+
+# Get reload: useful for on-the-fly updates to action plugin scripts without refreshing plugins
+try:
+    from importlib import reload
+except ImportError:
+    try:
+        from imp import reload
+    except ImportError:
+        try:
+            _ = reload
+        except NameError as err:
+            def reload(mod):
+                pass
 
 
 # Expose the basic classes to this package's top level

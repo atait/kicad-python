@@ -28,6 +28,7 @@ def notify(*args):
     except:
         print(text)
 
+
 deprecate_warn_fun = notify  # print is sometimes good
 def deprecate_member(old, new, deadline='v0.5.0'):
     def regular_decorator(klass):
