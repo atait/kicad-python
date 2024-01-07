@@ -19,9 +19,7 @@
 from kicad import pcbnew_bare as pcbnew
 import kicad
 
-from enum import IntEnum
-
-class Layer(IntEnum):
+class Layer():
     Front           = pcbnew.F_Cu
     Back            = pcbnew.B_Cu
 

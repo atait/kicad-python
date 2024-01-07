@@ -23,18 +23,19 @@ from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasPosition, HasConnection, Selectable, BoardItem
-from enum import IntEnum
+
 
 if SWIG_version >= 6:
-    class ViaType(IntEnum):
+    class ViaType():
         Through = pcbnew.VIATYPE_THROUGH
         Micro = pcbnew.VIATYPE_MICROVIA
         Blind = pcbnew.VIATYPE_BLIND_BURIED
 else:
-    class ViaType(IntEnum):
+    class ViaType():
         Through = pcbnew.VIA_THROUGH
         Micro = pcbnew.VIA_MICROVIA
         Blind = pcbnew.VIA_BLIND_BURIED
+
 
 class Via(HasPosition, HasConnection, Selectable, BoardItem):
     def __init__(self, coord, layer_pair, diameter, drill, board=None):

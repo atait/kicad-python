@@ -22,13 +22,12 @@ import kicad
 from kicad import units
 from kicad import Size
 from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
-from enum import IntEnum
 
-class DrillShape(IntEnum):
+class DrillShape():
     Circle = pcbnew.PAD_DRILL_SHAPE_CIRCLE
     Oval = pcbnew.PAD_DRILL_SHAPE_OBLONG
 
-class PadShape(IntEnum):
+class PadShape():
     Circle = pcbnew.PAD_SHAPE_CIRCLE
     Oval = pcbnew.PAD_SHAPE_OVAL
     Rectangle = pcbnew.PAD_SHAPE_RECT
@@ -37,7 +36,7 @@ class PadShape(IntEnum):
     Chamfered = pcbnew.PAD_SHAPE_CHAMFERED_RECT
     Custom = pcbnew.PAD_SHAPE_CUSTOM
 
-class PadType(IntEnum):
+class PadType():
     Through = pcbnew.PAD_ATTRIB_PTH
     SMD = pcbnew.PAD_ATTRIB_SMD
     Connector = pcbnew.PAD_ATTRIB_CONN
@@ -54,20 +53,20 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
     @property
     def padType(self):
-        return PadType(self._obj.GetAttribute())
+        return self._obj.GetAttribute()
 
     @padType.setter
     def padType(self, value):
-        """Value should be `PadType`."""
+        """Value should be integer that can be found by referencing PadType.Through"""
         self._obj.SetAttribute(value)
 
     @property
     def drillShape(self):
-        return DrillShape(self._obj.GetDrillShape())
+        return self._obj.GetDrillShape()
 
     @drillShape.setter
     def drillShape(self, value):
-        """Value should be `DrillShape`."""
+        """Value should be integer that can be found by referencing DrillShape.Circle"""
         self._obj.SetDrillShape(value)
 
     @property
@@ -93,11 +92,11 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
     @property
     def shape(self):
-        return PadShape(self._obj.GetShape())
+        return self._obj.GetShape()
 
     @shape.setter
     def shape(self, value):
-        """Value must be of type `PadShape`."""
+        """Value should be integer that can be found by referencing PadShape.Circle"""
         self._obj.SetShape(value)
 
     @property

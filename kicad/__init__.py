@@ -34,15 +34,6 @@ except EnvironmentError:
     pcbnew_bare = None
 
 
-# if `enum` cannot be imported (windoze!) we provide our own copy
-try:
-    import enum
-except ImportError:
-    import sys, os
-    module_dir = os.path.abspath(os.path.dirname(__file__))
-    sys.path.append(os.path.join(module_dir,'3rdparty'))
-
-
 # Low-level "new" function that avoids initializer
 class BareClass(object):
     pass
@@ -109,7 +100,7 @@ else:
             Point = pcbnew_bare.wxPoint
             Size = pcbnew_bare.wxSize
             Rect = pcbnew_bare.EDA_RECT
-    else:
+    elif SWIG_version == 5:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE_CONTAINER
             Track = pcbnew_bare.TRACK

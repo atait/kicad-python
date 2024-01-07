@@ -25,9 +25,8 @@ from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, Size, SWIGtype, SWIG_version
 from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, BoardItem
-from enum import IntEnum
 
-class ShapeType(IntEnum):
+class ShapeType():
     Segment = pcbnew.S_SEGMENT
     Circle = pcbnew.S_CIRCLE
     Arc = pcbnew.S_ARC
