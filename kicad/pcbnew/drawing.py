@@ -161,6 +161,14 @@ class Arc_v5(Drawing):
         self._obj.SetCenter(Point.native_from(value))
 
     @property
+    def radius(self):
+        return float(self._obj.GetRadius()) / units.DEFAULT_UNIT_IUS
+
+    @radius.setter
+    def radius(self, value):
+        self._obj.SetRadius(int(value * units.DEFAULT_UNIT_IUS))
+
+    @property
     def start(self):
         return Point.wrap(self._obj.GetArcStart())
 
@@ -207,6 +215,14 @@ class Arc_v6(Drawing):
     @center.setter
     def center(self, value):
         self._obj.SetCenter(Point.native_from(value))
+
+    @property
+    def radius(self):
+        return float(self._obj.GetRadius()) / units.DEFAULT_UNIT_IUS
+
+    @radius.setter
+    def radius(self, value):
+        self._obj.SetRadius(int(value * units.DEFAULT_UNIT_IUS))
 
     @property
     def start(self):
@@ -338,6 +354,13 @@ class Rectangle(Polygon):
         corners = [Point.wrap(pt) for pt in corners_native]
         return corners
 
+    @property
+    def size(self):
+        nw = Point.wrap(self._obj.GetStart())
+        se = Point.wrap(self._obj.GetEnd())
+        sz = nw - se
+        return (abs(sz[0]), abs(sz[1]))
+
     # The inherited to_segments works based on overloading get_vertices
 
     def to_polygon(self, replace=False):
@@ -393,13 +416,11 @@ class TextPCB(Drawing):
 
     @size.setter
     def size(self, value):
-        if isinstance(value, tuple):
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-            self._obj.SetTextSize(value.native_obj)
-
-        else: # value is a single number/integer
-            self._obj.SetTextSize(Size(value, value).native_obj)
+        try:
+            size = Size.build_from(value)
+        except TypeError:
+            size = Size.build_from((value, value))
+        self._obj.SetTextSize(size.native_obj)
 
     @property
     def orientation(self):
