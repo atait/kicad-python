@@ -71,12 +71,19 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
     @property
     def clearance(self):
-        return float(self._obj.GetClearance()) / units.DEFAULT_UNIT_IUS
+        if SWIG_version >= 7:
+            native = self._obj.GetLocalClearance()
+        else:
+            native = self._obj.GetClearance()
+        return float(native) / units.DEFAULT_UNIT_IUS
 
     @clearance.setter
     def clearance(self, value):
-        self._obj.SetClearance(int(value * units.DEFAULT_UNIT_IUS))
-        self._obj.SetZoneClearance(int(value * units.DEFAULT_UNIT_IUS))
+        if SWIG_version >= 7:
+            self._obj.SetLocalClearance(int(value * units.DEFAULT_UNIT_IUS))
+        else:
+            self._obj.SetClearance(int(value * units.DEFAULT_UNIT_IUS))
+            self._obj.SetZoneClearance(int(value * units.DEFAULT_UNIT_IUS))
 
     @property
     def min_width(self):
