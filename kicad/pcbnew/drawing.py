@@ -385,7 +385,8 @@ class Rectangle(Polygon):
 
 
 class TextPCB(Drawing):
-    def __init__(self, position, text=None, layer='F.SilkS', size=1.0, thickness=0.15, board=None):
+    def __init__(self, position, text=None, layer='F.SilkS',
+                 size=1.0, thickness=0.15, board=None):
         self._obj = SWIGtype.Text(board and board.native_obj)
         self.position = position
         if text:
@@ -404,11 +405,17 @@ class TextPCB(Drawing):
 
     @property
     def thickness(self):
-        return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
+        if SWIG_version >= 7:
+            return float(self._obj.GetTextThickness()) / units.DEFAULT_UNIT_IUS
+        else:
+            return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
 
     @thickness.setter
     def thickness(self, value):
-        return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
+        if SWIG_version >= 7:
+            return self._obj.SetTextThickness(int(value * units.DEFAULT_UNIT_IUS))
+        else:
+            return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
 
     @property
     def size(self):
