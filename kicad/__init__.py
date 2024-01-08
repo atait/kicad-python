@@ -43,7 +43,7 @@ if pcbnew_bare is None:
 else:
     # Determine version and map equivalent objects into consistent names
     try:
-        ver = (int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
+        ver = tuple(int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
     except AttributeError:
         ver = (5, 0)
     if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):

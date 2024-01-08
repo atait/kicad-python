@@ -81,6 +81,9 @@ class ModuleLine(HasLayerStrImpl, Selectable):
 @deprecate_member('libName', 'lib_name')
 @deprecate_member('fpName', 'fp_name')
 class Module(HasPosition, HasRotation, Selectable, BoardItem):
+    _ref_label = None
+    _val_label = None
+
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
             from kicad.pcbnew.board import Board
@@ -113,8 +116,10 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
 
     @property
     def reference_label(self):
-        # TODO: not critical but always return the same wrapper object
-        return ModuleLabel.wrap(self._obj.Reference())
+        native = self._obj.Reference()
+        if self._ref_label is None or self._ref_label.native_obj is not native:
+            self._ref_label = ModuleLabel.wrap(native)
+        return self._ref_label
 
     @property
     def value(self):
@@ -126,8 +131,10 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
 
     @property
     def value_label(self):
-        # TODO: not critical but always return the same wrapper object
-        return ModuleLabel.wrap(self._obj.Value())
+        native = self._obj.Value()
+        if self._val_label is None or self._val_label.native_obj is not native:
+            self._val_label = ModuleLabel.wrap(native)
+        return self._val_label
 
     @property
     def graphical_items(self):
