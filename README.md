@@ -12,6 +12,10 @@ This package is a pythonic wrapper around the various `pcbnew` APIs. It implemen
 
 This package has been fully tested with KiCAD 5, 6, 7 and partially tested with 7.99.
 
+> [!CAUTION]
+> The atait fork is undergoing a refactor that will result in new package imports.
+> Instances of `from kicad.pcbnew.board import Board` must be replaced by `from kigadgets.board import Board` by version 0.5.0
+
 ### An excerpt
 A simple pythonic script might look like this
 ```python
@@ -30,10 +34,8 @@ Don't be fooled though - `track` and `board` contain no state. They use properti
 
 1. 
 ```
-git clone git@github.com:atait/kicad-python
-pip install kicad-python/.
+pip install kigadgets
 ```
-<!-- pip install kigadgets -->
 
 2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) or ![](doc/pcbnew_terminal_icon2.png) and run these commands in kicad 6+
 ```python
@@ -105,9 +107,7 @@ Third, it exposes KiCad's `pcbnew.py` to your external python environment. The p
 **Effect:** You can now use the full KiCad built-in SWIG wrapper, the `kicad-python` package, and any non-GUI plugins you are developing *outside of the pcbnew application*. It is useful for batch processing, remote computers, procedural layout, continuous integration, and use in other software such as FreeCAD and various autorouters.
 
 ## Snippet examples
-These snippets are run in the GUI terminal. They are common automations that don't need dedicated action plugins
-
-There is no preceding context; the linking step above provides `pcb` to the terminal. These all should work in pcbnew 5, 6, or 7 on Mac, Windows, or Linux. 
+These snippets are run in the GUI terminal. They are common automations that aren't worth making dedicated action plugins. There is no preceding context; the linking step above provides `pcb` to the terminal. These all should work in pcbnew 5, 6, or 7 on Mac, Windows, or Linux.
 
 ### Hide silkscreen labels of selected footprints
 ```python
@@ -131,6 +131,7 @@ pcbnew.Refresh()
 ```
 
 ### Select similar vias
+This snippet assumes you have selected one via
 ```python
 og_via = next(pcb.selected_items)
 for via2 in pcb.vias:
@@ -140,7 +141,9 @@ for via2 in pcb.vias:
 og_via.select(False)
 pcbnew.Refresh()
 ```
-There is some additional functionality for micro and blind vias.
+The function `next` is used because `pcb.items` is a generator, not a list. Turn it into a list using the `list` function if desired. 
+
+See `via.py` for additional functionality related to micro and blind vias.
 
 ### Change all drill diameters
 Because planning ahead doesn't always work
@@ -170,7 +173,7 @@ for mod in pcb.footprints:
         mod.select()
 ```
 
-### Import user library
+### Import user library for GUI/CLI
 Suppose you wrote a file located in $KICAD_SCRIPTING_DIR/my_lib.py
 ```python
 # ~/.config/kicad/scripting/my_lib.py (Linux)
@@ -200,13 +203,13 @@ python my_lib.py some_file.kicad_pcb
 ```python
 from kicad.pcbnew.drawing import Rectangle
 my_rect = Rectangle((0,0), (60, 40))
-print(my_rect.x, my_rect.contains((1,1)))  # 30 True
 pcb.add(my_rect)
 pcbnew.Refresh()
+print(my_rect.x, my_rect.contains((1,1)))  # 30 True
 # Go move the new rectangle in the editor
-print(my_rect.x)  # 15.2 False
+print(my_rect.x, my_rect.contains((1,1)))  # 15.2 False
 ```
-`kicad-python` is a stateless wrapper of objects, not just an API wrapper. It stays synchronized with the state of the underlying native objects even when they are modified elsewhere.
+`kicad-python` stays synchronized with the state of the underlying native objects even when they are modified elsewhere because it is wrapping the C++ state rather than holding a Python state.
 
 ### Procedural layout
 Suppose you want to test various track width resistances.
@@ -224,7 +227,7 @@ for w in widths:
     y += 20
 pcbnew.Refresh()
 ```
-Go ahead and try this out in the pcbnew terminal, although this type of thing is better to stick in a user library(see above). The sky is the limit when it comes to procedural layout!
+Go ahead and try this out in the pcbnew terminal, although this type of thing is better to stick in a user library (see above). The sky is the limit when it comes to procedural layout!
 
 ## Related packages
 KiCAD has a rich landscape of user-developed tools, libraries, and plugins. They have complementary approaches that are optimized for different use cases. It is worth understanding this landscape in order to use the right tool for the job. This is how `kicad-python` fits in.
@@ -236,13 +239,13 @@ KiCAD has a rich landscape of user-developed tools, libraries, and plugins. They
 | ----------------- | ------------ | ---------------------------- |
 | Primary audience  | users        | developers                   |
 | CAD logic/state   | python       | C++                          |
-| Entry points      | Plugin, CLI  | API, examples                |
+| Entry points      | Plugin, CLI  | API                          |
 | Dependencies      | 8            | 0                            |
 | Lines to maintain | 15k          | 3k                           |
 | Python versions   | 3.7+         | 2.\*/3.\*                    |
-| Documentation     | extensive    | "documents itself" (for now) |
+| Documentation     | extensive    | "documents itself" for now   |
 
-**Audiences:** While `KiKit` is directed primarily to end users, `kicad-python` is directed moreso to developers and coders. It is lean: <2,800 lines of code, no constraints on python version, and **zero dependencies** besides `pcbnew.py`. Out of the box, `kicad-python` offers very little to the end user who doesn't want to code. It has no entry points, meaning the user must do some coding to write 10-line snippets, action plugins, and/or batch entry points. In contrast, out of the box, `KiKit` exposes highly-configurable, advanced functionality through friendly entry points in CLI and GUI action plugins.
+**Audiences:** While `KiKit` is directed primarily to end users, `kicad-python` is directed moreso to developers and coders. It is lean: <2,800 lines of code, no constraints on python version, and **zero dependencies** besides `pcbnew.py`. Out of the box, `kicad-python` offers very little to the end user who doesn't want to code. It has no entry points, meaning the user must do some coding to write 10-line snippets, action plugins, and/or batch entry points. In contrast, `KiKit` comes with batteries included. It exposes highly-configurable, advanced functionality through friendly entry points in CLI and GUI action plugins.
 
 **Internals:** `KiKit` performs a significant amount of internal state handling and CAD logic (via `shapely`). `kicad-python` does not store state; it is a thin wrapper around corresponding SWIG objects. While the first approach gives functionality beyond `pcbnew` built into KiKit, the second exposes the key functionality of underlying objects, leaving the state and logic to C++. It requires a coder to do things with those objects. If that dev wants to use `shapely` too, they are welcome to import it.
 
