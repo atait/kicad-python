@@ -108,13 +108,23 @@ sys.path.append("{}")
 """
 
 
-def create_link(pcbnew_module_path, kicad_config_path):
+def _print_file(arg):
+    print('\033[4m\033[91m' + arg + '\033[0m')
+
+
+def _print_contents(arg):
+    print('\033[92m' + arg + '\033[0m')
+
+
+def create_link(pcbnew_module_path, kicad_config_path, dry_run=False):
+    writing = 'Would write' if dry_run else 'Writing'
     # Determine what to put in the startup script
     my_package_path = os.path.dirname(__file__)
     my_search_path = os.path.dirname(my_package_path)
     startup_contents = startup_script.format(my_search_path)
     # Determine where to put the startup script
     startup_file = os.path.join(kicad_config_path.strip(), 'PyShell_pcbnew_startup.py')
+
     # Check that we are not overwriting something
     write_is_safe = True
     if os.path.isfile(startup_file):
@@ -128,10 +138,13 @@ def create_link(pcbnew_module_path, kicad_config_path):
             write_is_safe = False
 
     # Write the startup script
+    print('\n1. {} console startup script: for GUI snippet scripting'.format(writing))
+    _print_file(startup_file)
     if write_is_safe:
-        print('1. Writing console startup script,', startup_file)
-        with open(startup_file, 'w') as fx:
-            fx.write(startup_contents)
+        if not dry_run:
+            with open(startup_file, 'w') as fx:
+                fx.write(startup_contents)
+        _print_contents(startup_contents)
     else:
         print('Warning: Startup file is not empty:\n', startup_file)
         print('It is safer to delete that file, or\ndo this manually by inserting these lines into that file:\n\n', startup_contents)
@@ -141,16 +154,23 @@ def create_link(pcbnew_module_path, kicad_config_path):
     os.makedirs(plugin_dir, exist_ok=True)
     plugin_file = os.path.join(plugin_dir, 'initialize_kicad_python_plugin.py')
     plugin_contents = plugin_script.format(my_search_path)
-    print('2. Writing plugin importer,', plugin_file)
-    with open(plugin_file, 'w') as fx:
-        fx.write(plugin_contents)
+    print('2. {} plugin importer: for action plugin development'.format(writing))
+    _print_file(plugin_file)
+    if not dry_run:
+        with open(plugin_file, 'w') as fx:
+            fx.write(plugin_contents)
+    _print_contents(plugin_contents)
 
     # Store the location of pcbnew module
-    print('3. Writing pcbnew path,', pcbnew_path_store)
-    with open(pcbnew_path_store, 'w') as fx:
-        fx.write(pcbnew_module_path.strip())
+    print('3. {} pcbnew path: for batch processing outside KiCAD'.format(writing))
+    _print_file(pcbnew_path_store)
+    if not dry_run:
+        with open(pcbnew_path_store, 'w') as fx:
+            fx.write(pcbnew_module_path.strip())
+    _print_contents(pcbnew_module_path)
 
     # Try it
+    if dry_run: return
     try:
         get_pcbnew_path()
     except ImportError as err:
@@ -191,7 +211,8 @@ For example,
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=help_msg)
 parser.add_argument('pcbnew_module_path', type=str)
 parser.add_argument('kicad_config_path', type=str)
+parser.add_argument('-n', '--dry-run', action='store_true')
 
 def cl_main():
     args = parser.parse_args()
-    create_link(args.pcbnew_module_path, args.kicad_config_path)
+    create_link(args.pcbnew_module_path, args.kicad_config_path, dry_run=args.dry_run)
