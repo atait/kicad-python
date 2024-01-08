@@ -1,5 +1,3 @@
-# TODO: Mixins
-
 from math import radians, degrees
 from kicad.point import Point
 from kicad.exceptions import deprecate_member
@@ -113,19 +111,25 @@ class HasLayerStrImpl(object):
 
     @property
     def layer(self):
-        brd = self._obj.GetBoard()
-        if brd:
-            return brd.GetLayerName(self._obj.GetLayer())
-        else:
-            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
+        layid = self._obj.GetLayer()
+        try:
+            brd = self.board
+        except AttributeError:
+            from kicad.pcbnew.board import Board
+            native = self._obj.GetBoard()
+            brd = Board(native) if native else None
+        return pcbnew_layer.get_board_layer_name(brd, layid)
 
     @layer.setter
     def layer(self, value):
-        brd = self._obj.GetBoard()
-        if brd:
-            self._obj.SetLayer(brd.GetLayerID(value))
-        else:
-            self._obj.SetLayer(pcbnew_layer.get_std_layer_id(value))
+        try:
+            brd = self.board
+        except AttributeError:
+            from kicad.pcbnew.board import Board
+            native = self._obj.GetBoard()
+            brd = Board(native) if native else None
+        layid = pcbnew_layer.get_board_layer_id(brd, value)
+        self._obj.SetLayer(layid)
 
 
 @deprecate_member('netName', 'net_name')

@@ -43,6 +43,7 @@ class Board(object):
             self._obj = pcbnew.BOARD()
 
         self._modulelist = _ModuleList(self)
+        self._removed_elements = []
 
     @property
     def native_obj(self):
@@ -185,7 +186,20 @@ class Board(object):
         return track
 
     def get_layer_id(self, name):
-        return self._obj.GetLayerID(name)
+        lid = self._obj.GetLayerID(name)
+        if lid == -1:
+            # Try to recover from silkscreen rename
+            if name == 'F.SilkS':
+                lid = self._obj.GetLayerID('F.Silkscreen')
+            elif name == 'F.Silkscreen':
+                lid = self._obj.GetLayerID('F.SilkS')
+            elif name == 'B.SilkS':
+                lid = self._obj.GetLayerID('B.Silkscreen')
+            elif name == 'B.Silkscreen':
+                lid = self._obj.GetLayerID('B.Silkscreen')
+        if lid == -1:
+            raise ValueError('Layer {} not found in this board'.format(name))
+        return lid
 
     def get_layer_name(self, layer_id):
         return self._obj.GetLayerName(layer_id)
@@ -259,8 +273,6 @@ class Board(object):
             so it persists for the life of that object
         '''
         if not permanent:
-            if not hasattr(self, '_removed_elements'):
-                self._removed_elements = []
             self._removed_elements.append(element)
         self._obj.Remove(element._obj)
 

@@ -26,8 +26,6 @@ class Layer():
     FrontCourtyard  = pcbnew.F_CrtYd
     BackCourtyard   = pcbnew.B_CrtYd
 
-    # TODO: add inner layer names
-
 # dicts for converting layer name to id, used by _get_layer
 _std_layer_dict = None
 _std_layer_names = None
@@ -41,12 +39,14 @@ def load_std_layers():
             native_get_layername = pcbnew.BOARD_GetStandardLayerName
         _std_layer_dict = {native_get_layername(n): n
                            for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
-        # For backwards compatibility with silkscreen renames
         try:
+            # For backwards compatibility with silkscreen renames
             _std_layer_dict['F.SilkS'] = _std_layer_dict['F.Silkscreen']
             _std_layer_dict['B.SilkS'] = _std_layer_dict['B.Silkscreen']
         except KeyError:
-            pass
+            # Forwards compatibility
+            _std_layer_dict['F.Silkscreen'] = _std_layer_dict['F.SilkS']
+            _std_layer_dict['B.Silkscreen'] = _std_layer_dict['B.SilkS']
     if _std_layer_names is None:
         _std_layer_names = {s: n for n, s in _std_layer_dict.items()}
 
