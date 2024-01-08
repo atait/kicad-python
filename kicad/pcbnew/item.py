@@ -1,7 +1,9 @@
 from math import radians, degrees
+from kicad import units
 from kicad.point import Point
 from kicad.exceptions import deprecate_member
 import kicad.pcbnew.layer as pcbnew_layer
+
 
 class BoardItem(object):
     _obj = None
