@@ -30,26 +30,35 @@ which produces
 This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern. 
 Don't be fooled though - `track` and `board` contain no state. They use properties to give an intuition of state, but they are dynamically interacting with the underlying C++ `PCB_TRACK` and `BOARD`. You can always access the low-level objects using `track.native_obj`.
 
-## Installation
+<!-- ## Installation via package manager
+**IN PROGRESS**
+
+v6+ only
+
+1. Open kicad menu Tools > Plugin and Content Manager.
+2. Scroll down to `kigadgets`
+3. Double click. Apply transaction.
+4. You are done
+ -->
+ 
+## Installation via PyPI
 
 1. 
 ```
 pip install kigadgets
 ```
 
-2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) or ![](doc/pcbnew_terminal_icon2.png) and run these commands in kicad 6+
+2. Open the pcbnew GUI application. Open its terminal ![](doc/pcbnew_terminal_icon.png) or ![](doc/pcbnew_terminal_icon2.png) and run this command in kicad 6+
 ```python
-import pcbnew
-pcbnew.__file__
-# [Path A]: This will give something like "/usr/lib/python3/dist-packages/pcbnew.py"
-pcbnew.SETTINGS_MANAGER.GetUserSettingsPath()
-# [Path B]: This will give something like "home/username/.config/kicad"
+import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
 ```
+This will print 2 paths. *Copy that entire line.*
+
 For kicad 5, replace that last command with `pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()` (note the last underscore).
 
-3. Go back to your external command line or Terminal shell, and run this command, replacing Path A and Path B with what you got above.
+3. Go back to your external command line or Terminal shell, and run this command, replacing \[paste\] with what you copied
 ```bash
-link_kicad_python_to_pcbnew [Path A] [Path B]
+link_kicad_python_to_pcbnew [paste]
 ```
 For example,
 ```bash
@@ -267,18 +276,20 @@ This project adopts a philosophy similar to that of [lygadgets](https://github.c
 
 The overarching idea is workflow *interoperability* rather than uniformity. I think this works better for open source because everybody has their existing workflows, and there is no central authority to impose "the best" API or - more generally - to tell you how to do your thing. 
 
-An example of interoperability, `kicad-python` can be lightly inserted anywhere in existing code using `wrap` and `native_obj`.
+An example of interoperability, `kicad-python` can be delicately inserted anywhere in existing code using `wrap` and `native_obj`.
 ```python
-# legacy_script.py
+# file: legacy_script.py
 ...
 my_zone = get_a_zone_somewhere()
 # my_zone.SetClearance(my_zone.GetClearance() * 2)  # This existing line will not work >v5
+
 ### begin insertion
 from kicad.pcbnew.zone import Zone
-zone_tmp = Zone.wrap(my_zone)
-zone_tmp.clearance *= 2  # Works in all versions
-my_zone = zone_tmp.native_obj
+zone_tmp = Zone.wrap(my_zone)  # Intake from any version
+zone_tmp.clearance *= 2        # Version independent
+my_zone = zone_tmp.native_obj  # Outlet to correct version
 ### end insertion
+
 do_something_else_to(my_zone)
 ```
 Now this code is forwards compatible without breaking backwards compatibility.

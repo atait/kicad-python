@@ -1,3 +1,4 @@
+# TODO: this file not currently used, except by tests
 from kicad import pcbnew_bare
 
 import kicad
