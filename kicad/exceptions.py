@@ -29,6 +29,32 @@ def notify(*args):
         print(text)
 
 
+def query_user(prompt=None, default=''):
+    ''' Simple GUI dialog asking for a single value
+        Returns what was entered by the user as a string.
+
+            retstr = query_user('Enter a drill width in mm', 0.5)
+            if retstr is None:
+                return
+            drill = float(retstr)
+    '''
+    if prompt is None:
+        prompt = 'Enter a value'
+    try:
+        import wx
+    except ImportError:
+        # Try from the command line. Unused since it might hang
+        # retval = input(prompt + ': ')
+        # return retval
+        raise
+    default = str(default)
+    dialog = wx.TextEntryDialog(None, prompt, 'kicad-python query', default, wx.CANCEL | wx.OK)
+    sg = dialog.ShowModal()
+    if sg != wx.ID_OK:
+        return None
+    return dialog.GetValue()
+
+
 deprecate_warn_fun = notify  # print is sometimes good
 def deprecate_member(old, new, deadline='v0.5.0'):
     def regular_decorator(klass):
