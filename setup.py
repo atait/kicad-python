@@ -12,7 +12,7 @@ def readme():
 
 setuptools.setup(
         name='kigadgets',
-        version='0.4.1',
+        version='0.4.2',
         description='Cross-version python wrapper for KiCAD pcbnew',
         long_description=readme(),
         long_description_content_type='text/markdown',

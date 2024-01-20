@@ -195,7 +195,8 @@ def do_something(pcb):
 if __name__ == '__main__':
     pcb = Board.load(sys.argv[1])
     do_something(pcb)
-    pcb.save()
+    newname = pcb.filename.split('.')[0] + '-proc.kicad_pcb'  # Prevent overwrite of source file
+    pcb.save(newname)
 ```
 Then you can run it in the pcbnew.app terminal like
 ```python
