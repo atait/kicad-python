@@ -6,7 +6,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, Size, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem
+from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
 
 class ShapeType():
     Segment = pcbnew.S_SEGMENT
@@ -384,7 +384,7 @@ class Rectangle(Polygon):
         return poly.contains(point)
 
 
-class TextPCB(Drawing):
+class TextPCB(Drawing, TextEsque):
     def __init__(self, position, text=None, layer='F.SilkS',
                  size=1.0, thickness=0.15, board=None):
         self._obj = SWIGtype.Text(board and board.native_obj)
@@ -394,82 +394,3 @@ class TextPCB(Drawing):
         self.layer = layer
         self.size = size
         self.thickness = thickness
-
-    @property
-    def text(self):
-        return self._obj.GetText()
-
-    @text.setter
-    def text(self, value):
-        return self._obj.SetText(value)
-
-    @property
-    def thickness(self):
-        if SWIG_version >= 7:
-            return float(self._obj.GetTextThickness()) / units.DEFAULT_UNIT_IUS
-        else:
-            return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
-
-    @thickness.setter
-    def thickness(self, value):
-        if SWIG_version >= 7:
-            return self._obj.SetTextThickness(int(value * units.DEFAULT_UNIT_IUS))
-        else:
-            return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
-
-    @property
-    def size(self):
-        return Size.wrap(self._obj.GetTextSize())
-
-    @size.setter
-    def size(self, value):
-        try:
-            size = Size.build_from(value)
-        except TypeError:
-            size = Size.build_from((value, value))
-        self._obj.SetTextSize(size.native_obj)
-
-    @property
-    def orientation(self):
-        return self._obj.GetTextAngle() / 10
-
-    @orientation.setter
-    def orientation(self, value):
-        self._obj.SetTextAngle(value * 10)
-
-    @property
-    def justification(self):
-        hj = self._obj.GetHorizJustify()
-        vj = self._obj.GetVertJustify()
-        for k, v in justification_lookups.items():
-            if hj == getattr(pcbnew, v):
-                hjs = k
-            if vj in getattr(pcbnew, v):
-                vjs = k
-        return hjs, vjs
-
-    @justification.setter
-    def justification(self, value):
-        if isinstance(value, (list, tuple)):
-            assert len(value) == 2
-            self.justification = value[0]
-            self.justification = value[1]
-        else:
-            try:
-                token = justification_lookups[value]
-            except KeyError:
-                raise ValueError('Invalid justification {} of available {}'.format(value, list(justification_lookups.keys())))
-            enum_val = getattr(pcbnew, token)
-            if 'HJUSTIFY' in token:
-                self._obj.SetHorizJustify(enum_val)
-            else:
-                self._obj.SetVertJustify(enum_val)
-
-justification_lookups = dict(
-    left='GR_TEXT_HJUSTIFY_LEFT',
-    center='GR_TEXT_HJUSTIFY_CENTER',
-    right='GR_TEXT_HJUSTIFY_RIGHT',
-    bottom='GR_TEXT_VJUSTIFY_BOTTOM',
-    middle='GR_TEXT_VJUSTIFY_CENTER',
-    top='GR_TEXT_VJUSTIFY_TOP',
-)

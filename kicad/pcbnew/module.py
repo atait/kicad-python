@@ -3,12 +3,12 @@ from kicad import pcbnew_bare as pcbnew
 import kicad
 from kicad.exceptions import deprecate_member
 from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem
+from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem, TextEsque
 from kicad.pcbnew.pad import Pad
 
 
-class ModuleLabel(HasPosition, HasRotation, HasLayerStrImpl, Selectable):
-    """wrapper for `TEXTE_MODULE`"""
+class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque):
+    """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = SWIGtype.FpText(mod.native_obj)
         mod.native_obj.Add(self._obj)
@@ -18,42 +18,12 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerStrImpl, Selectable):
             self.layer = layer
 
     @property
-    def text(self):
-        return self._obj.GetText()
-
-    @text.setter
-    def text(self, value):
-        return self._obj.SetText(value)
-
-    @property
     def visible(self):
         raise ValueError('ModuleLabel.visible is write only.')
 
     @visible.setter
     def visible(self, value):
         return self._obj.SetVisible(value)
-
-    @property
-    def thickness(self):
-        return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
-
-    @thickness.setter
-    def thickness(self, value):
-        return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
-
-    @property
-    def size(self):
-        return Size.wrap(self._obj.GetTextSize())
-
-    @size.setter
-    def size(self, value):
-        if isinstance(value, tuple):
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-            self._obj.SetTextSize(value.native_obj)
-
-        else: # value is a single number/integer
-            self._obj.SetTextSize(Size(value, value).native_obj)
 
     @staticmethod
     def wrap(instance):

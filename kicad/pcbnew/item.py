@@ -1,5 +1,5 @@
 from math import radians, degrees
-from kicad import units
+from kicad import units, SWIG_version
 from kicad.point import Point
 from kicad.exceptions import deprecate_member
 import kicad.pcbnew.layer as pcbnew_layer
@@ -61,12 +61,18 @@ class HasRotation(object):
 
     @property
     def rotation(self):
-        """Rotation of the item in radians."""
-        return radians(self._obj.GetOrientation() / 10.)
+        """Rotation of the item in degrees."""
+        if SWIG_version >= 7:
+            return float(self._obj.GetOrientationDegrees())
+        else:
+            return float(self._obj.GetOrientation()) / 10
 
     @rotation.setter
     def rotation(self, value):
-        self._obj.SetOrientation(degrees(value) * 10.)
+        if SWIG_version >= 7:
+            self._obj.SetOrientationDegrees(value)
+        else:
+            self._obj.SetOrientation(value * 10.)
 
 
 class HasLayerEnumImpl(object):
@@ -202,3 +208,85 @@ class HasWidth(object):
     @width.setter
     def width(self, value):
         self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+
+
+class TextEsque(object):
+    # Note orientation and rotation mean different things
+    @property
+    def text(self):
+        return self._obj.GetText()
+
+    @text.setter
+    def text(self, value):
+        return self._obj.SetText(value)
+
+    @property
+    def thickness(self):
+        if SWIG_version >= 7:
+            return float(self._obj.GetTextThickness()) / units.DEFAULT_UNIT_IUS
+        else:
+            return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
+
+    @thickness.setter
+    def thickness(self, value):
+        if SWIG_version >= 7:
+            return self._obj.SetTextThickness(int(value * units.DEFAULT_UNIT_IUS))
+        else:
+            return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
+
+    @property
+    def size(self):
+        return Size.wrap(self._obj.GetTextSize())
+
+    @size.setter
+    def size(self, value):
+        try:
+            size = Size.build_from(value)
+        except TypeError:
+            size = Size.build_from((value, value))
+        self._obj.SetTextSize(size.native_obj)
+
+    @property
+    def orientation(self):
+        return self._obj.GetTextAngle() / 10
+
+    @orientation.setter
+    def orientation(self, value):
+        self._obj.SetTextAngle(value * 10)
+
+    @property
+    def justification(self):
+        hj = self._obj.GetHorizJustify()
+        vj = self._obj.GetVertJustify()
+        for k, v in justification_lookups.items():
+            if hj == getattr(pcbnew, v):
+                hjs = k
+            if vj in getattr(pcbnew, v):
+                vjs = k
+        return hjs, vjs
+
+    @justification.setter
+    def justification(self, value):
+        if isinstance(value, (list, tuple)):
+            assert len(value) == 2
+            self.justification = value[0]
+            self.justification = value[1]
+        else:
+            try:
+                token = justification_lookups[value]
+            except KeyError:
+                raise ValueError('Invalid justification {} of available {}'.format(value, list(justification_lookups.keys())))
+            enum_val = getattr(pcbnew, token)
+            if 'HJUSTIFY' in token:
+                self._obj.SetHorizJustify(enum_val)
+            else:
+                self._obj.SetVertJustify(enum_val)
+
+justification_lookups = dict(
+    left='GR_TEXT_HJUSTIFY_LEFT',
+    center='GR_TEXT_HJUSTIFY_CENTER',
+    right='GR_TEXT_HJUSTIFY_RIGHT',
+    bottom='GR_TEXT_VJUSTIFY_BOTTOM',
+    middle='GR_TEXT_VJUSTIFY_CENTER',
+    top='GR_TEXT_VJUSTIFY_TOP',
+)
