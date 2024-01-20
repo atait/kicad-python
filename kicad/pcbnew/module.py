@@ -19,7 +19,10 @@ class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque
 
     @property
     def visible(self):
-        raise ValueError('ModuleLabel.visible is write only.')
+        try:
+            return self._obj.IsVisible()
+        except AttributeError:
+            raise AttributeError('ModuleLabel.visible is write only in KiCad {}'.format(SWIG_version))
 
     @visible.setter
     def visible(self, value):
@@ -31,18 +34,12 @@ class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque
             return kicad.new(ModuleLabel, instance)
 
 
-class ModuleLine(HasLayerStrImpl, Selectable):
-    """Wrapper for `EDGE_MODULE`"""
-    @property
-    def native_obj(self):
-        return self._obj
-
+class ModuleLine(HasLayerStrImpl, Selectable, BoardItem):
+    """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
     @staticmethod
     def wrap(instance):
-        if type(instance) is not SWIGtype.FpShape:
-            # raise TypeError()
-            return None
-        return kicad.new(ModuleLine, instance)
+        if type(instance) is SWIGtype.FpShape:
+            return kicad.new(ModuleLine, instance)
 
 
 @deprecate_member('referenceLabel', 'reference_label')
@@ -71,10 +68,8 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
 
     @staticmethod
     def wrap(instance):
-        if type(instance) is not SWIGtype.Footprint:
-            # raise TypeError()
-            return None
-        return kicad.new(Module, instance)
+        if type(instance) is SWIGtype.Footprint:
+            return kicad.new(Module, instance)
 
     @property
     def reference(self):
