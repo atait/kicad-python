@@ -2,7 +2,6 @@ from kigadgets import pcbnew_bare as pcbnew
 
 import kigadgets
 from kigadgets import Size
-from kigadgets.exceptions import deprecate_member
 from kigadgets.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
 
 class DrillShape():
@@ -25,8 +24,6 @@ class PadType():
     NPTH = pcbnew.PAD_ATTRIB_NPTH
 
 
-@deprecate_member('padType', 'pad_type')
-@deprecate_member('drillShape', 'drill_shape')
 class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     def __init__(self):
         raise NotImplementedError('Direct instantiation of Pad is not supported')

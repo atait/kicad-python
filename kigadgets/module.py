@@ -1,7 +1,6 @@
 from kigadgets import pcbnew_bare as pcbnew
 
 import kigadgets
-from kigadgets.exceptions import deprecate_member
 from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
 from kigadgets.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem, TextEsque
 from kigadgets.pad import Pad
@@ -43,11 +42,6 @@ class ModuleLine(HasLayerStrImpl, Selectable, BoardItem):
             return kigadgets.new(ModuleLine, instance)
 
 
-@deprecate_member('referenceLabel', 'reference_label')
-@deprecate_member('valueLabel', 'value_label')
-@deprecate_member('graphicalItems', 'graphical_items')
-@deprecate_member('libName', 'lib_name')
-@deprecate_member('fpName', 'fp_name')
 class Module(HasPosition, HasRotation, Selectable, BoardItem):
     _ref_label = None
     _val_label = None
