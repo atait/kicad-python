@@ -327,7 +327,7 @@ class Polygon(Drawing):
         ''' Does this shape contain the point
 
             Args:
-                point (tuple, Point): the point as a tuple or kicad.Point
+                point (tuple, Point): the point as a tuple or kigadgets.Point
             Returns:
                 bool: True if contained
         '''
@@ -390,7 +390,7 @@ class Rectangle(Polygon):
         ''' Does this shape contain the point
 
             Args:
-                point (tuple, Point): the point as a tuple or kicad.Point
+                point (tuple, Point): the point as a tuple or kigadgets.Point
             Returns:
                 bool: True if contained
         '''

@@ -159,7 +159,7 @@ class Board(object):
     def copy(self):
         return Board(wrap=self._obj.Clone())
 
-    # TODO: add setter for Board.filename
+    # TODO: add setter for Board.filename. For now, use brd.save(filename)
     @property
     def filename(self):
         """Name of the board file."""
@@ -167,6 +167,10 @@ class Board(object):
 
     def add_module(self, ref, pos=(0, 0)):
         """Create new module on the board"""
+        return Module(ref, pos, board=self)
+
+    def add_footprint(self, ref, pos=(0, 0)):
+        """Same as add_module"""
         return Module(ref, pos, board=self)
 
     @property
@@ -301,7 +305,7 @@ class Board(object):
             except AttributeError:
                 continue
 
-    def fill_zones(self, zone_to_fill=None):
-        ''' zone_to_fill=None fills all zones in this board '''
+    def fill_zones(self):
+        ''' fills all zones in this board '''
         filler = pcbnew.ZONE_FILLER(self._obj)
         filler.Fill(self._obj.Zones())

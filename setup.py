@@ -22,5 +22,5 @@ setuptools.setup(
         url='https://github.com/atait/kicad-python/',
         packages=setuptools.find_packages(exclude=['tests']),
         install_requires=reqs,
-        entry_points={'console_scripts': 'link_kicad_python_to_pcbnew=kicad.environment:cl_main'},
+        entry_points={'console_scripts': 'link_kigadgets_to_pcbnew=kigadgets.environment:cl_main'},
     )

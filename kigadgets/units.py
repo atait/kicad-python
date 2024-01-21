@@ -106,8 +106,8 @@ class BaseUnitTuple(object):
 
         :Example:
 
-        >>> import kicad
-        >>> p = kicad.Point(1, 2)
+        >>> import kigadgets
+        >>> p = kigadgets.Point(1, 2)
         >>> p.mm
         (1, 2)
 

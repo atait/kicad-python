@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 from functools import wraps
-# from kicad.exceptions import deprecate_member
-# import kicad.exceptions as kex  # will use deprecate_member and deprecate_warn_fun
+# from kigadgets.exceptions import deprecate_member
+# import kigadgets.exceptions as kex  # will use deprecate_member and deprecate_warn_fun
 
 deprecate_warn_fun = print  # print is sometimes good
 def deprecate_member(old, new, deadline='v0.5.0'):
