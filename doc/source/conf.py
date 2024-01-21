@@ -109,7 +109,7 @@ pygments_style = 'sphinx'
 # -- AutoAPI configuration ----------------------------------------------------
 
 autoapi_root = 'API'
-autoapi_dirs = ['../../kicad']
+autoapi_dirs = ['../../kigadgets']
 # autoapi_template_dir = '../templates'  # Not working
 autoapi_member_order = 'bysource'
 autoapi_options = [
