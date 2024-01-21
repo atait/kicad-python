@@ -117,7 +117,8 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     def layerset(self):
         ''' For zones with multiple layers
             Changing this layerset will not propagate back to this zone
-            until you set layerset again. Common pattern:
+            until you set layerset again. Common pattern::
+
                 zone.layerset = zone.layerset.add_layer('F.Cu')
         '''
         from kicad.pcbnew.board import Board

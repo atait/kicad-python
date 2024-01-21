@@ -143,6 +143,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
     def copy(self, ref, pos=None, board=None):
         """Create a copy of an existing module on the board
             A new reference designator is required, example:
+
                 mod2 = mod1.copy('U2')
                 mod2.reference == 'U2'  # True
         """

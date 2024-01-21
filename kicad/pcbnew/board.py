@@ -51,7 +51,7 @@ class Board(object):
 
     @staticmethod
     def wrap(instance):
-        """Wraps a C++/old api BOARD object, and returns a Board."""
+        """Wraps a C++/old api `BOARD` object, and returns a `Board`."""
         return Board(wrap=instance)
 
     def add(self, obj):
@@ -290,8 +290,10 @@ class Board(object):
         ''' This useful for duck typing in the interactive terminal
             Suppose you want to set some drill radii. Iterating everything would cause attribute errors,
             so it is easier to just select the vias you want, then use this method for convenience.
+
             To get one item that you selected, use
-                xx = next(pcb.selected_items)
+
+            >>> xx = next(pcb.selected_items)
         '''
         for item in self.items:
             try:

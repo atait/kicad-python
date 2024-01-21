@@ -324,6 +324,13 @@ class Polygon(Drawing):
         self.native_obj.SetPolyShape(smoothed)
 
     def contains(self, point):
+        ''' Does this shape contain the point
+
+            Args:
+                point (tuple, Point): the point as a tuple or kicad.Point
+            Returns:
+                bool: True if contained
+        '''
         poly = self._obj.GetPolyShape()
         return poly.Contains(Point.native_from(point))
 
@@ -380,6 +387,13 @@ class Rectangle(Polygon):
         poly.fillet(radius_mm, tol_mm)
 
     def contains(self, point):
+        ''' Does this shape contain the point
+
+            Args:
+                point (tuple, Point): the point as a tuple or kicad.Point
+            Returns:
+                bool: True if contained
+        '''
         poly = self.to_polygon(replace=False)
         return poly.contains(point)
 

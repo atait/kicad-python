@@ -19,3 +19,14 @@ drawing
    :members:
    :undoc-members:
 
+.. autoclass:: Polygon
+   :members:
+   :undoc-members:
+
+.. autoclass:: Rectangle
+   :members:
+   :undoc-members:
+
+.. autoclass:: TextPCB
+   :members:
+   :undoc-members:

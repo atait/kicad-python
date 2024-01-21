@@ -11,9 +11,11 @@ class NoDefaultUnits(Exception):
 
 def notify(*args):
     ''' Show text in a popup window while in the GUI.
-        Arguments act the same as print(*args)
-        It is not the best debugging tool ever created, but
-        it is handy for debugging action plugins
+        Arguments act the same as print(\*args).
+        Not the best debugging tool ever created, but
+        it is handy for debugging action plugins::
+
+            notify('Debug info:', 'x =', x)
     '''
     text = ' '.join(str(arg) for arg in args)
     try:
@@ -30,8 +32,8 @@ def notify(*args):
 
 
 def query_user(prompt=None, default=''):
-    ''' Simple GUI dialog asking for a single value
-        Returns what was entered by the user as a string.
+    ''' Simple GUI dialog asking for a single value.
+        Returns what was entered by the user as a string::
 
             retstr = query_user('Enter a drill width in mm', 0.5)
             if retstr is None:
@@ -67,6 +69,7 @@ def deprecate_member(old, new, deadline='v0.5.0'):
             def warner(*args, **kwargs):
                 deprecate_warn_fun(header + map_str)
                 return fun(*args, **kwargs)
+            warner.__doc__ = 'Deprecation notice. Use `{}` instead'.format(new)
             return warner
 
         new_meth = getattr(klass, new)
