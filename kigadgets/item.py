@@ -1,5 +1,4 @@
 from kigadgets import SWIG_version, Point, DEFAULT_UNIT_IUS
-from kigadgets.exceptions import deprecate_member
 from kigadgets.layer import Layer, get_board_layer_name, get_board_layer_id
 
 
@@ -138,8 +137,6 @@ class HasLayerStrImpl(object):
         self._obj.SetLayer(layid)
 
 
-@deprecate_member('netName', 'net_name')
-@deprecate_member('netCode', 'net_code')
 class HasConnection(object):
     """All BOARD_CONNECTED_ITEMs should inherit this."""
     def __init__(self):

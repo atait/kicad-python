@@ -1,40 +1,13 @@
 import unittest
 from unittest.mock import patch
 from functools import wraps
-# from kigadgets.exceptions import deprecate_member
-# import kigadgets.exceptions as kex  # will use deprecate_member and deprecate_warn_fun
+import kigadgets.exceptions as kex  # will use deprecate_member and deprecate_warn_fun
 
-deprecate_warn_fun = print  # print is sometimes good
-def deprecate_member(old, new, deadline='v0.5.0'):
-    def regular_decorator(klass):
-        def auto_warn(fun):
-            from_str = klass.__name__ + '.' + old
-            to_str = klass.__name__ + '.' + new
-            header = 'Deprecation warning (deadline {}):'.format(deadline)
-            map_str = '{} -> {}'.format(from_str, to_str)
-            @wraps(fun)
-            def warner(*args, **kwargs):
-                deprecate_warn_fun(header, map_str)
-                return fun(*args, **kwargs)
-            return warner
+kex.deprecate_warn_fun = print
 
-        new_meth = getattr(klass, new)
-        if isinstance(new_meth, property):
-            aug_meth = property(
-                auto_warn(new_meth.fget),
-                auto_warn(new_meth.fset),
-                auto_warn(new_meth.fdel)
-            )
-        else:
-            aug_meth = auto_warn(new_meth)
-        setattr(klass, old, aug_meth)
-        return klass
-    return regular_decorator
-
-
-@deprecate_member('myMeth', 'my_meth')
-@deprecate_member('myClassmeth', 'my_classmeth')
-@deprecate_member('myProp', 'my_prop')
+@kex.deprecate_member('myMeth', 'my_meth')
+@kex.deprecate_member('myClassmeth', 'my_classmeth')
+@kex.deprecate_member('myProp', 'my_prop')
 class AugClass:
     def my_meth(self):
         ''' docstring here '''
@@ -53,11 +26,9 @@ class AugClass:
         # return 'my_prop.set'
         pass
 
-aug_obj = AugClass()
-aug_obj.myProp
 
 class MainTester(unittest.TestCase):
-    @patch('__main__.deprecate_warn_fun')
+    @patch('kigadgets.exceptions.deprecate_warn_fun')
     def test_1(self, mock_print):
         aug_obj = AugClass()
 
