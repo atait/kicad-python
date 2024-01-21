@@ -27,6 +27,7 @@ import sphinx_rtd_theme
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'autoapi.extension',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -36,10 +37,13 @@ extensions = [
 
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['templates']
+# templates_path = ['templates']
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
+source_parsers = {
+    '.md': 'recommonmark.parser.CommonMarkParser',
+}
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -102,17 +106,38 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 
-# -- Options for Autodocumentation ----------------------------------------
+# -- AutoAPI configuration ----------------------------------------------------
+
+autoapi_root = 'API'
+autoapi_dirs = ['../../kicad']
+# autoapi_template_dir = '../templates'  # Not working
+autoapi_member_order = 'bysource'
+autoapi_options = [
+    'members',
+    'undoc-members',
+    'inherited-members'
+    'show-inheritance',
+    'show-module-summary',
+    # 'private-members',
+    # 'special-members',
+    'imported-members',
+]
+
+from unittest.mock import MagicMock
+MOCK_MODULES = ['pcbnew']
+sys.modules.update((mod_name, MagicMock()) for mod_name in MOCK_MODULES)
+
 napoleon_google_docstring = True
 napoleon_use_param = True
+
 
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'sphinx_rtd_theme'
-#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_theme = 'classic'
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+# html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
