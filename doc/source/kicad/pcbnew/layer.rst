@@ -7,13 +7,13 @@ layers
    :members:
    :undoc-members:
 
-.. autofunction:: get_board_layer
+.. autofunction:: get_board_layer_id
 
 .. autofunction:: get_board_layer_name
 
 .. autofunction:: get_std_layer_name
 
-.. autofunction:: get_std_layer
+.. autofunction:: get_std_layer_id
 
 Layer enumerations
 ------------------

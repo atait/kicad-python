@@ -66,7 +66,6 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
     @staticmethod
     def wrap(instance):
-        """Wraps a C++ api TRACK object, and returns a `Track`."""
         return kicad.new(Zone, instance)
 
     @property

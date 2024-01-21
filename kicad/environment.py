@@ -76,21 +76,13 @@ def get_pcbnew_module():
                 print(err)
             pcbnew_bare = None
     else:
-        # special case for documentation without pcbnew at all
-        spoofing_for_documentation = os.environ.get('KICAD_PYTHON_IN_SPHINX_GENERATION', '0')
-        if spoofing_for_documentation == '1':
-            class SphinxEnumPhony:
-                def __getattr__(self, attr):
-                    return 0
-            pcbnew_bare = SphinxEnumPhony()
-        else:
-            # failed to find pcbnew
-            print(
-                'pcbnew is required by kicad-python.'
-                ' It gets installed when you install the kicad application, but not necessarily on your python path.'
-                '\nSee instructions for how to link them at https://github.com/atait/kicad-python'
-            )
-            pcbnew_bare = None
+        # failed to find pcbnew
+        print(
+            'pcbnew is required by kicad-python.'
+            ' It gets installed when you install the kicad application, but not necessarily on your python path.'
+            '\nSee instructions for how to link them at https://github.com/atait/kicad-python'
+        )
+        pcbnew_bare = None
     return pcbnew_bare
 
 

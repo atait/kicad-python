@@ -46,6 +46,8 @@ else:
         ver = tuple(int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
     except AttributeError:
         ver = (5, 0)
+    if len(ver) < 2:
+        ver = (5, 0)
     if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
         SWIG_version = 7
     elif ver[0] == 6 or (ver[0] == 5 and ver[1] == 99):

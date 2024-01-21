@@ -16,10 +16,6 @@ import sys
 import os
 import sphinx_rtd_theme
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration ------------------------------------------------
 
@@ -36,12 +32,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
 ]
-# Make kicad the python package visible
-sys.path.insert(0, os.path.abspath('../..'))
 
-# Make kicad the python package visible and spoof pcbnew
-sys.path.insert(0, os.path.abspath('../..'))
-os.environ['KICAD_PYTHON_IN_SPHINX_GENERATION'] = '1'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['ytemplates']
@@ -73,7 +64,7 @@ release = '0.1'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -122,6 +113,7 @@ html_theme = 'classic'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
+# html_theme_options = {"titles_only": True}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
