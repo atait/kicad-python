@@ -1,10 +1,11 @@
-from kicad import pcbnew_bare as pcbnew
+from kigadgets import pcbnew_bare as pcbnew
 
-import kicad
-from kicad.exceptions import deprecate_member
-from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem, TextEsque
-from kicad.pcbnew.pad import Pad
+import kigadgets
+from kigadgets.exceptions import deprecate_member
+from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
+from kigadgets.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem, TextEsque
+from kigadgets.pad import Pad
+from kigadgets.layer import get_std_layer_name
 
 
 class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque):
@@ -31,7 +32,7 @@ class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque
     @staticmethod
     def wrap(instance):
         if type(instance) is SWIGtype.FpText:
-            return kicad.new(ModuleLabel, instance)
+            return kigadgets.new(ModuleLabel, instance)
 
 
 class ModuleLine(HasLayerStrImpl, Selectable, BoardItem):
@@ -39,7 +40,7 @@ class ModuleLine(HasLayerStrImpl, Selectable, BoardItem):
     @staticmethod
     def wrap(instance):
         if type(instance) is SWIGtype.FpShape:
-            return kicad.new(ModuleLine, instance)
+            return kigadgets.new(ModuleLine, instance)
 
 
 @deprecate_member('referenceLabel', 'reference_label')
@@ -53,7 +54,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
 
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
-            from kicad.pcbnew.board import Board
+            from kigadgets.board import Board
             try:
                 board = Board.from_editor()
             except:
@@ -69,7 +70,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
     @staticmethod
     def wrap(instance):
         if type(instance) is SWIGtype.Footprint:
-            return kicad.new(Module, instance)
+            return kigadgets.new(Module, instance)
 
     @property
     def reference(self):
@@ -120,7 +121,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
         if self.board:
             return self.board.get_layer_name(self._obj.GetLayer())
         else:
-            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
+            return get_std_layer_name(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):

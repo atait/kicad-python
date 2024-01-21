@@ -1,5 +1,5 @@
-from kicad import pcbnew_bare as pcbnew, SWIG_version
-import kicad
+from kigadgets import pcbnew_bare as pcbnew
+import kigadgets
 
 class Layer():
     Front           = pcbnew.F_Cu
@@ -33,7 +33,7 @@ def load_std_layers():
     # lazy import for Sphinx to run properly
     global _std_layer_dict, _std_layer_names
     if _std_layer_dict is None:
-        if SWIG_version >= 7:
+        if kigadgets.SWIG_version >= 7:
             native_get_layername = pcbnew.BOARD.GetStandardLayerName
         else:
             native_get_layername = pcbnew.BOARD_GetStandardLayerName
@@ -94,7 +94,7 @@ class LayerSet:
     @staticmethod
     def wrap(instance):
         """Wraps a C++/old api LSET object, and returns a LayerSet."""
-        return kicad.new(LayerSet, instance)
+        return kigadgets.new(LayerSet, instance)
 
     def _build_layer_set(self, layers):
         """Create LayerSet used for defining pad layers"""

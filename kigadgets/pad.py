@@ -1,10 +1,9 @@
-from kicad import pcbnew_bare as pcbnew
+from kigadgets import pcbnew_bare as pcbnew
 
-import kicad
-from kicad import units
-from kicad import Size
-from kicad.exceptions import deprecate_member
-from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
+import kigadgets
+from kigadgets import Size
+from kigadgets.exceptions import deprecate_member
+from kigadgets.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
 
 class DrillShape():
     Circle = pcbnew.PAD_DRILL_SHAPE_CIRCLE
@@ -35,7 +34,7 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     @staticmethod
     def wrap(instance):
         """Wraps a C++ api PAD object, and returns a `Pad`."""
-        return kicad.new(Pad, instance)
+        return kigadgets.new(Pad, instance)
 
     @property
     def pad_type(self):

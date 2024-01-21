@@ -3,7 +3,7 @@
 # An example script to check for annular ring violations
 #
 
-from kicad.pcbnew.board import Board
+from kigadgets.board import Board
 
 def annring_size(pad):
     return min(pad.size) - max(pad.drill)

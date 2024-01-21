@@ -1,11 +1,9 @@
-from kicad import pcbnew_bare as pcbnew
+from kigadgets import pcbnew_bare as pcbnew
 
-import kicad
-from kicad.pcbnew import layer as pcbnew_layer
-from kicad.point import Point
-from kicad import units, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
-from kicad.pcbnew.layer import LayerSet
+import kigadgets
+from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
+from kigadgets.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
+from kigadgets.layer import LayerSet
 
 class KeepoutAllowance(object):
     """ Gives key-value interface of the form
@@ -66,7 +64,7 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
     @staticmethod
     def wrap(instance):
-        return kicad.new(Zone, instance)
+        return kigadgets.new(Zone, instance)
 
     @property
     def clearance(self):
@@ -74,23 +72,23 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
             native = self._obj.GetLocalClearance()
         else:
             native = self._obj.GetClearance()
-        return float(native) / units.DEFAULT_UNIT_IUS
+        return float(native) / DEFAULT_UNIT_IUS
 
     @clearance.setter
     def clearance(self, value):
         if SWIG_version >= 7:
-            self._obj.SetLocalClearance(int(value * units.DEFAULT_UNIT_IUS))
+            self._obj.SetLocalClearance(int(value * DEFAULT_UNIT_IUS))
         else:
-            self._obj.SetClearance(int(value * units.DEFAULT_UNIT_IUS))
-            self._obj.SetZoneClearance(int(value * units.DEFAULT_UNIT_IUS))
+            self._obj.SetClearance(int(value * DEFAULT_UNIT_IUS))
+            self._obj.SetZoneClearance(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def min_width(self):
-        return float(self._obj.GetMinThickness()) / units.DEFAULT_UNIT_IUS
+        return float(self._obj.GetMinThickness()) / DEFAULT_UNIT_IUS
 
     @min_width.setter
     def min_width(self, value):
-        self._obj.SetMinThickness(int(value * units.DEFAULT_UNIT_IUS))
+        self._obj.SetMinThickness(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def is_keepout(self):
@@ -121,7 +119,7 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
 
                 zone.layerset = zone.layerset.add_layer('F.Cu')
         '''
-        from kicad.pcbnew.board import Board
+        from kigadgets.board import Board
         layers_native = self._obj.GetLayerSet()
         lset = LayerSet.wrap(layers_native)
         lset._board = Board.wrap(self._obj.GetBoard())

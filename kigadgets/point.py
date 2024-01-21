@@ -1,9 +1,7 @@
-from kicad import pcbnew_bare
 import cmath
 
-import kicad
-from kicad import units
-from kicad import SWIGtype
+import kigadgets
+from kigadgets import units, SWIGtype
 
 
 class Point(units.BaseUnitTuple):
@@ -35,7 +33,7 @@ class Point(units.BaseUnitTuple):
         :type instance: wxPoint
         :return: Point
         """
-        wrapped_point = kicad.new(Point, instance)
+        wrapped_point = kigadgets.new(Point, instance)
         wrapped_point._class = Point
         return wrapped_point
 

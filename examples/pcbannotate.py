@@ -10,8 +10,8 @@
     net names, but shouldn't change any component footprints.
 '''
 
-from kicad.pcbnew.board import Board
-from kicad.pcbnew.layer import Layer
+from kigadgets.board import Board
+from kigadgets.layer import Layer
 import re
 import glob
 import os

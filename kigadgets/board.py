@@ -1,13 +1,11 @@
-from kicad import pcbnew_bare as pcbnew
+from kigadgets import pcbnew_bare as pcbnew
+from kigadgets import units, SWIGtype, instanceof
 
-import kicad
-from kicad.pcbnew import drawing
-from kicad.pcbnew import module
-from kicad.pcbnew.track import Track
-from kicad.pcbnew.via import Via
-from kicad.pcbnew.drawing import Drawing
-from kicad.pcbnew.zone import Zone
-from kicad import units, SWIGtype, instanceof
+from kigadgets.drawing import Drawing, Segment, Circle, Arc, TextPCB
+from kigadgets.module import Module
+from kigadgets.track import Track
+from kigadgets.via import Via
+from kigadgets.zone import Zone
 
 
 class _ModuleList(object):
@@ -18,7 +16,7 @@ class _ModuleList(object):
     def __getitem__(self, key):
         found = self._board._obj.FindFootprintByReference(key)
         if found:
-            return module.Module.wrap(found)
+            return Module.wrap(found)
         else:
             raise KeyError("No module with reference: %s" % key)
 
@@ -29,10 +27,11 @@ class _ModuleList(object):
         # https://docs.python.org/2.7/reference/datamodel.html?emulating-container-types#object.__iter__
         # But in my opinion `_ModuleList` is a list then mapping.
         for m in self._board._obj.GetFootprints():
-            yield module.Module.wrap(m)
+            yield Module.wrap(m)
 
     def __len__(self):
         return len(self._board._obj.GetFootprints())
+
 
 class Board(object):
     def __init__(self, wrap=None):
@@ -72,7 +71,7 @@ class Board(object):
         there is no such module."""
         found = self._obj.FindFootprintByReference(ref)
         if found:
-            return module.Module.wrap(found)
+            return Module.wrap(found)
 
     @property
     def footprints(self):
@@ -168,7 +167,7 @@ class Board(object):
 
     def add_module(self, ref, pos=(0, 0)):
         """Create new module on the board"""
-        return module.Module(ref, pos, board=self)
+        return Module(ref, pos, board=self)
 
     @property
     def default_width(self, width=None):
@@ -244,7 +243,7 @@ class Board(object):
     def add_line(self, start, end, layer='F.SilkS', width=0.15):
         """Create a graphic line on the board"""
         return self.add(
-            drawing.Segment(start, end, layer, width, board=self))
+            Segment(start, end, layer, width, board=self))
 
     def add_polyline(self, coords, layer='F.SilkS', width=0.15):
         """Create a graphic polyline on the board"""
@@ -254,18 +253,18 @@ class Board(object):
     def add_circle(self, center, radius, layer='F.SilkS', width=0.15):
         """Create a graphic circle on the board"""
         return self.add(
-            drawing.Circle(center, radius, layer, width, board=self))
+            Circle(center, radius, layer, width, board=self))
 
     def add_arc(self, center, radius, start_angle, stop_angle,
                 layer='F.SilkS', width=0.15):
         """Create a graphic arc on the board"""
         return self.add(
-            drawing.Arc(center, radius, start_angle, stop_angle,
+            Arc(center, radius, start_angle, stop_angle,
                         layer, width, board=self))
 
     def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15):
         return self.add(
-            drawing.TextPCB(position, text, layer, size, thickness, board=self))
+            TextPCB(position, text, layer, size, thickness, board=self))
 
     def remove(self, element, permanent=False):
         ''' Makes it so Ctrl-Z works.

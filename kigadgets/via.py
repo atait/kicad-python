@@ -1,11 +1,9 @@
-from kicad import pcbnew_bare as pcbnew
+from kigadgets import pcbnew_bare as pcbnew
 
-import kicad
-from kicad.pcbnew import layer as pcbnew_layer
-from kicad.point import Point
-from kicad import units, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasPosition, HasConnection, Selectable, BoardItem
-
+import kigadgets
+from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
+from kigadgets.item import HasPosition, HasConnection, Selectable, BoardItem
+from kigadgets.layer import get_std_layer_id, get_std_layer_name
 
 if SWIG_version >= 6:
     class ViaType():
@@ -30,32 +28,32 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
             self._obj.SetLayerPair(board.get_layer_id(layer_pair[0]),
                                    board.get_layer_id(layer_pair[1]))
         else:
-            self._obj.SetLayerPair(pcbnew_layer.get_std_layer_id(layer_pair[0]),
-                                   pcbnew_layer.get_std_layer_id(layer_pair[1]))
+            self._obj.SetLayerPair(get_std_layer_id(layer_pair[0]),
+                                   get_std_layer_id(layer_pair[1]))
         self.drill = drill
 
     @staticmethod
     def wrap(instance):
         """Wraps a C++ api VIA object, and returns a `Via`."""
-        return kicad.new(Via, instance)
+        return kigadgets.new(Via, instance)
 
     @property
     def drill(self):
         """Via drill diameter"""
-        return float(self._obj.GetDrill()) / units.DEFAULT_UNIT_IUS
+        return float(self._obj.GetDrill()) / DEFAULT_UNIT_IUS
 
     @drill.setter
     def drill(self, value):
-        self._obj.SetDrill(int(value * units.DEFAULT_UNIT_IUS))
+        self._obj.SetDrill(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def diameter(self):
         """Via diameter"""
-        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
+        return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
 
     @diameter.setter
     def diameter(self, value):
-        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+        self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def center(self):
@@ -71,28 +69,28 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         if self.board:
             return self.board.get_layer_name(self._obj.TopLayer())
         else:
-            return pcbnew_layer.get_std_layer_name(self._obj.TopLayer())
+            return get_std_layer_name(self._obj.TopLayer())
 
     @top_layer.setter
     def top_layer(self, value):
         if self.board:
             self._obj.SetTopLayer(self.board.get_layer_id(value))
         else:
-            self._obj.SetTopLayer(pcbnew_layer.get_std_layer_id(value))
+            self._obj.SetTopLayer(get_std_layer_id(value))
 
     @property
     def bottom_layer(self):
         if self.board:
             return self.board.get_layer_name(self._obj.BottomLayer())
         else:
-            return pcbnew_layer.get_std_layer_name(self._obj.BottomLayer())
+            return get_std_layer_name(self._obj.BottomLayer())
 
     @bottom_layer.setter
     def bottom_layer(self, value):
         if self.board:
             self._obj.SetTopLayer(self.board.get_layer_id(value))
         else:
-            self._obj.SetTopLayer(pcbnew_layer.get_std_layer_name(value))
+            self._obj.SetTopLayer(get_std_layer_name(value))
 
     @property
     def is_through(self):
