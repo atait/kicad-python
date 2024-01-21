@@ -1,7 +1,6 @@
 import unittest
 
-from kicad import *
-from kicad.pcbnew.board import *
+from kigadgets.board import Board
 
 
 class TestPcbnewBoard(unittest.TestCase):

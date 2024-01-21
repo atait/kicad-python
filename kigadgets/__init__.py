@@ -3,10 +3,10 @@ __version__ = '0.4.99'
 #: centralized import with fallback.
 #: Necessary for documentation and environment patching outside of application
 #: Import in this module in subpackages with
-#: from kicad import pcbnew_bare as pcbnew
+#: from kigadgets import pcbnew_bare as pcbnew
 import os, sys
-from kicad.environment import get_pcbnew_module
-from kicad.exceptions import notify, query_user
+from kigadgets.environment import get_pcbnew_module
+from kigadgets.exceptions import notify, query_user
 
 # Find SWIG pcbnew
 try:
@@ -18,7 +18,7 @@ except EnvironmentError:
 
 
 # Low-level "new" function that avoids initializer
-class BareClass(object):
+class __BareClass(object):
     pass
 
 
@@ -30,7 +30,7 @@ def new(class_type, instance):
     In kicad-python this is used to construct wrapper classes
     before injecting the native object.
     """
-    obj = BareClass()
+    obj = __BareClass()
     obj.__class__ = class_type
     obj._obj = instance
     return obj
@@ -134,7 +134,7 @@ except ImportError:
 
 # Expose the basic classes to this package's top level
 if pcbnew_bare:
-    from .units import *
+    from .units import DEFAULT_UNIT_IUS
     from .point import Point
     from .size import Size
-    import kicad.pcbnew
+    # CAD modules must be imported explicitly

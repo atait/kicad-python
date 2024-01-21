@@ -1,6 +1,6 @@
 import unittest
 
-from kicad.pcbnew.layer import *
+from kigadgets.layer import LayerSet
 
 
 TEST_LAYER_LIST = ['F.Cu', 'B.Cu', ]

@@ -1,21 +1,17 @@
-from kicad import pcbnew_bare
-import kicad
-from kicad import SWIGtype
+import kigadgets
+from kigadgets import units, SWIGtype
 
-from kicad.units import *
-
-
-class Size(BaseUnitTuple):
+class Size(units.BaseUnitTuple):
 
     def __init__(self, width, height):
         self._class = Size
-        self._obj = SWIGtype.Size(int(width * DEFAULT_UNIT_IUS),
-                                  int(height * DEFAULT_UNIT_IUS))
+        self._obj = SWIGtype.Size(int(width * units.DEFAULT_UNIT_IUS),
+                                  int(height * units.DEFAULT_UNIT_IUS))
 
     @staticmethod
     def wrap(instance):
         """Takes a wxSize instance and returns a Size class."""
-        wrapped_size = kicad.new(Size, instance)
+        wrapped_size = kigadgets.new(Size, instance)
         wrapped_size._class = Size
         return wrapped_size
 

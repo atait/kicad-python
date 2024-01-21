@@ -1,12 +1,12 @@
+from kigadgets import pcbnew_bare as pcbnew
+
 import cmath
 import math
 
-from kicad import pcbnew_bare as pcbnew, instanceof
-import kicad
-from kicad.pcbnew import layer as pcbnew_layer
-from kicad.point import Point
-from kicad import units, Size, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
+import kigadgets
+from kigadgets import units, Size, SWIGtype, SWIG_version, Point, instanceof
+from kigadgets.layer import get_board_layer_id
+from kigadgets.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
 
 class ShapeType():
     Segment = pcbnew.S_SEGMENT
@@ -21,7 +21,7 @@ class Drawing(HasLayerStrImpl, HasPosition, HasWidth, Selectable, BoardItem):
         if instanceof(instance, SWIGtype.Shape):
             return Drawing._wrap_drawsegment(instance)
         elif instanceof(instance, SWIGtype.Text):
-            return kicad.new(TextPCB, instance)
+            return kigadgets.new(TextPCB, instance)
         else:
             raise TypeError('Invalid drawing class: {}'.format(type(instance)))
 
@@ -30,19 +30,19 @@ class Drawing(HasLayerStrImpl, HasPosition, HasWidth, Selectable, BoardItem):
         obj_shape = instance.GetShape()
 
         if obj_shape is pcbnew.S_SEGMENT:
-            return kicad.new(Segment, instance)
+            return kigadgets.new(Segment, instance)
 
         if obj_shape is pcbnew.S_CIRCLE:
-            return kicad.new(Circle, instance)
+            return kigadgets.new(Circle, instance)
 
         if obj_shape is pcbnew.S_ARC:
-            return kicad.new(Arc, instance)
+            return kigadgets.new(Arc, instance)
 
         if obj_shape is pcbnew.S_POLYGON:
-            return kicad.new(Polygon, instance)
+            return kigadgets.new(Polygon, instance)
 
         if obj_shape is pcbnew.S_RECT:
-            return kicad.new(Rectangle, instance)
+            return kigadgets.new(Rectangle, instance)
 
         # Time to fail
         layer = instance.GetLayer()
@@ -97,7 +97,7 @@ class Circle(Drawing):
             circle.SetModified()
         else:
             circle.SetArcStart(start_coord)
-        circle.SetLayer(pcbnew_layer.get_board_layer_id(board, layer))
+        circle.SetLayer(get_board_layer_id(board, layer))
         circle.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = circle
 
@@ -148,7 +148,7 @@ class Arc_v5(Drawing):
         arc.SetCenter(center_coord)
         arc.SetArcStart(start_coord)
         arc.SetAngle(angle * 10)
-        arc.SetLayer(pcbnew_layer.get_board_layer_id(board, layer))
+        arc.SetLayer(get_board_layer_id(board, layer))
         arc.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = arc
 

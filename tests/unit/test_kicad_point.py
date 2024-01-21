@@ -1,6 +1,6 @@
 import unittest
 
-from kicad import *
+from kigadgets import Point
 
 
 class TestKicadPoint(unittest.TestCase):

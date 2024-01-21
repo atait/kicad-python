@@ -1,8 +1,6 @@
-from math import radians, degrees
-from kicad import units, SWIG_version
-from kicad.point import Point
-from kicad.exceptions import deprecate_member
-import kicad.pcbnew.layer as pcbnew_layer
+from kigadgets import SWIG_version, Point, DEFAULT_UNIT_IUS
+from kigadgets.exceptions import deprecate_member
+from kigadgets.layer import Layer, get_board_layer_name, get_board_layer_id
 
 
 class BoardItem(object):
@@ -14,7 +12,7 @@ class BoardItem(object):
 
     @property
     def board(self):
-        from kicad.pcbnew.board import Board
+        from kigadgets.board import Board
         brd_native = self._obj.GetBoard()
         if brd_native:
             return Board(brd_native)
@@ -82,7 +80,7 @@ class HasLayerEnumImpl(object):
 
     @property
     def layer(self):
-        return pcbnew_layer.Layer(self._obj.GetLayer())
+        return Layer(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):
@@ -101,7 +99,7 @@ class HasLayer(HasLayerEnumImpl):
     @property
     def layer(self):
         self.print_warning()
-        return pcbnew_layer.Layer(self._obj.GetLayer())
+        return Layer(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):
@@ -123,20 +121,20 @@ class HasLayerStrImpl(object):
         try:
             brd = self.board
         except AttributeError:
-            from kicad.pcbnew.board import Board
+            from kigadgets.board import Board
             native = self._obj.GetBoard()
             brd = Board(native) if native else None
-        return pcbnew_layer.get_board_layer_name(brd, layid)
+        return get_board_layer_name(brd, layid)
 
     @layer.setter
     def layer(self, value):
         try:
             brd = self.board
         except AttributeError:
-            from kicad.pcbnew.board import Board
+            from kigadgets.board import Board
             native = self._obj.GetBoard()
             brd = Board(native) if native else None
-        layid = pcbnew_layer.get_board_layer_id(brd, value)
+        layid = get_board_layer_id(brd, value)
         self._obj.SetLayer(layid)
 
 
@@ -203,11 +201,11 @@ class Selectable(object):
 class HasWidth(object):
     @property
     def width(self):
-        return float(self._obj.GetWidth()) / units.DEFAULT_UNIT_IUS
+        return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
 
     @width.setter
     def width(self, value):
-        self._obj.SetWidth(int(value * units.DEFAULT_UNIT_IUS))
+        self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
 
 
 class TextEsque(object):
@@ -223,16 +221,16 @@ class TextEsque(object):
     @property
     def thickness(self):
         if SWIG_version >= 7:
-            return float(self._obj.GetTextThickness()) / units.DEFAULT_UNIT_IUS
+            return float(self._obj.GetTextThickness()) / DEFAULT_UNIT_IUS
         else:
-            return float(self._obj.GetThickness()) / units.DEFAULT_UNIT_IUS
+            return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
 
     @thickness.setter
     def thickness(self, value):
         if SWIG_version >= 7:
-            return self._obj.SetTextThickness(int(value * units.DEFAULT_UNIT_IUS))
+            return self._obj.SetTextThickness(int(value * DEFAULT_UNIT_IUS))
         else:
-            return self._obj.SetThickness(int(value * units.DEFAULT_UNIT_IUS))
+            return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def size(self):

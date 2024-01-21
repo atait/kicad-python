@@ -6,7 +6,7 @@
 '''
 
 from math import cos, sin, radians, pi
-from kicad.pcbnew.board import Board
+from kigadgets.board import Board
 
 # PARAMETERS
 center = (100, 100)
