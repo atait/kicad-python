@@ -15,6 +15,8 @@ This package has been fully tested with KiCAD 5, 6, 7 and partially tested with 
 > [!CAUTION]
 > The atait fork is undergoing a refactor that will result in new package imports.
 > Instances of `from kicad.pcbnew.board import Board` must be replaced by `from kigadgets.board import Board` by version 0.5.0
+> 
+> You are reading version 4.99
 
 ### An excerpt
 A simple pythonic script might look like this
