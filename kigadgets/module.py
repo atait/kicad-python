@@ -4,7 +4,7 @@ import kigadgets
 from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
 from kigadgets.item import HasPosition, HasRotation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
-from kigadgets.layer import get_std_layer_name
+from kigadgets.layer import get_board_layer_name
 
 
 class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
@@ -120,10 +120,7 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
 
     @property
     def layer(self):
-        if self.board:
-            return self.board.get_layer_name(self._obj.GetLayer())
-        else:
-            return get_std_layer_name(self._obj.GetLayer())
+        return get_board_layer_name(self.board, self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):

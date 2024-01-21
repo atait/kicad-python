@@ -3,7 +3,7 @@ from kigadgets import pcbnew_bare as pcbnew
 import kigadgets
 from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
 from kigadgets.item import HasPosition, HasConnection, Selectable, BoardItem
-from kigadgets.layer import get_std_layer_id, get_std_layer_name
+from kigadgets.layer import get_board_layer_id, get_board_layer_name
 
 if SWIG_version >= 6:
     class ViaType():
@@ -87,10 +87,7 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
 
     @property
     def top_layer(self):
-        if self.board:
-            return self.board.get_layer_name(self._obj.TopLayer())
-        else:
-            return get_std_layer_name(self._obj.TopLayer())
+        return get_board_layer_name(self.board, self._obj.TopLayer())
 
     @top_layer.setter
     def top_layer(self, value):
@@ -101,10 +98,7 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
 
     @property
     def bottom_layer(self):
-        if self.board:
-            return self.board.get_layer_name(self._obj.BottomLayer())
-        else:
-            return get_std_layer_name(self._obj.BottomLayer())
+        return get_board_layer_name(self.board, self._obj.BottomLayer())
 
     @bottom_layer.setter
     def bottom_layer(self, value):

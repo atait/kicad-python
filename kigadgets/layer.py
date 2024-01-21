@@ -65,6 +65,7 @@ class LayerSet:
 
     @property
     def native_obj(self):
+        ''' Has _obj but not GetBoard, so it is not a BoardItem '''
         return self._obj
 
     @staticmethod
@@ -76,10 +77,7 @@ class LayerSet:
         """Create LayerSet used for defining pad layers"""
         bit_mask = 0
         for layer_name in layers:
-            if self._board:
-                bit_mask |= 1 << self._board.get_layer_id(layer_name)
-            else:
-                bit_mask |= 1 << get_std_layer_id(layer_name)
+            bit_mask |= 1 << get_board_layer_id(self._board, layer_name)
         hex_mask = '{0:013x}'.format(bit_mask)
         self._obj = pcbnew.LSET()
         self._obj.ParseHex(hex_mask, len(hex_mask))
