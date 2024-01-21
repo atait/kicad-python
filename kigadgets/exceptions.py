@@ -24,7 +24,7 @@ def notify(*args):
         print(text)
         return
     try:
-        dialog = wx.MessageDialog(None, text, 'kicad-python debug output', wx.OK)
+        dialog = wx.MessageDialog(None, text, 'kigadgets notification', wx.OK)
         sg = dialog.ShowModal()
         return sg
     except:
@@ -50,7 +50,7 @@ def query_user(prompt=None, default=''):
         # return retval
         raise
     default = str(default)
-    dialog = wx.TextEntryDialog(None, prompt, 'kicad-python query', default, wx.CANCEL | wx.OK)
+    dialog = wx.TextEntryDialog(None, prompt, 'kigadgets query', default, wx.CANCEL | wx.OK)
     sg = dialog.ShowModal()
     if sg != wx.ID_OK:
         return None

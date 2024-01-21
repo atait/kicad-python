@@ -27,7 +27,7 @@ def new(class_type, instance):
 
     This could lead to inconsistent objects, use only when you
     know what you're doing.
-    In kicad-python this is used to construct wrapper classes
+    In kigadgets this is used to construct wrapper classes
     before injecting the native object.
     """
     obj = __BareClass()
@@ -55,7 +55,7 @@ else:
     elif ver[0] == 5 or (ver[0] == 4 and ver[1] == 99):
         SWIG_version = 5
     else:
-        print('Version {} not supported by kicad-python. Some functionality might not work')
+        print('Version {} not supported by kigadgets. Some functionality might not work')
         SWIG_version = 7 if ver[0] > 7 else 5
 
     if SWIG_version == 7:
