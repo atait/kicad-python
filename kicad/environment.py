@@ -1,19 +1,16 @@
 ''' Automatic linker to pcbnew GUI and pcbnew python package
     Use this one time to create the link.
 
-    Copy-paste the argument from pcbnew terminal.
+    1. In pcbnew's terminal window:
 
-    1. Run this in pcbnew's terminal window::
+        >>> import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
+        /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
 
-    # (OLD VERSION): print('link_kicad_python_to_pcbnew', pcbnew.__file__, pcbnew.GetKicadConfigPath())
-    import pcbnew; print('link_kicad_python_to_pcbnew ' + pcbnew.__file__ + ' ' + pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
+    2. Copy the entire output.
 
+    3. In an external terminal, with environment of choice activated::
 
-    Copy the output. It should look something like::
-
-    link_kicad_python_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/atait/.config/kicad
-
-    2. Paste and run what you copied into command line from an environment where you have installed this package
+        (myenv) $ link_kicad_to_pcbnew [paste here]
 '''
 import os, sys
 import argparse

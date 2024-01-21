@@ -131,11 +131,9 @@ pcbnew.Refresh()
 Instead, we can keep them on Fab layers so we can still see them while designing the PCB.
 ```python
 for m in pcb.modules:
-    ref = m.reference_label
-    if ref.layer == 'F.Silkscreen':
-        ref.layer = 'F.Fab'
-    elif ref.layer == 'B.Silkscreen':
-        ref.layer = 'B.Fab'
+    ref = m.reference_label.layer.split('.')  # Gives tuple like ('B', 'Silkscreen')
+    if len(ref) > 1 and ref[1].startswith('Silk'):
+        ref.layer = ref[0] + '.Fab'
 pcbnew.Refresh()
 ```
 
@@ -248,23 +246,23 @@ KiCAD has a rich landscape of user-developed tools, libraries, and plugins. They
 |                   | KiKit        | kicad-python                 |
 | ----------------- | ------------ | ---------------------------- |
 | Primary audience  | users        | developers                   |
-| CAD logic/state   | python       | C++                          |
-| Entry points      | Plugin, CLI  | API                          |
+| CAD state + logic | python       | C++                          |
+| Entry points      | Plugin + CLI | API (available to plugins + CLI scripts)       |
 | Dependencies      | 8            | 0                            |
-| Lines to maintain | 15k          | 3k                           |
-| Python versions   | 3.7+         | 2.\*/3.\*                    |
-| Documentation     | extensive    | "documents itself" for now   |
+| Lines of code     | 15k          | 3k                           |
+| Python versions   | 3.7+         | 2.\*/3.\*                             |
+| Documentation     | extensive    | "documents itself" for now                          |
 
 **Audiences:** While `KiKit` is directed primarily to end users, `kicad-python` is directed moreso to developers and coders. It is lean: <2,800 lines of code, no constraints on python version, and **zero dependencies** besides `pcbnew.py`. Out of the box, `kicad-python` offers very little to the end user who doesn't want to code. It has no entry points, meaning the user must do some coding to write 10-line snippets, action plugins, and/or batch entry points. In contrast, `KiKit` comes with batteries included. It exposes highly-configurable, advanced functionality through friendly entry points in CLI and GUI action plugins.
 
-**Internals:** `KiKit` performs a significant amount of internal state handling and CAD logic (via `shapely`). `kicad-python` does not store state; it is a thin wrapper around corresponding SWIG objects. While the first approach gives functionality beyond `pcbnew` built into KiKit, the second exposes the key functionality of underlying objects, leaving the state and logic to C++. It requires a coder to do things with those objects. If that dev wants to use `shapely` too, they are welcome to import it.
+**Internals:** `KiKit` performs a significant amount of internal state handling and CAD logic (via `shapely`). `kicad-python` does not store state; it is a thin wrapper around corresponding SWIG objects. While the first approach gives built-in functionality beyond `pcbnew`, the second exposes the key functionality of underlying objects, leaving the state and logic to C++. It requires a coder to do things with those objects. If that dev wants to use `shapely` too, they are welcome to import it.
 
 > [!TIP]
 > If you don't view yourself as a coder, you can become one! Have a look at the snippets above - do you understand what they are doing? If so, you can code. 
 > While you are [learning python syntax](https://docs.python.org/3/tutorial/index.html), you can just copy the examples above and modify to suit your needs. 
 
 #### pcbnewTransition
-KiKit is based on [pcbnewTransition](https://github.com/yaqwsx/pcbnewTransition) to provide cross-version compatibility. This package unifies the APIs of v5-v7 `pcbnew` into the v7 API. Something similar is happening in `kicad/__init__.py` with a sylistic difference that `kicad-python` unifies under a wrapping API instead of patching the `pcbnew` API. One nice feature of a wrapper-style API is that the contract for cross-version compatibility ends at a clearly-defined place: the `native_obj` property.
+KiKit is based on [pcbnewTransition](https://github.com/yaqwsx/pcbnewTransition) to provide cross-version compatibility. This package unifies the APIs of v5-v7 `pcbnew` into the v7 API. Something similar is happening in `kicad/__init__.py` with a stylistic difference that `kicad-python` unifies under a wrapping API instead of patching the `pcbnew` API. One nice feature of a wrapper-style API is that the contract for cross-version compatibility ends at a clearly-defined place: the `native_obj` property.
 
 ### pykicad
 [pykicad](https://github.com/dvc94ch/pykicad) and various other packages use an approach of parsing ".kicad_pcb" files directly, without involvement of the KiCad's `pcbnew.py` library. In contrast, `kicad-python` wraps that SWIG library provided by KiCAD devs. Both packages work for batch processing. While `kicad-python` exposes all `pcbnew.py` state and functions, `pykicad` does not even require an installation of KiCAD, which is advantageous in certain use cases.
