@@ -20,6 +20,12 @@ This package is a pythonic wrapper around the various `pcbnew` APIs. It implemen
 
 This package has been fully tested with KiCAD 5, 6, 7 and partially tested with 7.99.
 
+> [!CAUTION]
+> The atait fork is undergoing a refactor that will result in new package imports.
+> Instances of `from kicad.pcbnew.board import Board` must be replaced by `from kigadgets.board import Board` by version 0.5.0
+>
+> You are reading version 4.99
+
 ### An excerpt
 A simple pythonic script might look like this
 ```python
@@ -31,13 +37,13 @@ which produces
 [F.Cu, B.Cu, B.Cu]
 [0.8, 0.6]
 ```
-This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern. 
+This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern.
 Don't be fooled though - `track` and `board` contain no state. They use properties to give an intuition of state, but they are dynamically interacting with the underlying C++ `PCB_TRACK` and `BOARD`. You can always access the low-level objects using `track.native_obj`.
 
 > [!CAUTION]
 > **MacOS Users:**
 > pcbnew.py from KiCAD v7 does not import due to something in the linking process to pcbnew.so. Everything works fine when inside the GUI. Outside the GUI, the workaround is to use the `python` that comes bundled with KiCAD. I recommend aliasing/symlinking it. Bonus points for encapsulating in a conda environment.
-> 
+>
 ```bash
 (base) $ kipython_path="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
 (base) $ conda_envbin_path="~/miniconda3/envs/ki/bin/kipython"
@@ -71,7 +77,7 @@ v6+ only
 
 ## Installation via PyPI
 
-1. 
+1.
 ```
 pip install kigadgets
 ```
@@ -176,7 +182,7 @@ for via2 in pcb.vias:
 og_via.select(False)
 pcbnew.Refresh()
 ```
-The function `next` is used because `pcb.items` is a generator, not a list. Turn it into a list using the `list` function if desired. 
+The function `next` is used because `pcb.items` is a generator, not a list. Turn it into a list using the `list` function if desired.
 
 See `via.py` for additional functionality related to micro and blind vias.
 
@@ -286,8 +292,8 @@ KiCAD has a rich landscape of user-developed tools, libraries, and plugins. They
 **Internals:** `KiKit` performs a significant amount of internal state handling and CAD logic (via `shapely`). `kicad-python` does not store state; it is a thin wrapper around corresponding SWIG objects. While the first approach gives built-in functionality beyond `pcbnew`, the second exposes the key functionality of underlying objects, leaving the state and logic to C++. It requires a coder to do things with those objects. If that dev wants to use `shapely` too, they are welcome to import it.
 
 > [!TIP]
-> If you don't view yourself as a coder, you can become one! Have a look at the snippets above - do you understand what they are doing? If so, you can code. 
-> While you are [learning python syntax](https://docs.python.org/3/tutorial/index.html), you can just copy the examples above and modify to suit your needs. 
+> If you don't view yourself as a coder, you can become one! Have a look at the snippets above - do you understand what they are doing? If so, you can code.
+> While you are [learning python syntax](https://docs.python.org/3/tutorial/index.html), you can just copy the examples above and modify to suit your needs.
 
 #### pcbnewTransition
 KiKit is based on [pcbnewTransition](https://github.com/yaqwsx/pcbnewTransition) to provide cross-version compatibility. This package unifies the APIs of v5-v7 `pcbnew` into the v7 API. Something similar is happening in `kicad/__init__.py` with a stylistic difference that `kicad-python` unifies under a wrapping API instead of patching the `pcbnew` API. One nice feature of a wrapper-style API is that the contract for cross-version compatibility ends at a clearly-defined place: the `native_obj` property.
@@ -301,7 +307,7 @@ This project forks KiCAD/kicad-python and maintains its complete history. The or
 ### lygadgets
 This project adopts a philosophy similar to that of [lygadgets](https://github.com/atait/klayout-gadgets), except for PCBs instead of integrated circuits. Both attempt to harmonize between a GUI application and external python environments. Neither uses `subprocess` because who knows where that will get interpreted. Both are simple and lean with zero dependencies.
 
-The overarching idea is workflow *interoperability* rather than uniformity. I think this works better for open source because everybody has their existing workflows, and there is no central authority to impose "the best" API or - more generally - to tell you how to do your thing. 
+The overarching idea is workflow *interoperability* rather than uniformity. I think this works better for open source because everybody has their existing workflows, and there is no central authority to impose "the best" API or - more generally - to tell you how to do your thing.
 
 An example of interoperability, `kicad-python` can be delicately inserted anywhere in existing code using `wrap` and `native_obj`.
 ```python
