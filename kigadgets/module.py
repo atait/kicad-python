@@ -1,7 +1,7 @@
 from kigadgets import pcbnew_bare as pcbnew
 
 from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
-from kigadgets.item import HasPosition, HasRotation, Selectable, HasLayer, BoardItem, TextEsque
+from kigadgets.item import HasPosition, HasOrientation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
 from kigadgets.layer import get_board_layer_name
 
@@ -35,7 +35,7 @@ class ModuleLine(HasLayer, Selectable, BoardItem):
     _wraps_native_cls = SWIGtype.FpShape
 
 
-class Module(HasPosition, HasRotation, Selectable, BoardItem):
+class Module(HasPosition, HasOrientation, Selectable, BoardItem):
     _ref_label = None
     _val_label = None
     _wraps_native_cls = SWIGtype.Footprint

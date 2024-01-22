@@ -66,18 +66,18 @@ class HasPosition(_ABC):
         self.position = (self.x, value)
 
 
-class HasRotation(_ABC):
-    """Board items that has rotation property should inherit this."""
+class HasOrientation(_ABC):
+    """Board items that has orientation property should inherit this."""
     @property
-    def rotation(self):
+    def orientation(self):
         """Rotation of the item in degrees."""
         if SWIG_version >= 7:
             return float(self._obj.GetOrientationDegrees())
         else:
             return float(self._obj.GetOrientation()) / 10
 
-    @rotation.setter
-    def rotation(self, value):
+    @orientation.setter
+    def orientation(self, value):
         if SWIG_version >= 7:
             self._obj.SetOrientationDegrees(value)
         else:
