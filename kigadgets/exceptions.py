@@ -1,3 +1,4 @@
+import sys
 from functools import wraps
 
 class NoDefaultUnits(Exception):
@@ -7,6 +8,20 @@ class NoDefaultUnits(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+def put_import_warning_on_kicad():
+    ''' Legacy scripts may attempt to import "kicad"
+        Rather than ImportError, tell them about the rename
+    '''
+    class NoImport(object):
+        __file__ = None
+        def __getattr__(self, attr):
+            raise NameError('kicad-python has been renamed to kigadgets. Change'
+                            '\n    from kicad.pcbnew.board import ...'
+                            '\n        # to'
+                            '\n    from kigadgets.board import ...')
+    sys.modules['kicad'] = NoImport()
 
 
 def notify(*args):
