@@ -2,32 +2,32 @@ from kigadgets import pcbnew_bare as pcbnew
 from kigadgets import units, SWIGtype, instanceof
 
 from kigadgets.drawing import wrap_drawing, Segment, Circle, Arc, TextPCB
-from kigadgets.module import Module
+from kigadgets.module import Footprint
 from kigadgets.track import Track
 from kigadgets.via import Via
 from kigadgets.zone import Zone
 
 
-class _ModuleList(object):
-    """Internal class to represent `Board.modules`"""
+class _FootprintList(object):
+    """Internal class to represent `Board.footprints`"""
     def __init__(self, board):
         self._board = board
 
     def __getitem__(self, key):
         found = self._board._obj.FindFootprintByReference(key)
         if found:
-            return Module.wrap(found)
+            return Footprint.wrap(found)
         else:
-            raise KeyError("No module with reference: %s" % key)
+            raise KeyError("No footprint with reference: %s" % key)
 
     def __iter__(self):
         # Note: this behavior is inconsistent with python manuals
         # suggestion. Manual suggests that a mapping should iterate
         # over keys ('reference' in our case). See:
         # https://docs.python.org/2.7/reference/datamodel.html?emulating-container-types#object.__iter__
-        # But in my opinion `_ModuleList` is a list then mapping.
+        # But in my opinion `_FootprintList` is a list then mapping.
         for m in self._board._obj.GetFootprints():
-            yield Module.wrap(m)
+            yield Footprint.wrap(m)
 
     def __len__(self):
         return len(self._board._obj.GetFootprints())
@@ -41,7 +41,7 @@ class Board(object):
         else:
             self._obj = pcbnew.BOARD()
 
-        self._modulelist = _ModuleList(self)
+        self._fplist = _FootprintList(self)
         self._removed_elements = []
 
     @property
@@ -62,25 +62,25 @@ class Board(object):
         return obj
 
     @property
-    def modules(self):
-        """Provides an iterator over the board Module objects."""
-        return self._modulelist
+    def footprints(self):
+        """Provides an iterator over the board Footprint objects."""
+        return self._fplist
 
-    def moduleByRef(self, ref):
-        """Returns the module that has the reference `ref`. Returns `None` if
-        there is no such module."""
+    def footprint_by_ref(self, ref):
+        """Returns the footprint that has the reference `ref`. Returns `None` if
+        there is no such footprint."""
         found = self._obj.FindFootprintByReference(ref)
         if found:
-            return Module.wrap(found)
+            return Footprint.wrap(found)
 
     @property
-    def footprints(self):
+    def modules(self):
         """Alias footprint to module"""
-        return self.modules
+        return self.footprints
 
-    def footprintByRef(self, ref):
+    def module_by_ref(self, ref):
         """Alias footprint to module"""
-        return self.moduleByRef(ref)
+        return self.footprintByRef(ref)
 
     @property
     def vias(self):
@@ -164,13 +164,13 @@ class Board(object):
         """Name of the board file."""
         return self._obj.GetFileName()
 
-    def add_module(self, ref, pos=(0, 0)):
-        """Create new module on the board"""
-        return Module(ref, pos, board=self)
-
     def add_footprint(self, ref, pos=(0, 0)):
-        """Same as add_module"""
-        return Module(ref, pos, board=self)
+        """Create new module on the board"""
+        return Footprint(ref, pos, board=self)
+
+    def add_module(self, ref, pos=(0, 0)):
+        """Same as add_footprint"""
+        return Footprint(ref, pos, board=self)
 
     @property
     def default_width(self, width=None):

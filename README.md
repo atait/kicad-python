@@ -132,7 +132,7 @@ pcbnew.Refresh()
 ### Move all silk labels to fab layers
 Instead, we can keep them on Fab layers so we can still see them while designing the PCB.
 ```python
-for m in pcb.modules:
+for m in pcb.footprints:
     ref = m.reference_label.layer.split('.')  # Gives tuple like ('B', 'Silkscreen')
     if len(ref) > 1 and ref[1].startswith('Silk'):
         ref.layer = ref[0] + '.Fab'
