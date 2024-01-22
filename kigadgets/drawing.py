@@ -58,8 +58,8 @@ class Segment(Drawing):
         line = SWIGtype.Shape(board and board.native_obj)
         line.SetShape(ShapeType.Segment)
         self._obj = line
-        line.SetStart(Point.native_from(start))
-        line.SetEnd(Point.native_from(end))
+        self.start = start
+        self.end = end
         self.layer = layer
         self.width = width
 
@@ -85,7 +85,11 @@ class Circle(Drawing):
                  board=None):
         circle = SWIGtype.Shape(board and board.native_obj)
         circle.SetShape(ShapeType.Circle)
-        circle.SetCenter(Point.native_from(center))
+        self._obj = circle
+        self.center = center
+        self.width = width
+        self.layer = layer
+
         start_coord = Point.native_from(
             (center[0], center[1] + radius))
         if SWIG_version >= 6:
@@ -93,9 +97,6 @@ class Circle(Drawing):
             circle.SetModified()
         else:
             circle.SetArcStart(start_coord)
-        circle.SetLayer(get_board_layer_id(board, layer))
-        circle.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
-        self._obj = circle
 
     @property
     def center(self):
@@ -265,6 +266,8 @@ class Polygon(Drawing):
         poly_obj = SWIGtype.Shape(board and board.native_obj)
         poly_obj.SetShape(ShapeType.Polygon)
         self._obj = poly_obj
+        self.layer = layer
+        self.width = width
 
         chain = pcbnew.SHAPE_LINE_CHAIN()
         for coord in coords:
@@ -272,9 +275,6 @@ class Polygon(Drawing):
         chain.SetClosed(True)
         poly_shape = pcbnew.SHAPE_POLY_SET(chain)
         poly_obj.SetPolyShape(poly_shape)
-
-        self.layer = layer
-        self.width = width
 
     @property
     def filled(self):
