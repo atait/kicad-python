@@ -22,9 +22,9 @@ From outside, you can load a board file and iterate over modules this way::
 
     my_board = Board.load('my_board.kicad_pcb')
 
-    for module in my_board.modules:
-        data = {'reference': module.reference,
-                'position': module.position}
+    for fp in my_board.footprints:
+        data = {'reference': fp.reference,
+                'position': fp.position}
         print "module %(reference)s is at %(position)s" % data
 
 .. toctree::

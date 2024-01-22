@@ -11,11 +11,11 @@ class TestPcbnewBoard(unittest.TestCase):
         self.board = Board()
 
     def test_module_creation(self):
-        self.board.add_module('M1')
-        self.assertEqual(1, len(list(self.board.modules)))
-        self.board.add_module('M2')
-        self.assertEqual(2, len(list(self.board.modules)))
-        refs = [module.reference for module in self.board.modules]
+        self.board.add_footprint('M1')
+        self.assertEqual(1, len(list(self.board.footprints)))
+        self.board.add_footprint('M2')
+        self.assertEqual(2, len(list(self.board.footprints)))
+        refs = [module.reference for module in self.board.footprints]
         self.assertIn('M1', refs)
         self.assertIn('M2', refs)
 

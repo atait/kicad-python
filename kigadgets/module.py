@@ -7,7 +7,7 @@ from kigadgets.pad import Pad
 from kigadgets.layer import get_board_layer_name
 
 
-class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
+class FootprintLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
     """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = SWIGtype.FpText(mod.native_obj)
@@ -22,7 +22,7 @@ class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
         try:
             return self._obj.IsVisible()
         except AttributeError:
-            raise AttributeError('ModuleLabel.visible is write only in KiCad {}'.format(SWIG_version))
+            raise AttributeError('FootprintLabel.visible is write only in KiCad v{}'.format(SWIG_version))
 
     @visible.setter
     def visible(self, value):
@@ -34,7 +34,7 @@ class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
             return kigadgets.new(ModuleLabel, instance)
 
 
-class ModuleLine(HasLayer, Selectable, BoardItem):
+class FootprintLine(HasLayer, Selectable, BoardItem):
     """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
     @staticmethod
     def wrap(instance):
@@ -42,7 +42,7 @@ class ModuleLine(HasLayer, Selectable, BoardItem):
             return kigadgets.new(ModuleLine, instance)
 
 
-class Module(HasPosition, HasOrientation, Selectable, BoardItem):
+class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     _ref_label = None
     _val_label = None
 
@@ -81,7 +81,7 @@ class Module(HasPosition, HasOrientation, Selectable, BoardItem):
     def reference_label(self):
         native = self._obj.Reference()
         if self._ref_label is None or self._ref_label.native_obj is not native:
-            self._ref_label = ModuleLabel.wrap(native)
+            self._ref_label = FootprintLabel.wrap(native)
         return self._ref_label
 
     @property
@@ -96,7 +96,7 @@ class Module(HasPosition, HasOrientation, Selectable, BoardItem):
     def value_label(self):
         native = self._obj.Value()
         if self._val_label is None or self._val_label.native_obj is not native:
-            self._val_label = ModuleLabel.wrap(native)
+            self._val_label = FootprintLabel.wrap(native)
         return self._val_label
 
     @property
@@ -104,9 +104,9 @@ class Module(HasPosition, HasOrientation, Selectable, BoardItem):
         """Text and drawings of module iterator."""
         for item in self._obj.GraphicalItems():
             if type(item) == SWIGtype.FpShape:
-                yield ModuleLine.wrap(item)
+                yield FootprintLine.wrap(item)
             elif type(item) == SWIGtype.FpText:
-                yield ModuleLabel.wrap(item)
+                yield FootprintLabel.wrap(item)
             else:
                 raise Exception("Unknown module item type: %s" % type(item))
 
@@ -147,7 +147,7 @@ class Module(HasPosition, HasOrientation, Selectable, BoardItem):
         else:
             _module = SWIGtype.Footprint(board and board._obj)
             _module.Copy(self._obj)
-        module = Module.wrap(_module)
+        module = Footprint.wrap(_module)
         module.reference = ref
         if pos:
             module.position = pos
@@ -180,7 +180,7 @@ class Module(HasPosition, HasOrientation, Selectable, BoardItem):
         self._removed_elements = []
 
 
-# In case v6+ naming is used
-Footprint = Module
-FootprintLine = ModuleLine
-FootprintLabel = ModuleLabel
+# In case v5 naming is used
+Module = Footprint
+ModuleLine = FootprintLine
+ModuleLabel = FootprintLabel
