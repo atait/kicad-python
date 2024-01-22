@@ -2,7 +2,7 @@ from kigadgets import pcbnew_bare as pcbnew
 
 import kigadgets
 from kigadgets import Size
-from kigadgets.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
+from kigadgets.item import HasPosition, HasConnection, HasLayer, Selectable, BoardItem
 
 class DrillShape():
     Circle = pcbnew.PAD_DRILL_SHAPE_CIRCLE
@@ -24,7 +24,7 @@ class PadType():
     NPTH = pcbnew.PAD_ATTRIB_NPTH
 
 
-class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
+class Pad(HasPosition, HasConnection, HasLayer, Selectable, BoardItem):
     def __init__(self):
         raise NotImplementedError('Direct instantiation of Pad is not supported')
 

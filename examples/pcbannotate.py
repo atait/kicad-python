@@ -22,9 +22,9 @@ b = Board.from_editor()
 mods = list(b.modules)
 
 def sortkeys(mod):
-    if mod.layer == Layer.Front:
+    if mod.layer == 'F.Cu':
         return (mod.layer, mod.y, mod.x)
-    else: # Layer.Back
+    else: # 'B.Cu'
         # Components in the back are sorted from right to
         # left according to their canvas position. When you flip the
         # board at your hand, they will be sorted 'left to right'.

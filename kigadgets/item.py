@@ -2,7 +2,12 @@ from kigadgets import SWIG_version, Point, DEFAULT_UNIT_IUS
 from kigadgets.layer import Layer, get_board_layer_name, get_board_layer_id
 
 
-class BoardItem(object):
+class _ABC(object):
+    def __init__(self):
+        raise NotImplementedError('{} is an abstract class with no __init__'.format(type(self)))
+
+
+class BoardItem(_ABC):
     _obj = None
 
     @property
@@ -19,12 +24,9 @@ class BoardItem(object):
             return None
 
 
-class HasPosition(object):
+class HasPosition(_ABC):
     """Board items that has valid position property should inherit
     this."""
-
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
 
     @property
     def position(self):
@@ -51,11 +53,8 @@ class HasPosition(object):
         self.position = (self.x, value)
 
 
-class HasRotation(object):
+class HasRotation(_ABC):
     """Board items that has rotation property should inherit this."""
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
-
     @property
     def rotation(self):
         """Rotation of the item in degrees."""
@@ -72,48 +71,10 @@ class HasRotation(object):
             self._obj.SetOrientation(value * 10.)
 
 
-class HasLayerEnumImpl(object):
-    """Board items that has layer should inherit this."""
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
-
-    @property
-    def layer(self):
-        return Layer(self._obj.GetLayer())
-
-    @layer.setter
-    def layer(self, value):
-        self._obj.SetLayer(value.value)
-
-
-class HasLayer(HasLayerEnumImpl):
-    _has_warned = False
-
-    def print_warning(self):
-        if not self._has_warned:
-            print('\nDeprecation warning (HasLayer): Use either HasLayerEnumImpl or HasLayerStrImpl.'
-                  '\nDefault will change from Enum to Str in the future.')
-            self._has_warned = True
-
-    @property
-    def layer(self):
-        self.print_warning()
-        return Layer(self._obj.GetLayer())
-
-    @layer.setter
-    def layer(self, value):
-        self.print_warning()
-        self._obj.SetLayer(value.value)
-
-
-class HasLayerStrImpl(object):
-    """ Board items that has layer outside of standard layers should inherit this.
-        String implementation can sometimes be more intuitive, and accomodates custom layer names.
+class HasLayer(_ABC):
+    """ Layer handling based on strings like `'F.Cu'`, `'B.Silkscreen'`, `'User.12'`, etc.
         If the layer is not present, it will be caught at runtime, rather than disallowed.
     """
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
-
     @property
     def layer(self):
         layid = self._obj.GetLayer()
@@ -137,11 +98,8 @@ class HasLayerStrImpl(object):
         self._obj.SetLayer(layid)
 
 
-class HasConnection(object):
+class HasConnection(_ABC):
     """All BOARD_CONNECTED_ITEMs should inherit this."""
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
-
     @property
     def net_name(self):
         return self._obj.GetNetname()
@@ -166,11 +124,8 @@ class HasConnection(object):
         self._obj.SetNetCode(value)
 
 
-class Selectable(object):
+class Selectable(_ABC):
     """ This influences the main window. Make sure to pcbnew.Refresh() to see it """
-    def __init__(self):
-        raise NotImplementedError("This is an abstract class!")
-
     @property
     def is_selected(self):
         return bool(self._obj.IsSelected())
@@ -195,7 +150,7 @@ class Selectable(object):
             self._obj.ClearBrightened()
 
 
-class HasWidth(object):
+class HasWidth(_ABC):
     @property
     def width(self):
         return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
@@ -205,8 +160,21 @@ class HasWidth(object):
         self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
 
 
-class TextEsque(object):
-    # Note orientation and rotation mean different things
+class TextEsque(_ABC):
+    ''' Base class for items with text-like properties
+
+        Note:
+            Text orientation and object rotation/orientation mean different things
+    '''
+    justification_lookups = dict(
+        left='GR_TEXT_HJUSTIFY_LEFT',
+        center='GR_TEXT_HJUSTIFY_CENTER',
+        right='GR_TEXT_HJUSTIFY_RIGHT',
+        bottom='GR_TEXT_VJUSTIFY_BOTTOM',
+        middle='GR_TEXT_VJUSTIFY_CENTER',
+        top='GR_TEXT_VJUSTIFY_TOP',
+    )
+
     @property
     def text(self):
         return self._obj.GetText()
@@ -276,12 +244,3 @@ class TextEsque(object):
                 self._obj.SetHorizJustify(enum_val)
             else:
                 self._obj.SetVertJustify(enum_val)
-
-justification_lookups = dict(
-    left='GR_TEXT_HJUSTIFY_LEFT',
-    center='GR_TEXT_HJUSTIFY_CENTER',
-    right='GR_TEXT_HJUSTIFY_RIGHT',
-    bottom='GR_TEXT_VJUSTIFY_BOTTOM',
-    middle='GR_TEXT_VJUSTIFY_CENTER',
-    top='GR_TEXT_VJUSTIFY_TOP',
-)

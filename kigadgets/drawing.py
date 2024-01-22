@@ -6,7 +6,7 @@ import math
 import kigadgets
 from kigadgets import units, Size, SWIGtype, SWIG_version, Point, instanceof
 from kigadgets.layer import get_board_layer_id
-from kigadgets.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
+from kigadgets.item import HasLayer, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
 
 class ShapeType():
     Segment = pcbnew.S_SEGMENT
@@ -15,7 +15,7 @@ class ShapeType():
     Polygon = pcbnew.S_POLYGON
     Rect = pcbnew.S_RECT
 
-class Drawing(HasLayerStrImpl, HasPosition, HasWidth, Selectable, BoardItem):
+class Drawing(HasLayer, HasPosition, HasWidth, Selectable, BoardItem):
     @staticmethod
     def wrap(instance):
         if instanceof(instance, SWIGtype.Shape):
