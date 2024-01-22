@@ -12,7 +12,6 @@ class Point(units.BaseUnitTuple):
         :param x: x coordinate.
         :param y: y coordinate.
         """
-        self._class = Point
         self._obj = SWIGtype.Point(int(x * units.DEFAULT_UNIT_IUS),
                                    int(y * units.DEFAULT_UNIT_IUS))
 
@@ -21,21 +20,6 @@ class Point(units.BaseUnitTuple):
 
     def __repr__(self):
         return "Point(%g, %g)" % (self.x, self.y)
-
-    @classmethod
-    def wrap(cls, instance):
-        """Wraps a wxPoint object from pcbnew and returns a Point one.
-
-        This function should not be generally used, but it's provided as
-        a helper when migrating old API code.
-
-        :param instance: input wxPoint or VECTOR2I to wrap.
-        :type instance: wxPoint
-        :return: Point
-        """
-        wrapped_point = kigadgets.new(cls, instance)
-        wrapped_point._class = cls
-        return wrapped_point
 
     @staticmethod
     def build_from(t):

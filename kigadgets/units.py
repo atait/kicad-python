@@ -1,4 +1,5 @@
 import math
+import kigadgets
 
 nm = 0.000001
 mm = 1.0
@@ -43,6 +44,12 @@ class BaseUnitTuple(object):
 
     It's a class to be used just by Point and Size.
     """
+    @classmethod
+    def wrap(cls, instance):
+        """Wraps a point or size native object
+        """
+        return kigadgets.new(cls, instance)
+
     @property
     def x(self):
         """x coordinate."""
@@ -73,15 +80,15 @@ class BaseUnitTuple(object):
             raise IndexError
 
     def __sub__(self, b):
-        return self._class.build_from((self[0] - b[0],
+        return type(self).build_from((self[0] - b[0],
                                        self[1] - b[1]))
 
     def __add__(self, b):
-        return self._class.build_from((self[0] + b[0],
+        return type(self).build_from((self[0] + b[0],
                                        self[1] + b[1]))
 
     def __eq__(self, _other):
-        other = self._class.build_from(_other)
+        other = type(self).build_from(_other)
         return (self.native_obj == other.native_obj)
 
     def __ne__(self, other):
