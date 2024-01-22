@@ -1,8 +1,8 @@
 import kigadgets
 from kigadgets import DEFAULT_UNIT_IUS, SWIGtype, Point
-from kigadgets.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
+from kigadgets.item import HasConnection, HasLayer, Selectable, BoardItem
 
-class Track(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
+class Track(HasConnection, HasLayer, Selectable, BoardItem):
     def __init__(self, start, end, layer='F.Cu', width=None, board=None):
         self._obj = SWIGtype.Track(board and board.native_obj)
         self.start = start

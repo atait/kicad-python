@@ -2,12 +2,12 @@ from kigadgets import pcbnew_bare as pcbnew
 
 import kigadgets
 from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
-from kigadgets.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem, TextEsque
+from kigadgets.item import HasPosition, HasRotation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
 from kigadgets.layer import get_std_layer_name
 
 
-class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque):
+class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
     """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = SWIGtype.FpText(mod.native_obj)
@@ -34,7 +34,7 @@ class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque
             return kigadgets.new(ModuleLabel, instance)
 
 
-class ModuleLine(HasLayerStrImpl, Selectable, BoardItem):
+class ModuleLine(HasLayer, Selectable, BoardItem):
     """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
     @staticmethod
     def wrap(instance):

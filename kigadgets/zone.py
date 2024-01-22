@@ -2,7 +2,7 @@ from kigadgets import pcbnew_bare as pcbnew
 
 import kigadgets
 from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
-from kigadgets.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
+from kigadgets.item import HasConnection, HasLayer, Selectable, BoardItem
 from kigadgets.layer import LayerSet
 
 class KeepoutAllowance(object):
@@ -56,7 +56,7 @@ class KeepoutAllowance(object):
         return type(self).__name__ + str(self)
 
 
-class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
+class Zone(HasConnection, HasLayer, Selectable, BoardItem):
     def __init__(self, layer='F.Cu', board=None):
         self._obj = SWIGtype.Zone(board and board.native_obj)
         self.layer = layer
