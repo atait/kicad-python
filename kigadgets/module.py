@@ -62,11 +62,6 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
             board.add(self)
 
     @staticmethod
-    def wrap(instance):
-        if type(instance) is SWIGtype.Footprint:
-            return kigadgets.new(Module, instance)
-
-    @staticmethod
     def load_from_library(library_path, name):
         m = pcbnew.FootprintLoad(library_path, name)
         if m is None:

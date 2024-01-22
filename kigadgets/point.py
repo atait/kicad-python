@@ -22,8 +22,8 @@ class Point(units.BaseUnitTuple):
     def __repr__(self):
         return "Point(%g, %g)" % (self.x, self.y)
 
-    @staticmethod
-    def wrap(instance):
+    @classmethod
+    def wrap(cls, instance):
         """Wraps a wxPoint object from pcbnew and returns a Point one.
 
         This function should not be generally used, but it's provided as
@@ -33,8 +33,8 @@ class Point(units.BaseUnitTuple):
         :type instance: wxPoint
         :return: Point
         """
-        wrapped_point = kigadgets.new(Point, instance)
-        wrapped_point._class = Point
+        wrapped_point = kigadgets.new(cls, instance)
+        wrapped_point._class = cls
         return wrapped_point
 
     @staticmethod

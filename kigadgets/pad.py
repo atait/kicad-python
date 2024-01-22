@@ -1,6 +1,5 @@
 from kigadgets import pcbnew_bare as pcbnew
 
-import kigadgets
 from kigadgets import Size
 from kigadgets.item import HasPosition, HasConnection, HasLayer, Selectable, BoardItem
 
@@ -27,11 +26,6 @@ class PadType():
 class Pad(HasPosition, HasConnection, HasLayer, Selectable, BoardItem):
     def __init__(self):
         raise NotImplementedError('Direct instantiation of Pad is not supported')
-
-    @staticmethod
-    def wrap(instance):
-        """Wraps a C++ api PAD object, and returns a `Pad`."""
-        return kigadgets.new(Pad, instance)
 
     @property
     def pad_type(self):

@@ -1,6 +1,5 @@
 from kigadgets import pcbnew_bare as pcbnew
 
-import kigadgets
 from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
 from kigadgets.item import HasPosition, HasConnection, Selectable, BoardItem
 from kigadgets.layer import get_board_layer_id, get_board_layer_name
@@ -21,6 +20,8 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
     ''' Careful setting top_layer, then getting top_layer may
         return different values if the new top_layer is below the existing bottom layer
     '''
+    _wraps_native_cls = SWIGtype.Via
+
     def __init__(self, center, size=None, drill=None, layer_pair=None, board=None):
         self._obj = SWIGtype.Via(board and board.native_obj)
         if size is None:
@@ -35,11 +36,6 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
             layer_pair = ['F.Cu', 'B.Cu']
         self.is_through = 'F.Cu' in layer_pair and 'B.Cu' in layer_pair
         self.set_layer_pair(layer_pair)
-
-    @staticmethod
-    def wrap(instance):
-        """Wraps a C++ api VIA object, and returns a `Via`."""
-        return kigadgets.new(Via, instance)
 
     @property
     def drill(self):
