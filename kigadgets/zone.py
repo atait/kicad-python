@@ -57,14 +57,12 @@ class KeepoutAllowance(object):
 
 
 class Zone(HasConnection, HasLayer, Selectable, BoardItem):
+    _wraps_native_cls = SWIGtype.Zone
+
     def __init__(self, layer='F.Cu', board=None):
         self._obj = SWIGtype.Zone(board and board.native_obj)
         self.layer = layer
         raise NotImplementedError('Constructor not supported yet')
-
-    @staticmethod
-    def wrap(instance):
-        return kigadgets.new(Zone, instance)
 
     @property
     def clearance(self):

@@ -3,7 +3,6 @@ from kigadgets import pcbnew_bare as pcbnew
 import cmath
 import math
 
-import kigadgets
 from kigadgets import units, Size, SWIGtype, SWIG_version, Point, instanceof
 from kigadgets.layer import get_board_layer_id
 from kigadgets.item import HasLayer, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
@@ -15,46 +14,43 @@ class ShapeType():
     Polygon = pcbnew.S_POLYGON
     Rect = pcbnew.S_RECT
 
+
+def wrap_drawing(instance):
+    ''' Handles anything found in BOARD.GetDrawings
+        Feeds through to shape wrap methods based on the type of shape.
+        It also detects and feeds through text.
+    '''
+    if instanceof(instance, SWIGtype.Text):
+        return TextPCB.wrap(instance)
+    if not instanceof(instance, SWIGtype.Shape):
+        raise TypeError('Invalid drawing class: {}'.format(type(instance)))
+
+    obj_shape = instance.GetShape()
+    if obj_shape == ShapeType.Segment:
+        return Segment.wrap(instance)
+    if obj_shape == ShapeType.Circle:
+        return Circle.wrap(instance)
+    if obj_shape == ShapeType.Arc:
+        return Arc.wrap(instance)
+    if obj_shape == ShapeType.Polygon:
+        return Polygon.wrap(instance)
+    if obj_shape == ShapeType.Rect:
+        return Rectangle.wrap(instance)
+
+    # Time to fail
+    layer = get_std_layer_name(instance.GetLayer())
+    unsupported = ['S_CURVE', 'S_LAST']
+    for unsup in unsupported:
+        if not hasattr(pcbnew, unsup):
+            continue
+        if obj_shape is getattr(pcbnew, unsup):
+            raise TypeError('Unsupported shape type: pcbnew.{} on layer {}.'.format(unsup, layer))
+    raise TypeError('Unrecognized shape type on layer {}'.format(layer))
+
+
 class Drawing(HasLayer, HasPosition, HasWidth, Selectable, BoardItem):
-    @staticmethod
-    def wrap(instance):
-        if instanceof(instance, SWIGtype.Shape):
-            return Drawing._wrap_drawsegment(instance)
-        elif instanceof(instance, SWIGtype.Text):
-            return kigadgets.new(TextPCB, instance)
-        else:
-            raise TypeError('Invalid drawing class: {}'.format(type(instance)))
-
-    @staticmethod
-    def _wrap_drawsegment(instance):
-        obj_shape = instance.GetShape()
-
-        if obj_shape is pcbnew.S_SEGMENT:
-            return kigadgets.new(Segment, instance)
-
-        if obj_shape is pcbnew.S_CIRCLE:
-            return kigadgets.new(Circle, instance)
-
-        if obj_shape is pcbnew.S_ARC:
-            return kigadgets.new(Arc, instance)
-
-        if obj_shape is pcbnew.S_POLYGON:
-            return kigadgets.new(Polygon, instance)
-
-        if obj_shape is pcbnew.S_RECT:
-            return kigadgets.new(Rectangle, instance)
-
-        # Time to fail
-        layer = instance.GetLayer()
-        layer_str = pcbnew.BOARD_GetStandardLayerName(layer)
-        unsupported = ['S_CURVE', 'S_LAST']
-        for unsup in unsupported:
-            if not hasattr(pcbnew, unsup):
-                continue
-            if obj_shape is getattr(pcbnew, unsup):
-                raise TypeError('Unsupported shape type: pcbnew.{} on layer {}.'.format(unsup, layer_str))
-
-        raise TypeError('Unrecognized shape type on layer {}'.format(layer_str))
+    ''' Base class of shape drawings, not including text '''
+    _wraps_native_cls = SWIGtype.Shape
 
 
 class Segment(Drawing):
@@ -398,7 +394,9 @@ class Rectangle(Polygon):
         return poly.contains(point)
 
 
-class TextPCB(Drawing, TextEsque):
+class TextPCB(HasLayer, HasPosition, Selectable, BoardItem, TextEsque):
+    _wraps_native_cls = SWIGtype.Text
+
     def __init__(self, position, text=None, layer='F.SilkS',
                  size=1.0, thickness=0.15, board=None):
         self._obj = SWIGtype.Text(board and board.native_obj)

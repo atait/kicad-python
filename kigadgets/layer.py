@@ -1,6 +1,6 @@
 from kigadgets import pcbnew_bare as pcbnew
 import kigadgets
-
+from kigadgets import SWIG_version, instanceof
 
 # dicts for converting layer name to id, used by _get_layer
 _std_layer_dict = None
@@ -9,7 +9,7 @@ def load_std_layers():
     # lazy import for Sphinx to run properly
     global _std_layer_dict, _std_layer_names
     if _std_layer_dict is None:
-        if kigadgets.SWIG_version >= 7:
+        if SWIG_version >= 7:
             native_get_layername = pcbnew.BOARD.GetStandardLayerName
         else:
             native_get_layername = pcbnew.BOARD_GetStandardLayerName
@@ -65,13 +65,16 @@ class LayerSet:
 
     @property
     def native_obj(self):
-        ''' Has _obj but not GetBoard, so it is not a BoardItem '''
         return self._obj
 
-    @staticmethod
-    def wrap(instance):
-        """Wraps a C++/old api LSET object, and returns a LayerSet."""
-        return kigadgets.new(LayerSet, instance)
+    @classmethod
+    def wrap(cls, instance):
+        if not instanceof(instance, pcbnew.LSET):
+            raise TypeError(
+                '{} cannot wrap native class {}'
+                '\n  Allowed: {}'.format(cls.__name__, type(instance).__name__, pcbnew.LSET)
+            )
+        return kigadgets.new(cls, instance)
 
     def _build_layer_set(self, layers):
         """Create LayerSet used for defining pad layers"""
@@ -90,8 +93,9 @@ class LayerSet:
 
     @property
     def layers(self):
-        """Returns the list of Layer IDs in this LayerSet."""
-        return [l for l in self._obj.Seq()]
+        """Returns the list of Layer names in this LayerSet."""
+        for lay_id in self._obj.Seq():
+            yield get_board_layer_name(self._board, lay_id)
 
     def add_layer(self, layer_name):
         self._obj.AddLayer(get_board_layer_id(self._board, layer_name))

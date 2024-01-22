@@ -8,11 +8,11 @@ class Size(units.BaseUnitTuple):
         self._obj = SWIGtype.Size(int(width * units.DEFAULT_UNIT_IUS),
                                   int(height * units.DEFAULT_UNIT_IUS))
 
-    @staticmethod
-    def wrap(instance):
+    @classmethod
+    def wrap(cls, instance):
         """Takes a wxSize instance and returns a Size class."""
-        wrapped_size = kigadgets.new(Size, instance)
-        wrapped_size._class = Size
+        wrapped_size = kigadgets.new(cls, instance)
+        wrapped_size._class = cls
         return wrapped_size
 
     @property

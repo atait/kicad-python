@@ -1,7 +1,7 @@
 from kigadgets import pcbnew_bare as pcbnew
 from kigadgets import units, SWIGtype, instanceof
 
-from kigadgets.drawing import Drawing, Segment, Circle, Arc, TextPCB
+from kigadgets.drawing import wrap_drawing, Segment, Circle, Arc, TextPCB
 from kigadgets.module import Module
 from kigadgets.track import Track
 from kigadgets.via import Via
@@ -120,8 +120,7 @@ class Board(object):
     def drawings(self):
         all_drawings = []
         for drawing in self._obj.GetDrawings():
-            if instanceof(drawing, (SWIGtype.Shape, SWIGtype.Text)):
-                yield Drawing.wrap(drawing)
+            yield wrap_drawing(drawing)
 
     @property
     def items(self):

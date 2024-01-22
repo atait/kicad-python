@@ -1,6 +1,5 @@
 from kigadgets import pcbnew_bare as pcbnew
 
-import kigadgets
 from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
 from kigadgets.item import HasPosition, HasRotation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
@@ -9,6 +8,8 @@ from kigadgets.layer import get_board_layer_name
 
 class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
     """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
+    _wraps_native_cls = SWIGtype.FpText
+
     def __init__(self, mod, text=None, layer=None):
         self._obj = SWIGtype.FpText(mod.native_obj)
         mod.native_obj.Add(self._obj)
@@ -22,29 +23,22 @@ class ModuleLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
         try:
             return self._obj.IsVisible()
         except AttributeError:
-            raise AttributeError('ModuleLabel.visible is write only in KiCad {}'.format(SWIG_version))
+            raise AttributeError('ModuleLabel.visible is write only in KiCad v{}'.format(SWIG_version))
 
     @visible.setter
     def visible(self, value):
         return self._obj.SetVisible(value)
 
-    @staticmethod
-    def wrap(instance):
-        if type(instance) is SWIGtype.FpText:
-            return kigadgets.new(ModuleLabel, instance)
-
 
 class ModuleLine(HasLayer, Selectable, BoardItem):
     """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
-    @staticmethod
-    def wrap(instance):
-        if type(instance) is SWIGtype.FpShape:
-            return kigadgets.new(ModuleLine, instance)
+    _wraps_native_cls = SWIGtype.FpShape
 
 
 class Module(HasPosition, HasRotation, Selectable, BoardItem):
     _ref_label = None
     _val_label = None
+    _wraps_native_cls = SWIGtype.Footprint
 
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
@@ -60,11 +54,6 @@ class Module(HasPosition, HasRotation, Selectable, BoardItem):
             self.position = pos
         if board:
             board.add(self)
-
-    @staticmethod
-    def wrap(instance):
-        if type(instance) is SWIGtype.Footprint:
-            return kigadgets.new(Module, instance)
 
     @property
     def reference(self):

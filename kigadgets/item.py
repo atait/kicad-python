@@ -1,14 +1,16 @@
-from kigadgets import SWIG_version, Point, DEFAULT_UNIT_IUS
-from kigadgets.layer import Layer, get_board_layer_name, get_board_layer_id
+import kigadgets
+from kigadgets import SWIG_version, Point, DEFAULT_UNIT_IUS, instanceof
+from kigadgets.layer import get_board_layer_name, get_board_layer_id
 
 
 class _ABC(object):
     def __init__(self):
-        raise NotImplementedError('{} is an abstract class with no __init__'.format(type(self)))
+        raise NotImplementedError('{} has no __init__. It is an abstract and/or wrapper-only class'.format(type(self)))
 
 
 class BoardItem(_ABC):
     _obj = None
+    _wraps_native_cls = None
 
     @property
     def native_obj(self):
@@ -22,6 +24,17 @@ class BoardItem(_ABC):
             return Board(brd_native)
         else:
             return None
+
+    @classmethod
+    def wrap(cls, instance):
+        if cls._wraps_native_cls is not None:
+            if not instanceof(instance, cls._wraps_native_cls):
+                raise TypeError(
+                    '{} cannot wrap native class {}'
+                    '\n  Allowed: {}'.format(cls.__name__, type(instance).__name__, cls._wraps_native_cls)
+                )
+        return kigadgets.new(cls, instance)
+
 
 
 class HasPosition(_ABC):
