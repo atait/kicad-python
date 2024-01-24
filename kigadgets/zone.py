@@ -117,15 +117,23 @@ class Zone(HasConnection, HasLayer, Selectable, BoardItem):
 
                 zone.layerset = zone.layerset.add_layer('F.Cu')
         '''
-        from kigadgets.board import Board
-        layers_native = self._obj.GetLayerSet()
-        lset = LayerSet.wrap(layers_native)
-        lset._board = Board.wrap(self._obj.GetBoard())
+        lset = LayerSet.wrap(self._obj.GetLayerSet())
+        lset._board = self.board
         return lset
 
     @layerset.setter
     def layerset(self, new_lset):
         self._obj.SetLayerSet(new_lset._obj)
+
+    def geohash(self):
+        hash((
+            self.clearance,
+            self.min_width,
+            self.is_keepout,
+            str(self.allow),
+            self.layerset.layers
+        ))
+        return mine + super().geohash()
 
 # GetCornerSmoothingType
 # GetDefaultHatchPitch

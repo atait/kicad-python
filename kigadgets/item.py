@@ -7,6 +7,15 @@ class _ABC(object):
     def __init__(self):
         raise NotImplementedError('{} has no __init__. It is an abstract and/or wrapper-only class'.format(type(self)))
 
+    def __eq__(self, other):
+        return True
+
+    def __hash__(self):
+        return 0
+
+    def geohash(self):
+        return hash(type(self).__name__)  # The leaf class, not "_ABC"
+
 
 class BoardItem(_ABC):
     _obj = None
@@ -35,6 +44,17 @@ class BoardItem(_ABC):
                 )
         return kigadgets.new(cls, instance)
 
+    def __eq__(self, other):
+        are_equal = True
+        are_equal &= super().__eq__(other)
+        return are_equal
+
+    def __hash__(self):
+        return super().__hash__()
+
+    # def geohash(self):
+    #     mine = 0  # Change this line to everything geometric when overloading
+    #     return mine + super().geohash()
 
 
 class HasPosition(_ABC):
@@ -65,6 +85,10 @@ class HasPosition(_ABC):
     def y(self, value):
         self.position = (self.x, value)
 
+    def geohash(self):
+        mine = hash(self.position)
+        return mine + super().geohash()
+
 
 class HasOrientation(_ABC):
     """Board items that has orientation property should inherit this."""
@@ -82,6 +106,10 @@ class HasOrientation(_ABC):
             self._obj.SetOrientationDegrees(value)
         else:
             self._obj.SetOrientation(value * 10.)
+
+    def geohash(self):
+        mine = hash(self.orientation)
+        return mine + super().geohash()
 
 
 class HasLayer(_ABC):
@@ -110,6 +138,10 @@ class HasLayer(_ABC):
         layid = get_board_layer_id(brd, value)
         self._obj.SetLayer(layid)
 
+    def geohash(self):
+        mine = hash(self.layer)
+        return mine + super().geohash()
+
 
 class HasConnection(_ABC):
     """All BOARD_CONNECTED_ITEMs should inherit this."""
@@ -136,6 +168,9 @@ class HasConnection(_ABC):
     def net_code(self, value):
         self._obj.SetNetCode(value)
 
+    def geohash(self):
+        mine = hash(self.net_name)
+        return mine + super().geohash()
 
 class Selectable(_ABC):
     """ This influences the main window. Make sure to pcbnew.Refresh() to see it """
@@ -171,6 +206,10 @@ class HasWidth(_ABC):
     @width.setter
     def width(self, value):
         self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
+
+    def geohash(self):
+        mine = hash(self.width)
+        return mine + super().geohash()
 
 
 class TextEsque(_ABC):
@@ -257,3 +296,13 @@ class TextEsque(_ABC):
                 self._obj.SetHorizJustify(enum_val)
             else:
                 self._obj.SetVertJustify(enum_val)
+
+    def geohash(self):
+        mine = hash((
+            self.text,
+            self.thickness,
+            self.size,
+            self.orientation,
+            self.justification,
+        ))
+        return mine + super().geohash()

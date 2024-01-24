@@ -86,16 +86,9 @@ class LayerSet:
         self._obj.ParseHex(hex_mask, len(hex_mask))
 
     @property
-    def layer_names(self):
-        """Returns the list of layer names in this LayerSet."""
-        return [get_board_layer_name(self._board, layer_id)
-                for layer_id in self.layers]
-
-    @property
     def layers(self):
         """Returns the list of Layer names in this LayerSet."""
-        for lay_id in self._obj.Seq():
-            yield get_board_layer_name(self._board, lay_id)
+        return [get_board_layer_name(self._board, lay_id) for lay_id in self._obj.Seq()]
 
     def add_layer(self, layer_name):
         self._obj.AddLayer(get_board_layer_id(self._board, layer_name))
