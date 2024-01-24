@@ -1,7 +1,7 @@
 from kigadgets import DEFAULT_UNIT_IUS, SWIGtype, Point
-from kigadgets.item import HasConnection, HasLayer, Selectable, BoardItem
+from kigadgets.item import HasConnection, HasLayer, HasWidth, Selectable, BoardItem
 
-class Track(HasConnection, HasLayer, Selectable, BoardItem):
+class Track(HasConnection, HasLayer, HasWidth, Selectable, BoardItem):
     _wraps_native_cls = SWIGtype.Track
 
     def __init__(self, start, end, layer='F.Cu', width=None, board=None):
@@ -12,14 +12,6 @@ class Track(HasConnection, HasLayer, Selectable, BoardItem):
             width = self.board.default_width if self.board else 0.2
         self.width = width
         self.layer = layer
-
-    @property
-    def width(self):
-        return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
-
-    @width.setter
-    def width(self, value):
-        self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def start(self):
@@ -39,3 +31,12 @@ class Track(HasConnection, HasLayer, Selectable, BoardItem):
 
     def delete(self):
         self._obj.DeleteStructure()
+
+    def geohash(self):
+        hstart = hash(self.start)
+        hend = hash(self.end)
+        if hstart < hend:
+            mine = hstart + hend
+        else:
+            mine = hend + hstart
+        return mine + super().geohash()

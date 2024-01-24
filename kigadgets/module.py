@@ -179,6 +179,20 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
                 self._obj.Add(element._obj)
         self._removed_elements = []
 
+    def geohash(self):
+        mine = hash((
+            self.reference,
+            self.value,
+            self.layer,
+            # self.lib_name,
+            self.fp_name
+        ))
+        for p in self.pads:
+            mine += p.geohash()
+        for d in self.graphical_items:
+            mine += d.geohash()
+        return mine + super().geohash()
+
 
 # In case v5 naming is used
 Module = Footprint

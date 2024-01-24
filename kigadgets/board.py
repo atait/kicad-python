@@ -170,6 +170,17 @@ class Board(object):
         """Name of the board file."""
         return self._obj.GetFileName()
 
+    def geohash(self):
+        ''' Geometric hash '''
+        item_hashes = []
+        for item in self.items:
+            try:
+                item_hashes.append(item.geohash())
+            except AttributeError:
+                continue
+        item_hashes.sort()
+        return hash(tuple(item_hashes))
+
     def add_footprint(self, ref, pos=(0, 0)):
         """Create new module on the board"""
         return Footprint(ref, pos, board=self)

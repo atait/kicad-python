@@ -79,6 +79,15 @@ class Segment(Drawing):
     def end(self, value):
         self._obj.SetEnd(Point.native_from(value))
 
+    def geohash(self):
+        hstart = hash(self.start)
+        hend = hash(self.end)
+        if hstart < hend:
+            mine = hstart + hend
+        else:
+            mine = hend + hstart
+        return mine + super().geohash()
+
 
 class Circle(Drawing):
     def __init__(self, center, radius, layer='F.SilkS', width=0.15,
@@ -128,6 +137,14 @@ class Circle(Drawing):
     @radius.setter
     def radius(self, value):
         self._obj.SetRadius(int(value * units.DEFAULT_UNIT_IUS))
+
+    def geohash(self):
+        mine = hash((
+            self.center,
+            self.start,
+            self.radius,
+        ))
+        return mine + super().geohash()
 
 
 # --- Logic for Arc changed a lot in version 6, so there are two classes
@@ -188,6 +205,16 @@ class Arc_v5(Drawing):
     @angle.setter
     def angle(self, value):
         self._obj.SetAngle(value * 10)
+
+    def geohash(self):
+        mine = hash((
+            self.center,
+            self.radius,
+            self.start,
+            self.end,
+            self.angle
+        ))
+        return mine + super().geohash()
 
 
 class Arc_v6(Drawing):
@@ -253,6 +280,17 @@ class Arc_v6(Drawing):
             self._obj.SetArcAngleAndEnd(val_obj)
         else:
             self._obj.SetArcAngleAndEnd(value * 10)
+
+    def geohash(self):
+        mine = hash((
+            self.center,
+            self.radius,
+            self.start,
+            self.end,
+            self.angle
+        ))
+        return mine + super().geohash()
+
 
 if SWIG_version >= 6:
     Arc = Arc_v6
@@ -329,6 +367,10 @@ class Polygon(Drawing):
         '''
         poly = self._obj.GetPolyShape()
         return poly.Contains(Point.native_from(point))
+
+    def geohash(self):
+        mine = hash((self.get_vertices, self.filled))
+        return mine + super().geohash()
 
 
 class Rectangle(Polygon):

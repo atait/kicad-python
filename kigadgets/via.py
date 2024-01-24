@@ -113,3 +113,14 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
             self._obj.SetViaType(ViaType.Through)
         else:
             self._obj.SetViaType(ViaType.Blind)
+
+    def geohash(self):
+        mine = hash((
+            self.drill,
+            self.size,
+            self.center,
+            self.top_layer,
+            self.bottom_layer,
+            self.is_through,
+        ))
+        return mine + super().geohash()
