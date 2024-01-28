@@ -1,0 +1,4 @@
+!*.gds
+!*.oas
+*.kicad_*
+!*.kicad_pcb
