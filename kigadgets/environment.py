@@ -48,8 +48,13 @@ def get_pcbnew_path():
 
 
 def get_pcbnew_module():
+    ''' returns the imported <module>. Modifies sys.path so that
+        subsequent `import pcbnew` will work
+    '''
     try:
-        return __import__('pcbnew')  # If this works, we are probably in the pcbnew application, and we're done.
+        pcbnew_bare = __import__('pcbnew')  # If this works, we are probably in the pcbnew application, and we're done.
+        if hasattr(pcbnew_bare, 'Refresh'):  # Check it is authentic
+            return pcbnew_bare
     except ImportError:
         pass
 
@@ -209,5 +214,10 @@ parser.add_argument('kicad_config_path', type=str)
 parser.add_argument('-n', '--dry-run', action='store_true')
 
 def cl_main():
+    from kigadgets import __version__, pcbnew_version
+    vkga = 'kigadgets v{}'.format(__version__)
+    vpcb = 'pcbnew    v{}'.format(pcbnew_version(asstr=True))
+    verz = vkga + '\n' + vpcb
+    parser.add_argument("-v", "--version", action="version", version=verz)
     args = parser.parse_args()
     create_link(args.pcbnew_module_path, args.kicad_config_path, dry_run=args.dry_run)

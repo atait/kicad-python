@@ -6,7 +6,8 @@ __version__ = '0.4.99'
 #: from kigadgets import pcbnew_bare as pcbnew
 import os, sys
 from kigadgets.environment import get_pcbnew_module
-from kigadgets.exceptions import notify, query_user, put_import_warning_on_kicad
+from kigadgets.util import notify, query_user, reload
+from kigadgets.exceptions import put_import_warning_on_kicad
 
 # Find SWIG pcbnew
 try:
@@ -36,18 +37,27 @@ def new(class_type, instance):
     return obj
 
 
+def pcbnew_version(asstr=False):
+    try:
+        verstr = pcbnew_bare.GetMajorMinorVersion()
+        print(verstr)
+    except AttributeError:
+        verstr = '5.0'
+    if asstr:
+        return verstr
+    ver = tuple(int(x) for x in verstr.split('.'))
+    if len(ver) < 2:
+        ver = (ver[0], 0)
+    return ver
+
+
 # Unify v5/6/7 APIs
 if pcbnew_bare is None:
     SWIG_version = None
     class SWIGtype: pass
 else:
     # Determine version and map equivalent objects into consistent names
-    try:
-        ver = tuple(int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
-    except AttributeError:
-        ver = (5, 0)
-    if len(ver) < 2:
-        ver = (5, 0)
+    ver = pcbnew_version()
     if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
         SWIG_version = 7
     elif ver[0] == 6 or (ver[0] == 5 and ver[1] == 99):
@@ -117,19 +127,6 @@ def instanceof(item, klass):
         return class_of_fun(item)
     except AttributeError:
         return False
-
-# Get reload: useful for on-the-fly updates to action plugin scripts without refreshing plugins
-try:
-    from importlib import reload
-except ImportError:
-    try:
-        from imp import reload
-    except ImportError:
-        try:
-            _ = reload
-        except NameError as err:
-            def reload(mod):
-                pass
 
 # Alters sys.modules so that `import kicad` gives more information
 put_import_warning_on_kicad()
