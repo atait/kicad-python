@@ -1,5 +1,6 @@
 from kigadgets import pcbnew_bare as pcbnew
 from kigadgets import units, SWIGtype, instanceof
+import tempfile
 
 from kigadgets.drawing import wrap_drawing, Segment, Circle, Arc, TextPCB
 from kigadgets.module import Footprint
@@ -156,7 +157,12 @@ class Board(object):
         self._obj.Save(filename)
 
     def copy(self):
-        return Board(wrap=self._obj.Clone())
+        native = self._obj.Clone()
+        if native is None:  # Clone not implemented in v7
+            # Fallback to save/load
+            with tempfile.NamedTemporaryFile(suffix='.kicad_pcb') as tfile:
+                self.save(tfile.name)
+                return Board.load(tfile.name)
 
     # TODO: add setter for Board.filename. For now, use brd.save(filename)
     @property
