@@ -1,20 +1,21 @@
-''' Get reload: useful for on-the-fly updates to action plugin scripts without refreshing plugins
+''' kireload is the builtin reload, which comes from different places depending on python version.
+    It is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
 
-        from kigadgets import reload
+        from kigadgets import kireload
         def run(self):
             import action_script  # Only runs the first time during this instance of pcbnew, even if file changed
-            reload(action_script)  # Forces reimport, rerunning, and any updates to source
+            kireload(action_script)  # Forces reimport, rerunning, and any updates to source
 '''
 try:
-    from importlib import reload
+    from importlib import reload as kireload
 except ImportError:
     try:
-        from imp import reload
+        from imp import reload as kireload
     except ImportError:
         try:
-            _ = reload
+            kireload = reload
         except NameError as err:
-            def reload(mod):
+            def kireload(mod):
                 pass
 
 

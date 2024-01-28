@@ -6,7 +6,7 @@ __version__ = '0.4.99'
 #: from kigadgets import pcbnew_bare as pcbnew
 import os, sys
 from kigadgets.environment import get_pcbnew_module
-from kigadgets.util import notify, query_user, reload
+from kigadgets.util import notify, query_user, kireload
 from kigadgets.exceptions import put_import_warning_on_kicad
 
 # Find SWIG pcbnew
