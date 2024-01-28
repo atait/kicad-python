@@ -3,12 +3,14 @@ from kigadgets import DEFAULT_UNIT_IUS, SWIGtype, Point
 from kigadgets.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
 
 class Track(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
-    def __init__(self, width, start, end, layer='F.Cu', board=None):
+    def __init__(self, start, end, layer='F.Cu', width=None, board=None):
         self._obj = SWIGtype.Track(board and board.native_obj)
-        self._obj.SetWidth(int(width * DEFAULT_UNIT_IUS))
+        self.start = start
+        self.end = end
+        if width is None:
+            width = self.board.default_width if self.board else 0.2
+        self.width = width
         self.layer = layer
-        self._obj.SetStart(Point.native_from(start))
-        self._obj.SetEnd(Point.native_from(end))
 
     @staticmethod
     def wrap(instance):
