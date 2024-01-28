@@ -1,3 +1,4 @@
 *.gds
 *.oas
+fp-info-cache
 *.kicad_*
