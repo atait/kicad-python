@@ -182,9 +182,8 @@ class Board(object):
 
     def add_track_segment(self, start, end, layer='F.Cu', width=None):
         """Create a track segment."""
-
-        track = Track(width or self.default_width,
-                      start, end, layer, board=self)
+        track = Track(start, end, layer,
+                      width or self.default_width, board=self)
         self._obj.Add(track.native_obj)
         return track
 
@@ -229,8 +228,7 @@ class Board(object):
         else:
             return 0.2
 
-    def add_via(self, coord, layer_pair=('B.Cu', 'F.Cu'), size=None,
-                drill=None):
+    def add_via(self, coord, size=None, drill=None, layer_pair=None):
         """Create a via on the board.
 
         :param coord: Position of the via.
@@ -241,8 +239,8 @@ class Board(object):
         :returns: the created Via
         """
         return self.add(
-            Via(coord, layer_pair, size or self.default_via_size,
-                drill or self.default_via_drill, board=self))
+            Via(coord, size or self.default_via_size,
+                drill or self.default_via_drill, layer_pair, board=self))
 
     def add_line(self, start, end, layer='F.SilkS', width=0.15):
         """Create a graphic line on the board"""

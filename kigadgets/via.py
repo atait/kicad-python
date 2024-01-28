@@ -18,19 +18,23 @@ else:
 
 
 class Via(HasPosition, HasConnection, Selectable, BoardItem):
-    def __init__(self, coord, layer_pair, diameter, drill, board=None):
+    ''' Careful setting top_layer, then getting top_layer may
+        return different values if the new top_layer is below the existing bottom layer
+    '''
+    def __init__(self, center, size=None, drill=None, layer_pair=None, board=None):
         self._obj = SWIGtype.Via(board and board.native_obj)
-        self.diameter = diameter
-        coord_point = Point.build_from(coord)
-        self._obj.SetEnd(coord_point.native_obj)
-        self._obj.SetStart(coord_point.native_obj)
-        if board:
-            self._obj.SetLayerPair(board.get_layer_id(layer_pair[0]),
-                                   board.get_layer_id(layer_pair[1]))
-        else:
-            self._obj.SetLayerPair(get_std_layer_id(layer_pair[0]),
-                                   get_std_layer_id(layer_pair[1]))
+        if size is None:
+            size = self.board.default_via_size if self.board else 0.6
+        if drill is None:
+            drill = self.board.default_via_drill if self.board else 0.3
+        self.center = center
+        self.size = size
         self.drill = drill
+
+        if layer_pair is None:
+            layer_pair = ['F.Cu', 'B.Cu']
+        self.is_through = 'F.Cu' in layer_pair and 'B.Cu' in layer_pair
+        self.set_layer_pair(layer_pair)
 
     @staticmethod
     def wrap(instance):
@@ -47,22 +51,39 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         self._obj.SetDrill(int(value * DEFAULT_UNIT_IUS))
 
     @property
-    def diameter(self):
+    def size(self):
         """Via diameter"""
         return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
 
-    @diameter.setter
-    def diameter(self, value):
+    @size.setter
+    def size(self, value):
         self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
 
     @property
     def center(self):
         """Via center"""
-        return Point.wrap(self._obj.GetCenter())
+        try:
+            return Point.wrap(self._obj.GetStart())
+        except AttributeError:
+            return Point.wrap(self._obj.GetCenter())
 
     @center.setter
     def center(self, value):
-        self._obj.SetCenter(Point.native_from(value))
+        try:
+            self._obj.SetEnd(Point.native_from(value))
+            self._obj.SetStart(Point.native_from(value))
+        except AttributeError:
+            self._obj.SetCenter(Point.native_from(value))
+
+    def set_layer_pair(self, layer_pair):
+        try:
+            if len(layer_pair) != 2:
+                raise TypeError
+            if layer_pair[0] == layer_pair[1]:
+                raise TypeError
+        except TypeError:
+            raise TypeError('layer_pair must have two uniqe layers as strings')
+        self.top_layer, self.bottom_layer = sorted(layer_pair, key=lambda name: get_board_layer_id(self.board, name))
 
     @property
     def top_layer(self):
@@ -73,10 +94,10 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
 
     @top_layer.setter
     def top_layer(self, value):
-        if self.board:
-            self._obj.SetTopLayer(self.board.get_layer_id(value))
-        else:
-            self._obj.SetTopLayer(get_std_layer_id(value))
+        assert value.endswith('.Cu')
+        self._obj.SetTopLayer(get_board_layer_id(self.board, value))
+        if value.startswith('In'):
+            self.is_through = False
 
     @property
     def bottom_layer(self):
@@ -87,15 +108,14 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
 
     @bottom_layer.setter
     def bottom_layer(self, value):
-        if self.board:
-            self._obj.SetTopLayer(self.board.get_layer_id(value))
-        else:
-            self._obj.SetTopLayer(get_std_layer_name(value))
+        assert value.endswith('.Cu')
+        self._obj.SetBottomLayer(get_board_layer_id(self.board, value))
+        if value.startswith('In'):
+            self.is_through = False
 
     @property
     def is_through(self):
         return self._obj.GetViaType() == ViaType.Through
-        # self._obj.GetViaType() in [ViaType.Micro, ViaType.Blind]
 
     @is_through.setter
     def is_through(self, value):

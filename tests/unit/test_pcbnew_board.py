@@ -31,8 +31,8 @@ class TestPcbnewBoard(unittest.TestCase):
 
     def test_via_creation(self):
         self.board.add_via((1, 1))
-        self.board.add_via((1, 2), ('B.Cu', 'F.Cu'), size=2)
-        self.board.add_via((1, 3), ('B.Cu', 'F.Cu'), size=2, drill=1)
+        self.board.add_via((1, 2), layer_pair=('B.Cu', 'F.Cu'), size=2)
+        self.board.add_via((1, 3), layer_pair=('B.Cu', 'F.Cu'), size=2, drill=1)
 
     def test_default_via_props(self):
         self.assertGreater(self.board.default_via_size, 0.1)
