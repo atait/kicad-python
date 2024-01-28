@@ -77,6 +77,7 @@
 
   (net 0 "")
 
-  (segment (start 1 1) (end 1 2) (width 0.2) (layer "B.Cu") (net 0) (tstamp a01135b6-6721-47ab-b8cb-f7758822dac1))
+  (segment (start -1 -1) (end -1 -2) (width 0.2) (layer "F.Cu") (net 0) (tstamp 7e4e3b0f-1e2f-4c1e-911f-8ce438a9af4c))
+  (segment (start 1 1) (end 1 2) (width 0.2) (layer "B.Cu") (net 0) (tstamp 8d6bbc4f-e172-415f-8450-d862deba0c54))
 
 )

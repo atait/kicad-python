@@ -2,6 +2,17 @@ import unittest
 from kigadgets.board import Board
 from kigadgets.via import Via
 import tempfile
+import pytest
+from . import iprepeat
+
+
+def test_repeatable_str():
+    if not iprepeat:
+        pytest.skip('Cannot compare hashes to literal integer unless PYTHONHASHSEED=0')
+    from kigadgets.via import Via
+    via = Via((20, 20))
+    assert via.geohash() == 1551763526998012866
+
 
 class TestGeohash(unittest.TestCase):
     def setUp(self):
