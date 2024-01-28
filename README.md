@@ -271,6 +271,26 @@ pcbnew.Refresh()
 ```
 Go ahead and try this out in the pcbnew terminal, although this type of thing is better to stick in a user library (see above). The sky is the limit when it comes to procedural layout!
 
+## Regression testing
+KiCAD does not guarantee binary equivalence of .kicad_pcb files. kigadgets `Board` and `BoardItem`s implement `geohash`, which returns a hash value that depends on every item in the PCB. It provides a fast and well-defined way to detect whether two boards are logically equivalent or not.
+
+Geometry hashing enables layout regression testing, git-diff, CI, and behavioral verification. We want to know that `kigadgets` is importing *and also* that it is producing correct behavior. Ok, "correct" is subjective. What we can do is ensure that behavior is logically unchanged when there are other changes: user code, kigadgets code, pcbnew.so, KiCAD version, operating system, .kicad_pcb encoding, dependency updates, and so on.
+
+```python
+pcb1 = Board()
+pcb1.add_track([(1, 1), (1, 2)])
+pcb2 = Board()
+pcb2.add_track([(1, 2), (1, 1)])
+assert pcb1.geohash() == pcb2.geohash()
+```
+
+Utilities specific to automated regression testing are provided by [lytest](https://github.com/atait/lytest). See kigadgets tests for examples.
+
+Note, for security reasons, `geohash` uses a random seed that changes when python is invoked. It is not repeatable between interpreter sessions. That means: 
+- do not store the geohash value for reference; instead store the .kicad_pcb for reference. When loaded, it will get the seed corresponding to this session.
+- `geohash` should not be used for checksums; instead use md5 on the file itself
+
+
 ## Related packages
 KiCAD has a rich landscape of user-developed tools, libraries, and plugins. They have complementary approaches that are optimized for different use cases. It is worth understanding this landscape in order to use the right tool for the job. This is how `kigadgets` fits in.
 
@@ -326,3 +346,4 @@ my_zone = zone_tmp.native_obj  # Outlet to correct version
 do_something_else_to(my_zone)
 ```
 Now this code is forwards compatible without breaking backwards compatibility.
+

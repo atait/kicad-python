@@ -17,3 +17,4 @@ pygments
 actdiag
 blockdiag
 seqdiag
+lytest>=0.1.0
