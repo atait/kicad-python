@@ -1,10 +1,10 @@
 # kigadgets
 ### a.k.a. kicad-python: atait fork
-Development of a new Python scripting API for KiCad
-based on Piers Titus van der Torren work and comunity
-feedback to create a less C++ tied API.
+Development of a stable Python scripting API for KiCad based on Piers Titus van der Torren work and comunity feedback.
 
 [v4.99 Documentation](https://kigadgets.readthedocs.io/en/4.99-refactor)
+
+<img src="docs/source/media/kiga-dark-1024.png" width="40%" margin="auto">
 
 ## Description
 KiCAD and pcbnew expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty (v7 does not exist yet); it is a clunky SWIG/C-style API with custom datatypes for things like lists; its API changes for every KiCAD version; and it exposes too much functionality on equal footing.
@@ -78,7 +78,7 @@ v6+ only
 pip install kigadgets
 ```
 
-2. Open the pcbnew GUI application. Open its terminal ![](docs/pcbnew_terminal_icon.png) or ![](docs/pcbnew_terminal_icon2.png) and run this command in kicad 6+
+2. Open the pcbnew GUI application. Open its terminal ![](docs/source/media/pcbnew_terminal_icon.png) or ![](docs/source/media/pcbnew_terminal_icon2.png) and run this command in kicad 6+
 ```python
 import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
 ```
@@ -182,19 +182,21 @@ def do_something(pcb):
 if __name__ == '__main__':
     pcb = Board.load(sys.argv[1])
     do_something(pcb)
-    newname = pcb.filename.split('.')[0] + '-proc.kicad_pcb'  # Prevent overwrite of source file
+    newname = os.path.splitext(pcb.filename)[0] + '-proc.kicad_pcb'  # Prevent overwrite of source file
     pcb.save(newname)
 ```
-Then you can run it in the pcbnew.app terminal like
+
+(API entry point) You can run it in the pcbnew.app terminal *or* any external python interpreter like this
 ```python
 from my_lib import do_something
 do_something(pcb)
 pcbnew.Refresh()
 ```
-or from the command line like
+or (CLI entry point) from the command line like 
 ```bash
 python my_lib.py some_file.kicad_pcb
 ```
+or (GUI entry point) `my_lib` can be imported by any other action plugins in the GUI.
 
 ### Keep track of live editor state
 ```python
