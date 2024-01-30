@@ -7,12 +7,6 @@ class _ABC(object):
     def __init__(self):
         raise NotImplementedError('{} has no __init__. It is an abstract and/or wrapper-only class'.format(type(self)))
 
-    def __eq__(self, other):
-        return True
-
-    def __hash__(self):
-        return 0
-
     def geohash(self):
         return hash(type(self).__name__)  # The leaf class, not "_ABC"
 
@@ -43,14 +37,6 @@ class BoardItem(_ABC):
                     '\n  Allowed: {}'.format(cls.__name__, type(instance).__name__, cls._wraps_native_cls)
                 )
         return kigadgets.new(cls, instance)
-
-    def __eq__(self, other):
-        are_equal = True
-        are_equal &= super().__eq__(other)
-        return are_equal
-
-    def __hash__(self):
-        return super().__hash__()
 
     # def geohash(self):
     #     mine = 0  # Change this line to everything geometric when overloading

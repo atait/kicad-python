@@ -40,7 +40,6 @@ def new(class_type, instance):
 def pcbnew_version(asstr=False):
     try:
         verstr = pcbnew_bare.GetMajorMinorVersion()
-        print(verstr)
     except AttributeError:
         verstr = '5.0'
     if asstr:
