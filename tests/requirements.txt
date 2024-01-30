@@ -14,10 +14,6 @@ tempest-lib
 flake8
 pylint
 pygments
-sphinx_rtd_theme
 actdiag
 blockdiag
 seqdiag
-sphinx>=1.1.2
-sphinxcontrib-actdiag
-sphinxcontrib-blockdiag

@@ -27,15 +27,13 @@ From outside, you can load a board file and iterate over modules this way::
                 'position': module.position}
         print "module %(reference)s is at %(position)s" % data
 
-kicad
+API
 -----
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
-   kicad/point
-   kicad/size
-   kicad/pcbnew/index
+   API top <API/index>
 
 Indices and tables
 ==================

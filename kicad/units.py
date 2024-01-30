@@ -1,20 +1,3 @@
-#  Copyright 2015 Piers Titus van der Torren
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#
 import math
 
 nm = 0.000001
@@ -67,7 +50,7 @@ class BaseUnitTuple(object):
 
     @x.setter
     def x(self, value):
-        self.native_obj.x = value * DEFAULT_UNIT_IUS
+        self.native_obj.x = int(value * DEFAULT_UNIT_IUS)
 
     @property
     def y(self):
@@ -76,7 +59,7 @@ class BaseUnitTuple(object):
 
     @y.setter
     def y(self, value):
-        self.native_obj.y = value * DEFAULT_UNIT_IUS
+        self.native_obj.y = int(value * DEFAULT_UNIT_IUS)
 
     def __getitem__(self, index):
         return self.mm[index]
@@ -143,9 +126,9 @@ class BaseUnitTuple(object):
 
     @staticmethod
     def _tuple_to_class(v, cls):
-        if type(v) == cls:
+        if isinstance(v, cls):
             return v
-        elif type(v) == tuple:
+        elif isinstance(v, (tuple, list)):
             if len(v) != 2:
                 raise TypeError("A point parameter must be a 2 value tuple")
         return cls(v[0], v[1])

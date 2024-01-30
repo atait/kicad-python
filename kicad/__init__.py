@@ -1,21 +1,4 @@
-#  Copyright 2015 Miguel Angel Ajo Pelayo <miguelangel@ajo.es>
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#
-__version__ = '0.3.0'
+__version__ = '0.4.2'
 
 #: centralized import with fallback.
 #: Necessary for documentation and environment patching outside of application
@@ -23,6 +6,7 @@ __version__ = '0.3.0'
 #: from kicad import pcbnew_bare as pcbnew
 import os, sys
 from kicad.environment import get_pcbnew_module
+from kicad.exceptions import notify, query_user
 
 # Find SWIG pcbnew
 try:
@@ -31,15 +15,6 @@ except EnvironmentError:
     print('Warning: pcbnew.py is not found or PCBNEW_PATH is corrupted. '
         'Only environment commands will be available')
     pcbnew_bare = None
-
-
-# if `enum` cannot be imported (windoze!) we provide our own copy
-try:
-    import enum
-except ImportError:
-    import sys, os
-    module_dir = os.path.abspath(os.path.dirname(__file__))
-    sys.path.append(os.path.join(module_dir,'3rdparty'))
 
 
 # Low-level "new" function that avoids initializer
@@ -67,7 +42,12 @@ if pcbnew_bare is None:
     class SWIGtype: pass
 else:
     # Determine version and map equivalent objects into consistent names
-    ver = [int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.')]
+    try:
+        ver = tuple(int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
+    except AttributeError:
+        ver = (5, 0)
+    if len(ver) < 2:
+        ver = (5, 0)
     if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
         SWIG_version = 7
     elif ver[0] == 6 or (ver[0] == 5 and ver[1] == 99):
@@ -108,7 +88,7 @@ else:
             Point = pcbnew_bare.wxPoint
             Size = pcbnew_bare.wxSize
             Rect = pcbnew_bare.EDA_RECT
-    else:
+    elif SWIG_version == 5:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE_CONTAINER
             Track = pcbnew_bare.TRACK
@@ -137,6 +117,19 @@ def instanceof(item, klass):
         return class_of_fun(item)
     except AttributeError:
         return False
+
+# Get reload: useful for on-the-fly updates to action plugin scripts without refreshing plugins
+try:
+    from importlib import reload
+except ImportError:
+    try:
+        from imp import reload
+    except ImportError:
+        try:
+            _ = reload
+        except NameError as err:
+            def reload(mod):
+                pass
 
 
 # Expose the basic classes to this package's top level

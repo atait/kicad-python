@@ -1,27 +1,10 @@
-#  Copyright 2020 Alexander Tait <atait@ieee.org>
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable
+from kicad.pcbnew.item import HasConnection, HasLayerStrImpl, Selectable, BoardItem
 from kicad.pcbnew.layer import LayerSet
 
 class KeepoutAllowance(object):
@@ -75,29 +58,31 @@ class KeepoutAllowance(object):
         return type(self).__name__ + str(self)
 
 
-class Zone(HasConnection, HasLayerStrImpl, Selectable):
+class Zone(HasConnection, HasLayerStrImpl, Selectable, BoardItem):
     def __init__(self, layer='F.Cu', board=None):
         self._obj = SWIGtype.Zone(board and board.native_obj)
         self.layer = layer
         raise NotImplementedError('Constructor not supported yet')
 
-    @property
-    def native_obj(self):
-        return self._obj
-
     @staticmethod
     def wrap(instance):
-        """Wraps a C++ api TRACK object, and returns a `Track`."""
         return kicad.new(Zone, instance)
 
     @property
     def clearance(self):
-        return float(self._obj.GetClearance()) / units.DEFAULT_UNIT_IUS
+        if SWIG_version >= 7:
+            native = self._obj.GetLocalClearance()
+        else:
+            native = self._obj.GetClearance()
+        return float(native) / units.DEFAULT_UNIT_IUS
 
     @clearance.setter
     def clearance(self, value):
-        self._obj.SetClearance(int(value * units.DEFAULT_UNIT_IUS))
-        self._obj.SetZoneClearance(int(value * units.DEFAULT_UNIT_IUS))
+        if SWIG_version >= 7:
+            self._obj.SetLocalClearance(int(value * units.DEFAULT_UNIT_IUS))
+        else:
+            self._obj.SetClearance(int(value * units.DEFAULT_UNIT_IUS))
+            self._obj.SetZoneClearance(int(value * units.DEFAULT_UNIT_IUS))
 
     @property
     def min_width(self):
@@ -132,7 +117,8 @@ class Zone(HasConnection, HasLayerStrImpl, Selectable):
     def layerset(self):
         ''' For zones with multiple layers
             Changing this layerset will not propagate back to this zone
-            until you set layerset again. Common pattern:
+            until you set layerset again. Common pattern::
+
                 zone.layerset = zone.layerset.add_layer('F.Cu')
         '''
         from kicad.pcbnew.board import Board

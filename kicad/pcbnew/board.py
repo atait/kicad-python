@@ -1,21 +1,3 @@
-#  Copyright 2014 Piers Titus van der Torren <pierstitus@gmail.com>
-#  Copyright 2015 Miguel Angel Ajo <miguelangel@ajo.es>
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
@@ -61,6 +43,7 @@ class Board(object):
             self._obj = pcbnew.BOARD()
 
         self._modulelist = _ModuleList(self)
+        self._removed_elements = []
 
     @property
     def native_obj(self):
@@ -68,7 +51,7 @@ class Board(object):
 
     @staticmethod
     def wrap(instance):
-        """Wraps a C++/old api BOARD object, and returns a Board."""
+        """Wraps a C++/old api `BOARD` object, and returns a `Board`."""
         return Board(wrap=instance)
 
     def add(self, obj):
@@ -90,6 +73,15 @@ class Board(object):
         found = self._obj.FindFootprintByReference(ref)
         if found:
             return module.Module.wrap(found)
+
+    @property
+    def footprints(self):
+        """Alias footprint to module"""
+        return self.modules
+
+    def footprintByRef(self, ref):
+        """Alias footprint to module"""
+        return self.moduleByRef(ref)
 
     @property
     def vias(self):
@@ -193,8 +185,21 @@ class Board(object):
         self._obj.Add(track.native_obj)
         return track
 
-    def get_layer(self, name):
-        return self._obj.GetLayerID(name)
+    def get_layer_id(self, name):
+        lid = self._obj.GetLayerID(name)
+        if lid == -1:
+            # Try to recover from silkscreen rename
+            if name == 'F.SilkS':
+                lid = self._obj.GetLayerID('F.Silkscreen')
+            elif name == 'F.Silkscreen':
+                lid = self._obj.GetLayerID('F.SilkS')
+            elif name == 'B.SilkS':
+                lid = self._obj.GetLayerID('B.Silkscreen')
+            elif name == 'B.Silkscreen':
+                lid = self._obj.GetLayerID('B.Silkscreen')
+        if lid == -1:
+            raise ValueError('Layer {} not found in this board'.format(name))
+        return lid
 
     def get_layer_name(self, layer_id):
         return self._obj.GetLayerName(layer_id)
@@ -268,8 +273,6 @@ class Board(object):
             so it persists for the life of that object
         '''
         if not permanent:
-            if not hasattr(self, '_removed_elements'):
-                self._removed_elements = []
             self._removed_elements.append(element)
         self._obj.Remove(element._obj)
 
@@ -287,8 +290,10 @@ class Board(object):
         ''' This useful for duck typing in the interactive terminal
             Suppose you want to set some drill radii. Iterating everything would cause attribute errors,
             so it is easier to just select the vias you want, then use this method for convenience.
+
             To get one item that you selected, use
-                xx = next(pcb.selected_items)
+
+            >>> xx = next(pcb.selected_items)
         '''
         for item in self.items:
             try:

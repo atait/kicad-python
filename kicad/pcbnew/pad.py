@@ -1,34 +1,16 @@
-#  Copyright 2018 Hasan Yavuz Ozderya <hy@ozderya.net>
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#
-
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
 from kicad import units
 from kicad import Size
-from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable
-from enum import IntEnum
+from kicad.exceptions import deprecate_member
+from kicad.pcbnew.item import HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem
 
-class DrillShape(IntEnum):
+class DrillShape():
     Circle = pcbnew.PAD_DRILL_SHAPE_CIRCLE
     Oval = pcbnew.PAD_DRILL_SHAPE_OBLONG
 
-class PadShape(IntEnum):
+class PadShape():
     Circle = pcbnew.PAD_SHAPE_CIRCLE
     Oval = pcbnew.PAD_SHAPE_OVAL
     Rectangle = pcbnew.PAD_SHAPE_RECT
@@ -37,20 +19,18 @@ class PadShape(IntEnum):
     Chamfered = pcbnew.PAD_SHAPE_CHAMFERED_RECT
     Custom = pcbnew.PAD_SHAPE_CUSTOM
 
-class PadType(IntEnum):
+class PadType():
     Through = pcbnew.PAD_ATTRIB_PTH
     SMD = pcbnew.PAD_ATTRIB_SMD
     Connector = pcbnew.PAD_ATTRIB_CONN
     NPTH = pcbnew.PAD_ATTRIB_NPTH
 
-class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable):
-    def __init__(self):
-        # TODO: add initialization parameters for `Pad`
-        pass
 
-    @property
-    def native_obj(self):
-        return self._obj
+@deprecate_member('padType', 'pad_type')
+@deprecate_member('drillShape', 'drill_shape')
+class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable, BoardItem):
+    def __init__(self):
+        raise NotImplementedError('Direct instantiation of Pad is not supported')
 
     @staticmethod
     def wrap(instance):
@@ -58,21 +38,21 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable):
         return kicad.new(Pad, instance)
 
     @property
-    def padType(self):
-        return PadType(self._obj.GetAttribute())
+    def pad_type(self):
+        return self._obj.GetAttribute()
 
-    @padType.setter
-    def padType(self, value):
-        """Value should be `PadType`."""
+    @pad_type.setter
+    def pad_type(self, value):
+        """Value should be integer that can be found by referencing PadType.Through"""
         self._obj.SetAttribute(value)
 
     @property
-    def drillShape(self):
-        return DrillShape(self._obj.GetDrillShape())
+    def drill_shape(self):
+        return self._obj.GetDrillShape()
 
-    @drillShape.setter
-    def drillShape(self, value):
-        """Value should be `DrillShape`."""
+    @drill_shape.setter
+    def drill_shape(self, value):
+        """Value should be integer that can be found by referencing DrillShape.Circle"""
         self._obj.SetDrillShape(value)
 
     @property
@@ -85,24 +65,21 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable):
         """Sets the drill size. If value is a single float or int, pad drill
         shape is set to circle, if input is a tuple of (x, y) drill
         shape is set to oval."""
-        if isinstance(value, tuple):
-            self.drillShape = DrillShape.Oval
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-
-            self._obj.SetDrillSize(value.native_obj)
-
-        else: # value is a single number/integer
-            drillShape = DrillShape.Circle
-            self._obj.SetDrillSize(Size(value, value).native_obj())
+        try:
+            size = Size.build_from(value)
+            self.drill_shape = DrillShape.Oval
+        except TypeError:
+            size = Size.build_from((value, value))
+            self.drill_shape = DrillShape.Circle
+        self._obj.SetDrillSize(size.native_obj)
 
     @property
     def shape(self):
-        return PadShape(self._obj.GetShape())
+        return self._obj.GetShape()
 
     @shape.setter
     def shape(self, value):
-        """Value must be of type `PadShape`."""
+        """Value should be integer that can be found by referencing PadShape.Circle"""
         self._obj.SetShape(value)
 
     @property
@@ -111,10 +88,10 @@ class Pad(HasPosition, HasConnection, HasLayerStrImpl, Selectable):
 
     @size.setter
     def size(self, value):
-        if isinstance(value, tuple):
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-            self._obj.SetSize(value.native_obj)
-
-        else: # value is a single number/integer
-            self._obj.SetSize(Size(value, value).native_obj)
+        try:
+            size = Size.build_from(value)
+            # self.drill_shape = DrillShape.Oval
+        except TypeError:
+            size = Size.build_from((value, value))
+            # self.drill_shape = DrillShape.Circle
+        self._obj.SetSize(size.native_obj)

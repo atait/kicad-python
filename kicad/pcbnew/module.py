@@ -1,33 +1,14 @@
-#  Copyright 2014 Piers Titus van der Torren <pierstitus@gmail.com>
-#  Copyright 2015 Miguel Angel Ajo <miguelangel@ajo.es>
-#  Copyright 2017 Hasan Yavuz Ozderya <hy@ozderya.net>
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#
 from kicad import pcbnew_bare as pcbnew
 
 import kicad
+from kicad.exceptions import deprecate_member
 from kicad import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl
-from kicad.pcbnew.layer import Layer
+from kicad.pcbnew.item import HasPosition, HasRotation, HasLayerEnumImpl, Selectable, HasLayerStrImpl, BoardItem, TextEsque
 from kicad.pcbnew.pad import Pad
 
 
-class ModuleLabel(HasPosition, HasRotation, HasLayerStrImpl, Selectable):
-    """wrapper for `TEXTE_MODULE`"""
+class ModuleLabel(HasPosition, HasLayerStrImpl, Selectable, BoardItem, TextEsque):
+    """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
     def __init__(self, mod, text=None, layer=None):
         self._obj = SWIGtype.FpText(mod.native_obj)
         mod.native_obj.Add(self._obj)
@@ -37,42 +18,15 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerStrImpl, Selectable):
             self.layer = layer
 
     @property
-    def text(self):
-        return self._obj.GetText()
-
-    @text.setter
-    def text(self, value):
-        return self._obj.SetText(value)
-
-    @property
     def visible(self):
-        raise ValueError('ModuleLabel.visible is write only.')
+        try:
+            return self._obj.IsVisible()
+        except AttributeError:
+            raise AttributeError('ModuleLabel.visible is write only in KiCad {}'.format(SWIG_version))
 
     @visible.setter
     def visible(self, value):
         return self._obj.SetVisible(value)
-
-    @property
-    def thickness(self):
-        return float(self._obj.GetThickness()) / DEFAULT_UNIT_IUS
-
-    @thickness.setter
-    def thickness(self, value):
-        return self._obj.SetThickness(int(value * DEFAULT_UNIT_IUS))
-
-    @property
-    def size(self):
-        return Size.wrap(self._obj.GetTextSize())
-
-    @size.setter
-    def size(self, value):
-        if isinstance(value, tuple):
-            if not isinstance(value, Size):
-                value = Size(value[0], value[1])
-            self._obj.SetTextSize(value.native_obj)
-
-        else: # value is a single number/integer
-            self._obj.SetTextSize(Size(value, value).native_obj)
 
     @staticmethod
     def wrap(instance):
@@ -80,19 +34,23 @@ class ModuleLabel(HasPosition, HasRotation, HasLayerStrImpl, Selectable):
             return kicad.new(ModuleLabel, instance)
 
 
-class ModuleLine(HasLayerStrImpl, Selectable):
-    """Wrapper for `EDGE_MODULE`"""
-    @property
-    def native_obj(self):
-        return self._obj
-
+class ModuleLine(HasLayerStrImpl, Selectable, BoardItem):
+    """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
     @staticmethod
     def wrap(instance):
         if type(instance) is SWIGtype.FpShape:
             return kicad.new(ModuleLine, instance)
 
 
-class Module(HasPosition, HasRotation, Selectable):
+@deprecate_member('referenceLabel', 'reference_label')
+@deprecate_member('valueLabel', 'value_label')
+@deprecate_member('graphicalItems', 'graphical_items')
+@deprecate_member('libName', 'lib_name')
+@deprecate_member('fpName', 'fp_name')
+class Module(HasPosition, HasRotation, Selectable, BoardItem):
+    _ref_label = None
+    _val_label = None
+
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
             from kicad.pcbnew.board import Board
@@ -108,10 +66,6 @@ class Module(HasPosition, HasRotation, Selectable):
         if board:
             board.add(self)
 
-    @property
-    def native_obj(self):
-        return self._obj
-
     @staticmethod
     def wrap(instance):
         if type(instance) is SWIGtype.Footprint:
@@ -126,11 +80,6 @@ class Module(HasPosition, HasRotation, Selectable):
             return Module.wrap(m)
 
     @property
-    def board(self):
-        from kicad.pcbnew.board import Board
-        return Board.wrap(self._obj.GetBoard())
-
-    @property
     def reference(self):
         return self._obj.GetReference()
 
@@ -139,9 +88,11 @@ class Module(HasPosition, HasRotation, Selectable):
         self._obj.SetReference(value)
 
     @property
-    def referenceLabel(self):
-        # TODO: not critical but always return the same wrapper object
-        return ModuleLabel.wrap(self._obj.Reference())
+    def reference_label(self):
+        native = self._obj.Reference()
+        if self._ref_label is None or self._ref_label.native_obj is not native:
+            self._ref_label = ModuleLabel.wrap(native)
+        return self._ref_label
 
     @property
     def value(self):
@@ -152,12 +103,14 @@ class Module(HasPosition, HasRotation, Selectable):
         self._obj.SetValue(value)
 
     @property
-    def valueLabel(self):
-        # TODO: not critical but always return the same wrapper object
-        return ModuleLabel.wrap(self._obj.Value())
+    def value_label(self):
+        native = self._obj.Value()
+        if self._val_label is None or self._val_label.native_obj is not native:
+            self._val_label = ModuleLabel.wrap(native)
+        return self._val_label
 
     @property
-    def graphicalItems(self):
+    def graphical_items(self):
         """Text and drawings of module iterator."""
         for item in self._obj.GraphicalItems():
             if type(item) == SWIGtype.FpShape:
@@ -167,31 +120,38 @@ class Module(HasPosition, HasRotation, Selectable):
             else:
                 raise Exception("Unknown module item type: %s" % type(item))
 
+    def flip(self):
+        self._obj.Flip(self._obj.GetCenter())
+
     @property
     def layer(self):
-        return Layer(self._obj.GetLayer())
+        if self.board:
+            return self.board.get_layer_name(self._obj.GetLayer())
+        else:
+            return pcbnew_layer.get_std_layer_name(self._obj.GetLayer())
 
     @layer.setter
     def layer(self, value):
-        if value != self.layer:
-            if value in [Layer.Front, Layer.Back]:
-                # this will make sure all components of the module is
-                # switched to correct layer
-                self._obj.Flip(self._obj.GetCenter())
-            else:
-                raise ValueError("You can place a module only on Front or Back layers!")
+        if value == self.layer:
+            return
+        if value not in ['F.Cu', 'B.Cu']:
+            raise ValueError("You can place a module only on 'F.Cu' or 'B.Cu' layers!")
+        # Using flip will make sure all components of the module are
+        # switched to correct layer
+        self.flip()
 
     @property
-    def libName(self):
+    def lib_name(self):
         return self._obj.GetFPID().GetLibNickname().GetChars()
 
     @property
-    def fpName(self):
+    def fp_name(self):
         return self._obj.GetFPID().GetLibItemName().GetChars()
 
     def copy(self, ref, pos=None, board=None):
         """Create a copy of an existing module on the board
             A new reference designator is required, example:
+
                 mod2 = mod1.copy('U2')
                 mod2.reference == 'U2'  # True
         """
@@ -231,3 +191,9 @@ class Module(HasPosition, HasRotation, Selectable):
             for element in self._removed_elements:
                 self._obj.Add(element._obj)
         self._removed_elements = []
+
+
+# In case v6+ naming is used
+Footprint = Module
+FootprintLine = ModuleLine
+FootprintLabel = ModuleLabel

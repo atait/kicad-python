@@ -6,15 +6,21 @@ try:
 except IOError:
     reqs = []
 
+def readme():
+    with open('README.md', 'r') as fx:
+      return fx.read()
+
 setuptools.setup(
-        name='kicad',
-        version='0.3.0',
-        description='KiCad python API',
-        author='Piers Titus van der Torren, KiCad Developers, Hasan Yavuz Ozderya, Alex Tait',
-        author_email='kicad-developers@lists.launchpad.net',
-        url='https://github.com/kicad/kicad-python/',
-        packages=setuptools.find_packages(exclude=['ez_setup']),
-        zip_safe=False,
+        name='kigadgets',
+        version='0.4.2',
+        description='Cross-version python wrapper for KiCAD pcbnew',
+        long_description=readme(),
+        long_description_content_type='text/markdown',
+        author='Piers Titus van der Torren, Miguel Angel Ajo, Hasan Yavuz Ozderya, Alex Tait',
+        author_email='atait@ieee.org',
+        license='GPL v2',
+        url='https://github.com/atait/kicad-python/',
+        packages=setuptools.find_packages(exclude=['tests']),
         install_requires=reqs,
         entry_points={'console_scripts': 'link_kicad_python_to_pcbnew=kicad.environment:cl_main'},
-        test_suite='kicad.test.unit')
+    )
