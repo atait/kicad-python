@@ -1,7 +1,7 @@
 import kigadgets
-from kigadgets import SWIG_version, Point, DEFAULT_UNIT_IUS, instanceof
+from kigadgets import SWIG_version, Point, Size, DEFAULT_UNIT_IUS, instanceof
 from kigadgets.layer import get_board_layer_name, get_board_layer_id
-
+import pcbnew
 
 class _ABC(object):
     def __init__(self):
@@ -273,7 +273,7 @@ class TextEsque(_ABC):
     def justification(self):
         hj = self._obj.GetHorizJustify()
         vj = self._obj.GetVertJustify()
-        for k, v in justification_lookups.items():
+        for k, v in TextEsque.justification_lookups.items():
             if hj == getattr(pcbnew, v):
                 hjs = k
             if vj in getattr(pcbnew, v):
@@ -288,9 +288,9 @@ class TextEsque(_ABC):
             self.justification = value[1]
         else:
             try:
-                token = justification_lookups[value]
+                token = TextEsque.justification_lookups[value]
             except KeyError:
-                raise ValueError('Invalid justification {} of available {}'.format(value, list(justification_lookups.keys())))
+                raise ValueError('Invalid justification {} of available {}'.format(value, list(TextEsque.justification_lookups.keys())))
             enum_val = getattr(pcbnew, token)
             if 'HJUSTIFY' in token:
                 self._obj.SetHorizJustify(enum_val)
