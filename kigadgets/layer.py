@@ -90,6 +90,13 @@ class LayerSet:
         """Returns the list of Layer names in this LayerSet."""
         return [get_board_layer_name(self._board, lay_id) for lay_id in self._obj.Seq()]
 
+    @layers.setter
+    def layers(self, new_lylist):
+        for layer_name in self.layers:
+            self.remove_layer(layer_name)
+        for layer_name in new_lylist:
+            self.add_layer(layer_name)
+
     def add_layer(self, layer_name):
         self._obj.AddLayer(get_board_layer_id(self._board, layer_name))
         return self
