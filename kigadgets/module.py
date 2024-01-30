@@ -111,7 +111,10 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
                 raise Exception("Unknown module item type: %s" % type(item))
 
     def flip(self):
-        self._obj.Flip(self._obj.GetCenter())
+        if SWIG_version >= 7:
+            self._obj.Flip(self._obj.GetCenter(), True)
+        else:
+            self._obj.Flip(self._obj.GetCenter())
 
     @property
     def layer(self):
@@ -187,10 +190,14 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             # self.lib_name,
             self.fp_name
         ))
+
+        child_hashes = []
         for p in self.pads:
-            mine += p.geohash()
+            child_hashes.append(p.geohash())
         for d in self.graphical_items:
-            mine += d.geohash()
+            child_hashes.append(d.geohash())
+        child_hashes.sort()
+        mine += hash(tuple(child_hashes))
         return mine + super().geohash()
 
 
