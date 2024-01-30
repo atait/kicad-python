@@ -137,12 +137,12 @@ class Zone(HasConnection, Selectable, BoardItem):
         self.layerset.layers = new_lylist
 
     def geohash(self):
-        hash((
+        mine = hash((
             self.clearance,
             self.min_width,
             self.is_keepout,
-            str(self.allow),
-            self.layerset.layers
+            (self.allow.tracks, self.allow.pour, self.allow.vias),
+            tuple(sorted(self.layers))
         ))
         return mine + super().geohash()
 
