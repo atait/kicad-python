@@ -27,18 +27,7 @@ From outside, you can load a board file and iterate over modules this way::
                 'position': module.position}
         print "module %(reference)s is at %(position)s" % data
 
-API
------
-
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 5
 
-   API top <API/index>
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   kigadgets API <API/kicad/index>

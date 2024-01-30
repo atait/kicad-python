@@ -33,6 +33,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.graphviz',
 ]
 
 
@@ -112,11 +114,13 @@ autoapi_root = 'API'
 autoapi_dirs = ['../../kicad']
 # autoapi_template_dir = '../templates'  # Not working
 autoapi_member_order = 'bysource'
+autoapi_add_toctree_entry = False
 autoapi_options = [
     'members',
     'undoc-members',
-    'inherited-members'
+    'inherited-members',
     'show-inheritance',
+    'show-inheritance-diagram',
     'show-module-summary',
     # 'private-members',
     # 'special-members',
