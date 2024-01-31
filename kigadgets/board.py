@@ -1,3 +1,6 @@
+from kigadgets.util import register_return
+from Pyro5.api import expose
+
 from kigadgets import pcbnew_bare as pcbnew
 from kigadgets import units, SWIGtype, instanceof
 import tempfile
@@ -8,8 +11,13 @@ from kigadgets.track import Track
 from kigadgets.via import Via
 from kigadgets.zone import Zone
 
+import logging
 
-class _FootprintList(object):
+log = logging.getLogger(__name__)
+
+
+@expose
+class FootprintList(object):
     """Internal class to represent `Board.footprints`"""
     def __init__(self, board):
         self._board = board
@@ -34,26 +42,30 @@ class _FootprintList(object):
         return len(self._board._obj.GetFootprints())
 
 
+@expose
 class Board(object):
     def __init__(self, wrap=None):
         """Board object"""
+        log.debug("Creating board from: %s", wrap)
         if wrap:
             self._obj = wrap
         else:
             self._obj = pcbnew.BOARD()
+        log.debug("Board object created: %s", self._obj)
 
-        self._fplist = _FootprintList(self)
+        self._fplist = FootprintList(self)
         self._removed_elements = []
 
     @property
     def native_obj(self):
         return self._obj
 
-    @staticmethod
-    def wrap(instance):
+    @classmethod
+    def wrap(cls, instance):
         """Wraps a C++/old api `BOARD` object, and returns a `Board`."""
         return Board(wrap=instance)
 
+    @register_return
     def add(self, obj):
         """Adds an object to the Board.
 
@@ -63,10 +75,12 @@ class Board(object):
         return obj
 
     @property
+    @register_return
     def footprints(self):
         """Provides an iterator over the board Footprint objects."""
         return self._fplist
 
+    @register_return
     def footprint_by_ref(self, ref):
         """Returns the footprint that has the reference `ref`. Returns `None` if
         there is no such footprint."""
@@ -75,10 +89,12 @@ class Board(object):
             return Footprint.wrap(found)
 
     @property
+    @register_return
     def modules(self):
         """Alias footprint to module"""
         return self.footprints
 
+    @register_return
     def module_by_ref(self, ref):
         """Alias footprint to module"""
         return self.footprintByRef(ref)
@@ -137,13 +153,15 @@ class Board(object):
         for item in self.drawings:
             yield item
 
-    @staticmethod
-    def from_editor():
+    @classmethod
+    @register_return
+    def from_editor(cls):
         """Provides the board object from the editor."""
         return Board.wrap(pcbnew.GetBoard())
 
-    @staticmethod
-    def load(filename):
+    @classmethod
+    @register_return
+    def load(cls, filename):
         """Loads a board file."""
         return Board.wrap(pcbnew.LoadBoard(filename))
 
@@ -166,8 +184,9 @@ class Board(object):
 
     # TODO: add setter for Board.filename. For now, use brd.save(filename)
     @property
-    def filename(self):
+    def filename(self) -> str:
         """Name of the board file."""
+        log.debug("repr(Board:self._obj): %s", self._obj)
         return self._obj.GetFileName()
 
     def geohash(self):

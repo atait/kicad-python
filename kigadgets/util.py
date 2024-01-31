@@ -6,6 +6,8 @@
             import action_script  # Only runs the first time during this instance of pcbnew, even if file changed
             kireload(action_script)  # Forces reimport, rerunning, and any updates to source
 '''
+from functools import wraps
+
 try:
     from importlib import reload as kireload
 except ImportError:
@@ -65,3 +67,22 @@ def query_user(prompt=None, default=''):
     if sg != wx.ID_OK:
         return None
     return dialog.GetValue()
+
+
+def has_pyro_id(obj_or_class) -> bool:
+    return (
+        hasattr(obj_or_class, "_pyroId") and
+        obj_or_class._pyroId != ""
+    )
+
+def register_return(method):
+    """Decorator to register the return value
+    of a method in the Pyro daemon."""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        result = method(self, *args, **kwargs)
+        if not has_pyro_id(result):
+            self._pyroDaemon.register(result)
+        return result
+
+    return wrapper
