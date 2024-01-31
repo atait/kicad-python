@@ -1,3 +1,6 @@
+from kigadgets.util import register_return
+from Pyro5.api import expose
+
 from kigadgets import pcbnew_bare as pcbnew
 
 from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
@@ -16,6 +19,7 @@ else:
         Blind = pcbnew.VIA_BLIND_BURIED
 
 
+@expose
 class Via(HasPosition, HasConnection, Selectable, BoardItem):
     ''' Careful setting top_layer, then getting top_layer may
         return different values if the new top_layer is below the existing bottom layer

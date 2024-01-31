@@ -8,6 +8,12 @@ import os, sys
 from kigadgets.environment import get_pcbnew_module
 from kigadgets.util import notify, query_user, kireload
 from kigadgets.exceptions import put_import_warning_on_kicad
+import logging
+from pathlib import Path
+
+logging.basicConfig(level=logging.DEBUG, handlers=[logging.FileHandler(Path("~/kigadgets.log").expanduser())])
+
+log = logging.getLogger(__name__)
 
 # Find SWIG pcbnew
 try:

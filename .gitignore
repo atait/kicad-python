@@ -55,3 +55,13 @@ target/
 
 # Record of pcbnew module location
 kigadgets/.path_to_pcbnew_module
+
+# Virtual environments
+venv/
+.venv/
+
+# OSx things
+.DS_Store
+
+# IDEs
+.vscode/

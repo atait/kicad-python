@@ -2,8 +2,12 @@ import cmath
 
 import kigadgets
 from kigadgets import units, SWIGtype
+from typing import Iterable, Optional, Union
+from Pyro5.api import expose
+from kigadgets.util import register_return, register_yielded
 
 
+@expose
 class Point(units.BaseUnitTuple):
 
     def __init__(self, x, y):
