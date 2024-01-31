@@ -69,20 +69,18 @@ def query_user(prompt=None, default=''):
     return dialog.GetValue()
 
 
-def has_pyro_id(obj_or_class) -> bool:
-    return (
-        hasattr(obj_or_class, "_pyroId") and
-        obj_or_class._pyroId != ""
-    )
-
 def register_return(method):
     """Decorator to register the return value
     of a method in the Pyro daemon."""
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+        daemon = self._pyroDaemon
         result = method(self, *args, **kwargs)
-        if not has_pyro_id(result):
-            self._pyroDaemon.register(result)
+        if pyro_id := getattr(result, "_pyroId", None):
+            if daemon.objectsById[pyro_id] is not result:
+                daemon.register(result, force=True)
+        else:
+            daemon.register(result)
         return result
 
     return wrapper
