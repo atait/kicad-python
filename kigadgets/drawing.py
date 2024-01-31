@@ -1,11 +1,17 @@
-from kigadgets import pcbnew_bare as pcbnew
-
 import cmath
 import math
+from typing import Iterable, Optional, Union
 
-from kigadgets import units, Size, SWIGtype, SWIG_version, Point, instanceof
+from Pyro5.api import expose
+
+from kigadgets import Point, Size, SWIG_version, SWIGtype, instanceof
+from kigadgets import pcbnew_bare as pcbnew
+from kigadgets import units
+from kigadgets.item import (BoardItem, HasLayer, HasPosition, HasWidth,
+                            Selectable, TextEsque)
 from kigadgets.layer import get_board_layer_id
-from kigadgets.item import HasLayer, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
+from kigadgets.util import register_return, register_yielded
+
 
 class ShapeType():
     Segment = pcbnew.S_SEGMENT
@@ -48,11 +54,13 @@ def wrap_drawing(instance):
     raise TypeError('Unrecognized shape type on layer {}'.format(layer))
 
 
+@expose
 class Drawing(HasLayer, HasPosition, HasWidth, Selectable, BoardItem):
     ''' Base class of shape drawings, not including text '''
     _wraps_native_cls = SWIGtype.Shape
 
 
+@expose
 class Segment(Drawing):
     def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
         line = SWIGtype.Shape(board and board.native_obj)
@@ -89,6 +97,7 @@ class Segment(Drawing):
         return mine + super().geohash()
 
 
+@expose
 class Circle(Drawing):
     def __init__(self, center, radius, layer='F.SilkS', width=0.15,
                  board=None):
@@ -108,7 +117,8 @@ class Circle(Drawing):
             circle.SetArcStart(start_coord)
 
     @property
-    def center(self):
+    @register_return
+    def center(self) -> Point:
         return Point.wrap(self._obj.GetCenter())
 
     @center.setter
@@ -148,6 +158,7 @@ class Circle(Drawing):
 
 
 # --- Logic for Arc changed a lot in version 6, so there are two classes
+@expose
 class Arc_v5(Drawing):
     def __init__(self, center, radius, start_angle, stop_angle,
                  layer='F.SilkS', width=0.15, board=None):

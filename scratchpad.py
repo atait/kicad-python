@@ -24,21 +24,30 @@ board = Pyro5.api.Proxy(uri)
 #     print("Pyro traceback:")
 #     print("".join(Pyro5.errors.get_pyro_traceback()))
 
-# %%
-try:
-    b: "Board" = board.from_editor()
-    for via in b.vias:
-        print(via)
-    # print(b.filename)
-except Exception:
-    print("Pyro traceback:")
-    print("".join(Pyro5.errors.get_pyro_traceback()))
+# # %%
+# try:
+#     b: "Board" = board.from_editor()
+#     for via in b.vias:
+#         print(via.drill)
+#     # print(b.filename)
+# except Exception:
+#     print("Pyro traceback:")
+#     print("".join(Pyro5.errors.get_pyro_traceback()))
 
 # %%
-uri = "PYRONAME:dummy"
+b: "Board" = board.from_editor()
+for i in range(10):
+    b.add_via((50, 50 + i * 5))
 
-dummy = Pyro5.api.Proxy(uri)
+# # %%
+# len(list(b.vias))
+# # %%
 
-for results in dummy.thingos:
-    print(results.value)
+# b: "Board" = board.from_editor()
+# b.add_via((101, 50))
+
+# %%
+with Pyro5.api.Proxy("PYRONAME:kigadgets.Pcbnew") as pcbnew:
+    pcbnew.refresh()
+
 # %%

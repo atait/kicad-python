@@ -1,20 +1,24 @@
-from kigadgets.util import register_return, register_yielded
+import logging
+import tempfile
+from typing import Iterable, Optional, Union
+
 from Pyro5.api import expose
 
+from kigadgets import SWIGtype, instanceof
 from kigadgets import pcbnew_bare as pcbnew
-from kigadgets import units, SWIGtype, instanceof
-import tempfile
-
-from kigadgets.drawing import wrap_drawing, Segment, Circle, Arc, TextPCB
+from kigadgets import units
+from kigadgets.drawing import Arc, Circle, Segment, TextPCB, wrap_drawing
 from kigadgets.module import Footprint
 from kigadgets.track import Track
+from kigadgets.util import register_return, register_yielded
 from kigadgets.via import Via
 from kigadgets.zone import Zone
 
-import logging
-
 log = logging.getLogger(__name__)
 
+
+COPPER_TYPES = Union[Footprint, Track, Via, Zone]
+DRAWING_TYPES = Union[Arc, Circle, Segment, TextPCB]
 
 @expose
 class FootprintList(object):
@@ -57,16 +61,17 @@ class Board(object):
         self._removed_elements = []
 
     @property
-    def native_obj(self):
+    def native_obj(self) -> "pcbnew.BOARD":
         return self._obj
 
     @classmethod
-    def wrap(cls, instance):
+    @register_return
+    def wrap(cls, instance: "pcbnew.BOARD") -> "Board":
         """Wraps a C++/old api `BOARD` object, and returns a `Board`."""
         return Board(wrap=instance)
 
     @register_return
-    def add(self, obj):
+    def add(self, obj: COPPER_TYPES) -> COPPER_TYPES:
         """Adds an object to the Board.
 
         Tracks, Drawings, Modules, etc...
@@ -76,12 +81,12 @@ class Board(object):
 
     @property
     @register_return
-    def footprints(self):
+    def footprints(self) -> Iterable[Footprint]:
         """Provides an iterator over the board Footprint objects."""
         return self._fplist
 
     @register_return
-    def footprint_by_ref(self, ref):
+    def footprint_by_ref(self, ref) -> Optional[Footprint]:
         """Returns the footprint that has the reference `ref`. Returns `None` if
         there is no such footprint."""
         found = self._obj.FindFootprintByReference(ref)
@@ -90,18 +95,18 @@ class Board(object):
 
     @property
     @register_return
-    def modules(self):
+    def modules(self) -> Iterable[Footprint]:
         """Alias footprint to module"""
         return self.footprints
 
     @register_return
-    def module_by_ref(self, ref):
+    def module_by_ref(self, ref) -> Optional[Footprint]:
         """Alias footprint to module"""
         return self.footprintByRef(ref)
 
     @property
     @register_yielded
-    def vias(self):
+    def vias(self) -> Iterable[Via]:
         """An iterator over via objects"""
         for t in self._obj.GetTracks():
             if type(t) == SWIGtype.Via:
@@ -110,7 +115,8 @@ class Board(object):
                 continue
 
     @property
-    def tracks(self):
+    @register_yielded
+    def tracks(self) -> Iterable[Track]:
         """An iterator over track objects"""
         for t in self._obj.GetTracks():
             if type(t) == SWIGtype.Track:
@@ -119,7 +125,8 @@ class Board(object):
                 continue
 
     @property
-    def zones(self):
+    @register_yielded
+    def zones(self) -> Iterable[Zone]:
         """ An iterator over zone objects
             Implementation note: The iterator breaks if zones are removed during the iteration,
             so it is put in a list first, then yielded from that list.
@@ -135,13 +142,15 @@ class Board(object):
             yield tt
 
     @property
-    def drawings(self):
+    @register_yielded
+    def drawings(self) -> Iterable[DRAWING_TYPES]:
         all_drawings = []
         for drawing in self._obj.GetDrawings():
             yield wrap_drawing(drawing)
 
     @property
-    def items(self):
+    @register_yielded
+    def items(self) -> Iterable[Union[COPPER_TYPES, DRAWING_TYPES]]:
         ''' Everything on the board '''
         for item in self.modules:
             yield item
@@ -175,6 +184,7 @@ class Board(object):
             filename = self._obj.GetFileName()
         self._obj.Save(filename)
 
+    @register_return
     def copy(self):
         native = self._obj.Clone()
         if native is None:  # Clone not implemented in v7
@@ -190,7 +200,7 @@ class Board(object):
         log.debug("repr(Board:self._obj): %s", self._obj)
         return self._obj.GetFileName()
 
-    def geohash(self):
+    def geohash(self) -> int:
         ''' Geometric hash '''
         item_hashes = []
         for item in self.items:
@@ -201,29 +211,32 @@ class Board(object):
         item_hashes.sort()
         return hash(tuple(item_hashes))
 
-    def add_footprint(self, ref, pos=(0, 0)):
+    @register_return
+    def add_footprint(self, ref, pos=(0, 0)) -> Footprint:
         """Create new module on the board"""
         return Footprint(ref, pos, board=self)
 
-    def add_module(self, ref, pos=(0, 0)):
+    @register_return
+    def add_module(self, ref, pos=(0, 0)) -> Footprint:
         """Same as add_footprint"""
         return Footprint(ref, pos, board=self)
 
     @property
-    def default_width(self, width=None):
+    def default_width(self, width=None) -> float:
         b = self._obj
         return (
             float(b.GetDesignSettings().GetCurrentTrackWidth()) /
             units.DEFAULT_UNIT_IUS)
 
-    def add_track_segment(self, start, end, layer='F.Cu', width=None):
+    @register_return
+    def add_track_segment(self, start, end, layer='F.Cu', width=None) -> Track:
         """Create a track segment."""
         track = Track(start, end, layer,
                       width or self.default_width, board=self)
         self._obj.Add(track.native_obj)
         return track
 
-    def get_layer_id(self, name):
+    def get_layer_id(self, name) -> int:
         lid = self._obj.GetLayerID(name)
         if lid == -1:
             # Try to recover from silkscreen rename
@@ -239,10 +252,11 @@ class Board(object):
             raise ValueError('Layer {} not found in this board'.format(name))
         return lid
 
-    def get_layer_name(self, layer_id):
+    def get_layer_name(self, layer_id) -> str:
         return self._obj.GetLayerName(layer_id)
 
-    def add_track(self, coords, layer='F.Cu', width=None):
+    @register_return
+    def add_track(self, coords, layer='F.Cu', width=None) -> Track:
         """Create a track polyline.
 
         Create track segments from each coordinate to the next.
@@ -252,19 +266,20 @@ class Board(object):
                                    layer=layer, width=width)
 
     @property
-    def default_via_size(self):
+    def default_via_size(self) -> float:
         return (float(self._obj.GetDesignSettings().GetCurrentViaSize()) /
                 units.DEFAULT_UNIT_IUS)
 
     @property
-    def default_via_drill(self):
+    def default_via_drill(self) -> float:
         via_drill = self._obj.GetDesignSettings().GetCurrentViaDrill()
         if via_drill > 0:
             return (float(via_drill) / units.DEFAULT_UNIT_IUS)
         else:
             return 0.2
 
-    def add_via(self, coord, size=None, drill=None, layer_pair=None):
+    @register_return
+    def add_via(self, coord, size=None, drill=None, layer_pair=None) -> Via:
         """Create a via on the board.
 
         :param coord: Position of the via.
@@ -278,7 +293,8 @@ class Board(object):
             Via(coord, size or self.default_via_size,
                 drill or self.default_via_drill, layer_pair, board=self))
 
-    def add_line(self, start, end, layer='F.SilkS', width=0.15):
+    @register_return
+    def add_line(self, start, end, layer='F.SilkS', width=0.15) -> Segment:
         """Create a graphic line on the board"""
         return self.add(
             Segment(start, end, layer, width, board=self))
@@ -288,19 +304,22 @@ class Board(object):
         for n in range(len(coords) - 1):
             self.add_line(coords[n], coords[n + 1], layer=layer, width=width)
 
-    def add_circle(self, center, radius, layer='F.SilkS', width=0.15):
+    @register_return
+    def add_circle(self, center, radius, layer='F.SilkS', width=0.15) -> Circle:
         """Create a graphic circle on the board"""
         return self.add(
             Circle(center, radius, layer, width, board=self))
 
+    @register_return
     def add_arc(self, center, radius, start_angle, stop_angle,
-                layer='F.SilkS', width=0.15):
+                layer='F.SilkS', width=0.15) -> Arc:
         """Create a graphic arc on the board"""
         return self.add(
             Arc(center, radius, start_angle, stop_angle,
                         layer, width, board=self))
 
-    def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15):
+    @register_return
+    def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15) -> TextPCB:
         return self.add(
             TextPCB(position, text, layer, size, thickness, board=self))
 
@@ -323,7 +342,8 @@ class Board(object):
         self._obj.ClearSelected()
 
     @property
-    def selected_items(self):
+    @register_yielded
+    def selected_items(self) -> Iterable[Union[COPPER_TYPES, DRAWING_TYPES]]:
         ''' This useful for duck typing in the interactive terminal
             Suppose you want to set some drill radii. Iterating everything would cause attribute errors,
             so it is easier to just select the vias you want, then use this method for convenience.

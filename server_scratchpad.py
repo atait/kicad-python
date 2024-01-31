@@ -1,5 +1,5 @@
 from Pyro5.api import expose, serve
-from kigadgets.util import register_yielded
+from kigadgets.util import register_yielded, register_return
 
 
 import debugpy
@@ -24,6 +24,10 @@ class Dummy(object):
     def thingos(self):
         for i in range(3):
             yield Returned(i)
+
+    @register_return
+    def do_something(self, obj: Returned) -> Returned:
+        return obj
 
 
 serve({Dummy: "dummy"})
