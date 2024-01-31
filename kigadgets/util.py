@@ -7,6 +7,7 @@
             kireload(action_script)  # Forces reimport, rerunning, and any updates to source
 '''
 from functools import wraps
+from Pyro5.errors import DaemonError
 
 try:
     from importlib import reload as kireload
@@ -69,6 +70,16 @@ def query_user(prompt=None, default=''):
     return dialog.GetValue()
 
 
+def _do_register(daemon, result):
+    """Registers the result in the Pyro daemon
+    if it's not already there."""
+    if pyro_id := getattr(result, "_pyroId", None):
+        if daemon.objectsById[pyro_id] is not result:
+            daemon.register(result, force=True)
+    else:
+        daemon.register(result)
+
+
 def register_return(method):
     """Decorator to register the return value
     of a method in the Pyro daemon."""
@@ -76,11 +87,19 @@ def register_return(method):
     def wrapper(self, *args, **kwargs):
         daemon = self._pyroDaemon
         result = method(self, *args, **kwargs)
-        if pyro_id := getattr(result, "_pyroId", None):
-            if daemon.objectsById[pyro_id] is not result:
-                daemon.register(result, force=True)
-        else:
-            daemon.register(result)
+        _do_register(daemon, result)
         return result
 
+    return wrapper
+
+
+def register_yielded(method):
+    """Decorator to register the return value
+    of a method in the Pyro daemon."""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        daemon = self._pyroDaemon
+        for result in method(self, *args, **kwargs):
+            _do_register(daemon, result)
+            yield result
     return wrapper

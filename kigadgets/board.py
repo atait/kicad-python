@@ -1,4 +1,4 @@
-from kigadgets.util import register_return
+from kigadgets.util import register_return, register_yielded
 from Pyro5.api import expose
 
 from kigadgets import pcbnew_bare as pcbnew
@@ -100,6 +100,7 @@ class Board(object):
         return self.footprintByRef(ref)
 
     @property
+    @register_yielded
     def vias(self):
         """An iterator over via objects"""
         for t in self._obj.GetTracks():
