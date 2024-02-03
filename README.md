@@ -4,13 +4,7 @@ Development of a new Python scripting API for KiCad
 based on Piers Titus van der Torren work and comunity
 feedback to create a less C++ tied API.
 
-> [!CAUTION]
-> The atait fork is undergoing a refactor that will result in new package imports.
-> Instances of `from kicad.pcbnew.board import Board` must be replaced by `from kigadgets.board import Board` by version 0.5.0
-
-[v0.4.2 Documentation](https://kigadgets.readthedocs.io/en/latest/index.html)
-
-[v0.4.99 Documentation](https://kigadgets.readthedocs.io/en/4.99-refactor/index.html)
+[Documentation](https://kigadgets.readthedocs.io)
 
 ## Description
 KiCAD and pcbnew expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty (v7 does not exist yet); it is a clunky SWIG/C-style API with custom datatypes for things like lists; its API changes for every KiCAD version; and it exposes too much functionality on equal footing.
@@ -286,7 +280,7 @@ assert pcb1.geohash() == pcb2.geohash()
 
 Utilities specific to automated regression testing are provided by [lytest](https://github.com/atait/lytest). See kigadgets tests for examples.
 
-Note, for security reasons, `geohash` uses a random seed that changes when python is invoked. It is not repeatable between interpreter sessions. That means: 
+Note, for security reasons, `geohash` uses a random seed that changes when python is invoked. It is not repeatable between interpreter sessions. That means:
 - do not store the geohash value for reference; instead store the .kicad_pcb for reference. When loaded, it will get the seed corresponding to this session.
 - `geohash` should not be used for checksums; instead use md5 on the file itself
 
