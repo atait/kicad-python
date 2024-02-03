@@ -30,4 +30,5 @@ From outside, you can load a board file and iterate over modules this way::
 .. toctree::
    :maxdepth: 5
 
-   kigadgets API <API/kicad/index>
+   API top <API/index>
+   Placeholder <otherpage>
