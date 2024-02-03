@@ -34,11 +34,4 @@ API
    :maxdepth: 1
 
    API top <API/index>
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   Placeholder <otherpage>
