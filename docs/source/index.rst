@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the kigadgets documentation!
+kigadgets documentation
 ============================================
 
 kigadgets is designed to let you interact design files or extend
