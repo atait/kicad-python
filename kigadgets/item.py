@@ -34,7 +34,7 @@ class BoardItem(_ABC):
             if not instanceof(instance, cls._wraps_native_cls):
                 raise TypeError(
                     '{} cannot wrap native class {}'
-                    '\n  Allowed: {}'.format(cls.__name__, type(instance).__name__, cls._wraps_native_cls)
+                    '\nAllowed: {}'.format(cls.__name__, type(instance).__name__, cls._wraps_native_cls)
                 )
         return kigadgets.new(cls, instance)
 

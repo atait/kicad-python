@@ -1,3 +1,11 @@
+''' Another mutation example
+
+    `difftest_it` will look for the container's name in src_layouts,
+    to find src_layouts/simple_footprint.kicad_pcb, load it, and pass it as `pcb`
+
+    As ususal, afterwards, a new output is generated in run_layouts and compared
+    against the correspoinding one stored in ref_layouts
+'''
 from lytest import contained_pcbnewBoard, difftest_it
 from kigadgets.drawing import TextPCB
 
