@@ -1,0 +1,5 @@
+!*.gds
+!*.oas
+*.kicad_*
+fp-info-cache
+!*.kicad_pcb
