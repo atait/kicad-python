@@ -6,6 +6,10 @@
 Welcome to KiCad Python API's documentation!
 ============================================
 
+.. note:: You are reading documentation for v4.2 which will be replaced soon
+    `Find documentation for v5.0 here <https://kigadgets.readthedocs.io/en/4.99-refactor>`_
+
+
 KiCad Python API is designed to let you interact design files or extend
 kicad to fit your purposes without the need to write C++ code.
 
