@@ -6,4 +6,4 @@ import lytest
 lytest.utest_buds.default_file_ext = '.kicad_pcb'
 lytest.utest_buds.test_root = os.path.dirname(__file__)
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))

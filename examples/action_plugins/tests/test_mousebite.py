@@ -7,6 +7,8 @@ import subprocess
 import mousebite_kigadget
 import mousebite_kigadget.mousebite_script as mbcore
 
+ap_pkg_dir = mousebite_kigadget.__path__[0]
+
 
 @contained_pcbnewBoard#(infile='mousebite_source.kicad_pcb')
 def mousebite_api(pcb):
@@ -17,18 +19,20 @@ def test_mousebite_api(): difftest_it(mousebite_api)()
 
 @contained_script
 def mousebite_cli():
-    script_file = os.path.join(mousebite_kigadget.__path__[0], 'mousebite_script.py')
-    slayarg = '-s User.Eco2' if False else None
+    script_file = os.path.join(ap_pkg_dir, 'mousebite_script.py')
     src_file = os.path.join(get_src_dir(), 'mousebite_api.kicad_pcb')
     out_file = os.path.join(get_src_dir(), 'mousebite_api-proc.kicad_pcb')
     assert os.path.isfile(script_file)
     assert os.path.isfile(src_file)
 
+    slayarg = '-s User.Eco2' if False else None
+
     script = [sys.executable, script_file, src_file]
+    cwd = os.path.dirname(ap_pkg_dir)
     print(script)
     # if False:
     #     script.insert(2, '--slay=User.Eco2')
-    completed_process = subprocess.run(script, capture_output=True)
+    completed_process = subprocess.run(script, cwd=cwd, capture_output=True)
     if completed_process.returncode != 0:
         print(completed_process.stderr.decode())
         raise RuntimeError('Script failed')
