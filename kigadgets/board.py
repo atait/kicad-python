@@ -81,13 +81,13 @@ class Board(object):
 
     def module_by_ref(self, ref):
         """Alias footprint to module"""
-        return self.footprintByRef(ref)
+        return self.footprint_by_ref(ref)
 
     @property
     def vias(self):
         """An iterator over via objects"""
         for t in self._obj.GetTracks():
-            if type(t) == SWIGtype.Via:
+            if instanceof(t, SWIGtype.Via):
                 yield Via.wrap(t)
             else:
                 continue
@@ -96,7 +96,7 @@ class Board(object):
     def tracks(self):
         """An iterator over track objects"""
         for t in self._obj.GetTracks():
-            if type(t) == SWIGtype.Track:
+            if instanceof(t, SWIGtype.Track):
                 yield Track.wrap(t)
             else:
                 continue
@@ -110,7 +110,7 @@ class Board(object):
         """
         builder = list()
         for t in self._obj.Zones():
-            if type(t) == SWIGtype.Zone:
+            if instanceof(t, SWIGtype.Zone):
                 builder.append(Zone.wrap(t))
             else:
                 continue

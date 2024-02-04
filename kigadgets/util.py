@@ -1,11 +1,19 @@
-''' kireload is the builtin reload, which comes from different places depending on python version.
-    It is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
+''' Utilities for interacting with the pcbnew GUI application
+
+    `reload` is the builtin reload, which comes from different places depending on python version.
+    `kireload` is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
 
         from kigadgets import kireload
         def run(self):
             import action_script  # Only runs the first time during this instance of pcbnew, even if file changed
             kireload(action_script)  # Forces reimport, rerunning, and any updates to source
 '''
+try:
+    import wx
+except ImportError:
+    wx = None
+
+
 try:
     from importlib import reload as kireload
 except ImportError:
@@ -28,16 +36,12 @@ def notify(*args):
             notify('Debug info:', 'x =', x)
     '''
     text = ' '.join(str(arg) for arg in args)
-    try:
-        import wx
-    except ImportError:
-        print(text)
-        return
-    try:
-        dialog = wx.MessageDialog(None, text, 'kigadgets notification', wx.OK)
+    if wx:
+        parent = get_app_window()
+        dialog = wx.MessageDialog(parent, text, 'kigadgets notification', wx.OK)
         sg = dialog.ShowModal()
         return sg
-    except:
+    else:
         print(text)
 
 
@@ -50,18 +54,32 @@ def query_user(prompt=None, default=''):
                 return
             drill = float(retstr)
     '''
+    if not wx:
+        print('Skipping query_user outside of GUI')
+        return None
     if prompt is None:
         prompt = 'Enter a value'
-    try:
-        import wx
-    except ImportError:
-        # Try from the command line. Unused since it might hang
-        # retval = input(prompt + ': ')
-        # return retval
-        raise
     default = str(default)
-    dialog = wx.TextEntryDialog(None, prompt, 'kigadgets query', default, wx.CANCEL | wx.OK)
+    parent = get_app_window()
+    dialog = wx.TextEntryDialog(parent, prompt, 'kigadgets query', default, wx.CANCEL | wx.OK)
     sg = dialog.ShowModal()
     if sg != wx.ID_OK:
         return None
     return dialog.GetValue()
+
+
+def get_app_frame():
+    ''' Get a parent for action plugin dialogs.
+        Returns None if outside of GUI
+    '''
+    if not wx:
+        return None
+    for frame in wx.GetTopLevelWindows():
+        if 'PCB Editor' in frame.GetTitle():
+            return frame
+    else:
+        return None
+
+
+def in_GUI():
+    return get_app_frame() is not None

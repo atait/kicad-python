@@ -102,7 +102,7 @@ class LayerSet:
         return self
 
     def remove_layer(self, layer_name):
-        if layer_name not in self.layer_names:
+        if layer_name not in self.layers:
             raise KeyError('Layer {} not present in {}'.format(layer_name, self.layer_names))
         self._obj.RemoveLayer(get_board_layer_id(self._board, layer_name))
         return self
