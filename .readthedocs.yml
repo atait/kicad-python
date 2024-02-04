@@ -5,8 +5,10 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.10"
+  apt_packages:
+    - graphviz
 sphinx:
   configuration: docs/source/conf.py
 python:
    install:
-   - requirements: docs/requirements.txt
+     - requirements: docs/requirements.txt
