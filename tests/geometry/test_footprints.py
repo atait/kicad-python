@@ -11,9 +11,7 @@ from kigadgets.drawing import TextPCB
 
 @contained_pcbnewBoard
 def simple_footprint(pcb):
-    for fp in pcb.footprints:
-        pass
-    # fp = next(pcb.footprints)
+    fp = pcb.footprints[0]
     assert fp.reference == 'U1'
     assert fp.value == 'LM555xM'
     assert len(list(fp.pads)) == 8

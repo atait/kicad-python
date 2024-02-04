@@ -29,4 +29,4 @@ Once you have a `Board`, all other operations behave exactly the same within the
    :maxdepth: 5
 
    API top <API/index>
-   Placeholder page <otherpage>
+   Why lists, not generators <why_lists>

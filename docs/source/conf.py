@@ -29,6 +29,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'autoapi.extension',
     'sphinx.ext.doctest',
+    'myst_parser',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
@@ -42,9 +43,9 @@ extensions = [
 # templates_path = ['templates']
 
 # The suffix of source filenames.
-source_suffix = ['.rst', '.md']
-source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
 }
 
 # The encoding of source files.
