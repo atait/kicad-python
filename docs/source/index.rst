@@ -32,4 +32,4 @@ API
    :maxdepth: 1
 
    API top <API/index>
-   Placeholder page <otherpage>
+   Why lists, not generators <why_lists>

@@ -38,7 +38,7 @@ class TestGeohash(unittest.TestCase):
 
     def test_difference(self):
         new_pcb = self.pcb.copy()
-        new_pcb.remove(next(new_pcb.tracks))
+        new_pcb.remove(new_pcb.tracks[0])
         assert self.pcb.geohash() != new_pcb.geohash()
 
 

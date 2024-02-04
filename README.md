@@ -32,7 +32,7 @@ which produces
 [F.Cu, B.Cu, B.Cu]
 [0.8, 0.6]
 ```
-This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the generator pattern. 
+This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the list comprehension. 
 Don't be fooled though - `track` and `board` contain no state. They use properties to give an intuition of state, but they are dynamically interacting with the underlying C++ `PCB_TRACK` and `BOARD`. You can always access the low-level objects using `track.native_obj`.
 
 <!-- ## Installation via package manager
@@ -144,7 +144,7 @@ pcbnew.Refresh()
 ### Select similar vias
 This snippet assumes you have selected one via
 ```python
-og_via = next(pcb.selected_items)
+og_via = pcb.selected_items[0]
 for via2 in pcb.vias:
     if via2.diameter != og_via.diameter: continue
     if via2.drill != og_via.drill: continue
@@ -152,8 +152,6 @@ for via2 in pcb.vias:
 og_via.select(False)
 pcbnew.Refresh()
 ```
-The function `next` is used because `pcb.items` is a generator, not a list. Turn it into a list using the `list` function if desired. 
-
 See `via.py` for additional functionality related to micro and blind vias.
 
 ### Change all drill diameters
@@ -176,7 +174,7 @@ pcbnew.Refresh()
 
 ### Select everything schematically connected to this footprint
 ```python
-fp = next(pcb.selected_items)
+fp = pcb.selected_items[0]
 nets = {pad.net_name for pad in fp.pads}
 nets -= {'GND', '+5V'}  # because these are connected to everything
 for mod in pcb.footprints:

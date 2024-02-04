@@ -9,31 +9,6 @@ from kigadgets.via import Via
 from kigadgets.zone import Zone, Keepout, RuleArea
 
 
-class _FootprintList(object):
-    """Internal class to represent `Board.footprints`"""
-    def __init__(self, board):
-        self._board = board
-
-    def __getitem__(self, key):
-        found = self._board._obj.FindFootprintByReference(key)
-        if found:
-            return Footprint.wrap(found)
-        else:
-            raise KeyError("No footprint with reference: %s" % key)
-
-    def __iter__(self):
-        # Note: this behavior is inconsistent with python manuals
-        # suggestion. Manual suggests that a mapping should iterate
-        # over keys ('reference' in our case). See:
-        # https://docs.python.org/2.7/reference/datamodel.html?emulating-container-types#object.__iter__
-        # But in my opinion `_FootprintList` is a list then mapping.
-        for m in self._board._obj.GetFootprints():
-            yield Footprint.wrap(m)
-
-    def __len__(self):
-        return len(self._board._obj.GetFootprints())
-
-
 class Board(object):
     def __init__(self, wrap=None):
         """Board object"""
@@ -41,8 +16,6 @@ class Board(object):
             self._obj = wrap
         else:
             self._obj = pcbnew.BOARD()
-
-        self._fplist = _FootprintList(self)
         self._removed_elements = []
 
     @property
@@ -64,8 +37,8 @@ class Board(object):
 
     @property
     def footprints(self):
-        """Provides an iterator over the board Footprint objects."""
-        return self._fplist
+        """Provides a list of the board Footprint objects."""
+        return [Footprint.wrap(fp) for fp in self._obj.GetFootprints()]
 
     def footprint_by_ref(self, ref):
         """Returns the footprint that has the reference `ref`. Returns `None` if
@@ -85,72 +58,37 @@ class Board(object):
 
     @property
     def vias(self):
-        """An iterator over via objects"""
-        for t in self._obj.GetTracks():
-            if instanceof(t, SWIGtype.Via):
-                yield Via.wrap(t)
-            else:
-                continue
+        """A list of via objects"""
+        return [Via.wrap(t) for t in self._obj.GetTracks() if instanceof(t, SWIGtype.Via)]
 
     @property
     def tracks(self):
-        """An iterator over track objects"""
-        for t in self._obj.GetTracks():
-            if instanceof(t, SWIGtype.Track):
-                yield Track.wrap(t)
-            else:
-                continue
+        """A list of track objects"""
+        return [Track.wrap(t) for t in self._obj.GetTracks() if instanceof(t, SWIGtype.Track)]
 
     @property
     def rule_areas(self):
-        """ An iterator over zone objects
-            Implementation note: The iterator breaks if zones are removed during the iteration,
-            so it is put in a list first, then yielded from that list.
-            This issue was not seen with the other iterators
+        """ A list of both zone and keepout objects
         """
-        builder = list()
-        for t in self._obj.Zones():
-            if instanceof(t, SWIGtype.Zone):
-                builder.append(RuleArea.wrap(t))
-            else:
-                continue
-        for tt in builder:
-            yield tt
+        return [RuleArea.wrap(t) for t in self._obj.Zones() if instanceof(t, SWIGtype.Zone)]
 
     @property
     def zones(self):
-        for area in self.rule_areas:
-            if not area.is_keepout:
-                yield area
+        return [area for area in self.rule_areas if not area.is_keepout]
 
     @property
     def keepouts(self):
-        for area in self.rule_areas:
-            if area.is_keepout:
-                yield area
+        return [area for area in self.rule_areas if area.is_keepout]
 
     @property
     def drawings(self):
-        all_drawings = []
-        for drawing in self._obj.GetDrawings():
-            yield wrap_drawing(drawing)
+        """ list of drawings, including all shapes and text """
+        return [wrap_drawing(dwg) for dwg in self._obj.GetDrawings()]
 
     @property
     def items(self):
-        ''' Everything on the board '''
-        for item in self.modules:
-            yield item
-        for item in self.vias:
-            yield item
-        for item in self.tracks:
-            yield item
-        for item in self.drawings:
-            yield item
-        for item in self.zones:
-            yield item
-        for item in self.keepouts:
-            yield item
-        # return self.modules + self.vias + self.tracks + self.drawings + self.rule_areas
+        """ Everything on the board """
+        return self.modules + self.vias + self.tracks + self.drawings + self.rule_areas
 
     @staticmethod
     def from_editor():
@@ -164,8 +102,8 @@ class Board(object):
 
     def save(self, filename=None):
         """Save the board to a file.
-
-        filename should have .kicad_pcb extention.
+           The filename should have .kicad_pcb extention, but it is not enforced.
+           If filename=None, the board's GetFileName value is used.
         """
         if filename is None:
             filename = self._obj.GetFileName()
@@ -186,7 +124,7 @@ class Board(object):
         return self._obj.GetFileName()
 
     def geohash(self):
-        ''' Geometric hash '''
+        """ Geometric hash """
         item_hashes = []
         for item in self.items:
             try:
@@ -325,14 +263,16 @@ class Board(object):
 
             To get one item that you selected, use
 
-            >>> xx = next(pcb.selected_items)
+            >>> xx = pcb.selected_items[0]
         '''
+        selected = []
         for item in self.items:
             try:
                 if item.is_selected:
-                    yield item
+                    selected.append(item)
             except AttributeError:
                 continue
+        return selected
 
     def fill_zones(self):
         ''' fills all zones in this board '''

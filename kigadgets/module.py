@@ -1,6 +1,6 @@
 from kigadgets import pcbnew_bare as pcbnew
 
-from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
+from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version, instanceof
 from kigadgets.item import HasPosition, HasOrientation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
 from kigadgets.layer import get_board_layer_name
@@ -88,13 +88,14 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     @property
     def graphical_items(self):
         """Text and drawings of module iterator."""
-        for item in self._obj.GraphicalItems():
-            if type(item) == SWIGtype.FpShape:
-                yield FootprintLine.wrap(item)
-            elif type(item) == SWIGtype.FpText:
-                yield FootprintLabel.wrap(item)
+        def wrap_both(item):
+            if instanceof(item, SWIGtype.FpShape):
+                return FootprintLine.wrap(item)
+            elif instanceof(item, SWIGtype.FpText):
+                return FootprintLabel.wrap(item)
             else:
-                raise Exception("Unknown module item type: %s" % type(item))
+                raise Exception("Unknown module item type: {}".format(type(item)))
+        return [wrap_both(item) for item in self._obj.GraphicalItems()]
 
     def flip(self):
         if SWIG_version >= 7:
@@ -148,8 +149,7 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
 
     @property
     def pads(self):
-        for p in self._obj.Pads():
-            yield Pad.wrap(p)
+        return [Pad.wrap(p) for p in self._obj.Pads()]
 
     def remove(self, element, permanent=False):
         ''' Makes it so Ctrl-Z works.
