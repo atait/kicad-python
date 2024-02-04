@@ -314,6 +314,33 @@ class Polygon(Drawing):
         poly_shape = pcbnew.SHAPE_POLY_SET(chain)
         poly_obj.SetPolyShape(poly_shape)
 
+    @classmethod
+    def _from_polyset(cls, shape_poly_set, multiple=False, **pkwds):
+        ''' If multiple=True, returns a list that can be any length (possibly zero).
+            Otherwise, it checks that there is only one Outline and returns one Polygon, no list
+
+            shape_poly_set is a `pcbnew.SHAPE_POLY_SET` native to `pcbnew`,
+            so this constructor is not intended for direct usage
+        '''
+        poly_builder = []
+        for iout in range(shape_poly_set.OutlineCount()):
+            outline = shape_poly_set.Outline(iout)
+            pts = []
+            for ipt in range(outline.PointCount()):
+                native = outline.GetPoint(ipt)
+                pts.append(Point.wrap(native))
+            poly = cls(pts, **pkwds)
+            poly_builder.append(poly)
+
+        if multiple:
+            return poly_builder
+        else:
+            if len(poly_builder) == 0:
+                raise ValueError('Given SHAPE_POLY_SET has no Outlines')
+            elif len(poly_builder) > 1:
+                raise ValueError('SHAPE_POLY_SET contains multiple Outlines. Use Polygon.from_polyset(..., multiple=True)')
+            return poly_builder[0]
+
     @property
     def filled(self):
         return self._obj.IsFilled()

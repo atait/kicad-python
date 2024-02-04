@@ -6,7 +6,7 @@ from kigadgets.drawing import wrap_drawing, Segment, Circle, Arc, TextPCB
 from kigadgets.module import Footprint
 from kigadgets.track import Track
 from kigadgets.via import Via
-from kigadgets.zone import Zone
+from kigadgets.zone import Zone, Keepout, RuleArea
 
 
 class _FootprintList(object):
@@ -102,7 +102,7 @@ class Board(object):
                 continue
 
     @property
-    def zones(self):
+    def rule_areas(self):
         """ An iterator over zone objects
             Implementation note: The iterator breaks if zones are removed during the iteration,
             so it is put in a list first, then yielded from that list.
@@ -111,11 +111,23 @@ class Board(object):
         builder = list()
         for t in self._obj.Zones():
             if instanceof(t, SWIGtype.Zone):
-                builder.append(Zone.wrap(t))
+                builder.append(RuleArea.wrap(t))
             else:
                 continue
         for tt in builder:
             yield tt
+
+    @property
+    def zones(self):
+        for area in self.rule_areas:
+            if not area.is_keepout:
+                yield area
+
+    @property
+    def keepouts(self):
+        for area in self.rule_areas:
+            if area.is_keepout:
+                yield area
 
     @property
     def drawings(self):
@@ -132,10 +144,13 @@ class Board(object):
             yield item
         for item in self.tracks:
             yield item
-        for item in self.zones:
-            yield item
         for item in self.drawings:
             yield item
+        for item in self.zones:
+            yield item
+        for item in self.keepouts:
+            yield item
+        # return self.modules + self.vias + self.tracks + self.drawings + self.rule_areas
 
     @staticmethod
     def from_editor():
