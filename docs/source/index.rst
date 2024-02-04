@@ -1,9 +1,4 @@
-.. KiCad Python API documentation master file, created by
-   sphinx-quickstart on Fri Jan 23 20:40:38 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-kigadgets documentation
+:py:mod:`kigadgets` Documentation
 ============================================
 
 kigadgets is designed to let you interact design files or extend
@@ -28,5 +23,9 @@ Once you have a `Board`, all other operations behave exactly the same within the
 .. toctree::
    :maxdepth: 5
 
-   API top <API/index>
-   Why lists, not generators <why_lists>
+   getting_started/index
+   ap_devs/index
+   design/index
+   API/index
+
+

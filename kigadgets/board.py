@@ -145,7 +145,7 @@ class Board(object):
 
     def add_module(self, ref, pos=(0, 0)):
         """Same as add_footprint"""
-        return Footprint(ref, pos, board=self)
+        return self.add_footprint(ref, pos, board=self)
 
     @property
     def default_width(self, width=None):

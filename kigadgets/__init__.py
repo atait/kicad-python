@@ -132,7 +132,7 @@ put_import_warning_on_kicad()
 
 # Expose the basic classes to this package's top level
 if pcbnew_bare:
-    from .units import DEFAULT_UNIT_IUS
-    from .point import Point
-    from .size import Size
+    from kigadgets.units import DEFAULT_UNIT_IUS
+    from kigadgets.point import Point
+    from kigadgets.size import Size
     # CAD modules must be imported explicitly
