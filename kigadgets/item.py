@@ -38,10 +38,6 @@ class BoardItem(_ABC):
                 )
         return kigadgets.new(cls, instance)
 
-    # def geohash(self):
-    #     mine = 0  # Change this line to everything geometric when overloading
-    #     return mine + super().geohash()
-
 
 class HasPosition(_ABC):
     """Board items that has valid position property should inherit
