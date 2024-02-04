@@ -4,7 +4,7 @@ Development of a new Python scripting API for KiCad
 based on Piers Titus van der Torren work and comunity
 feedback to create a less C++ tied API.
 
-[Documentation](https://kigadgets.readthedocs.io)
+[v4.99 Documentation](https://kigadgets.readthedocs.io/en/4.99-refactor)
 
 ## Description
 KiCAD and pcbnew expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty (v7 does not exist yet); it is a clunky SWIG/C-style API with custom datatypes for things like lists; its API changes for every KiCAD version; and it exposes too much functionality on equal footing.
