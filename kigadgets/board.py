@@ -1,5 +1,5 @@
 from kigadgets import pcbnew_bare as pcbnew
-from kigadgets import units, SWIGtype, instanceof
+from kigadgets import units, SWIGtype, instanceof, SWIG_version
 import tempfile
 
 from kigadgets.drawing import wrap_drawing, Segment, Circle, Arc, TextPCB
@@ -110,8 +110,10 @@ class Board(object):
         self._obj.Save(filename)
 
     def copy(self):
-        native = self._obj.Clone()
-        if native is None:  # Clone not implemented in v7
+        if SWIG_version <= 6:
+            native = self._obj.Clone()
+            return Board.wrap(native)
+        else:
             # Fallback to save/load
             with tempfile.NamedTemporaryFile(suffix='.kicad_pcb') as tfile:
                 self.save(tfile.name)
@@ -132,7 +134,10 @@ class Board(object):
             except AttributeError:
                 continue
         item_hashes.sort()
-        return hash(tuple(item_hashes))
+        res = hash(tuple(item_hashes))
+        if res == 0:
+            print('You won a bitcoin!')
+        return res
 
     def add_footprint(self, ref, pos=(0, 0)):
         """Create new module on the board"""
