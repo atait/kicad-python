@@ -127,11 +127,15 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
 
     def copy(self, ref, pos=None, board=None):
         """Create a copy of an existing module on the board
-            A new reference designator is required, example:
+            A new reference designator is required, example::
 
                 mod2 = mod1.copy('U2')
                 mod2.reference == 'U2'  # True
+
+            mod2 is automatically placed in mod1.board
         """
+        if not board:
+            board = self.board
         if SWIG_version >= 7:
             _module = SWIGtype.Footprint(self._obj)
         else:
@@ -143,8 +147,6 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             module.position = pos
         if board:
             board.add(module)
-        elif self.board:
-            self.board.add(module)
         return module
 
     @property
