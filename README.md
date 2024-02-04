@@ -35,6 +35,30 @@ which produces
 This simple interface is not possible with the C++ SWIG API. The python wrapper is handling things like calling the (sometimes hard to find) function names, sanitizing datatypes, looking up layers, and enabling the list comprehension. 
 Don't be fooled though - `track` and `board` contain no state. They use properties to give an intuition of state, but they are dynamically interacting with the underlying C++ `PCB_TRACK` and `BOARD`. You can always access the low-level objects using `track.native_obj`.
 
+> [!CAUTION]
+> **MacOS Users:**
+> pcbnew.py from KiCAD v7 does not import due to something in the linking process to pcbnew.so. Everything works fine when inside the GUI. Outside the GUI, the workaround is to use the `python` that comes bundled with KiCAD. I recommend aliasing/symlinking it. Bonus points for encapsulating in a conda environment.
+> 
+```bash
+(base) $ kipython_path="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
+(base) $ conda_envbin_path="~/miniconda3/envs/ki/bin/kipython"
+(base) $ ln -s $kipython_path $conda_envbin_path
+```
+> Replacing "miniconda3" with your conda (or mamba) root; replacing "ki" with the name of desired environment.
+> You will need to reinstall all needed packages using kicad's pip like this
+```bash
+(base) $ conda activate ki
+(ki) $ kipython -m pip install kigadgets ...
+```
+> Now you can run tests with
+```bash
+kipython -m pip install tests/requirements.txt
+kipython -m pip install -e .
+kipython -m pytest tests
+```
+> Double caution: installing things with `kipython` will get installed in the GUI's environment as well. The packages will not be encapsulated between particular conda environments.
+> That is potentially bad but can be purged by reinstalling KiCAD.
+
 <!-- ## Installation via package manager
 **IN PROGRESS**
 
@@ -45,7 +69,7 @@ v6+ only
 3. Double click. Apply transaction.
 4. You are done
  -->
- 
+
 ## Installation via PyPI
 
 1. 
