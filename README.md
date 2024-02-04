@@ -3,7 +3,13 @@ Development of a new Python scripting API for KiCad
 based on Piers Titus van der Torren work and comunity
 feedback to create a less C++ tied API.
 
-[Documentation](https://kigadgets.readthedocs.io/en/latest/index.html)
+> [!CAUTION]
+> The atait fork is undergoing a refactor that will result in new package imports.
+> Instances of `from kicad.pcbnew.board import Board` must be replaced by `from kigadgets.board import Board` by version 0.5.0
+
+[v0.4.2 Documentation](https://kigadgets.readthedocs.io/en/latest/index.html)
+
+[v0.4.99 Documentation](https://kigadgets.readthedocs.io/en/4.99-refactor/index.html)
 
 ## Description
 KiCAD and pcbnew expose a python API that allows plugins and other procedural processing of PCB layouts. There are limitations of using this API directly: [its documentation](https://docs.kicad.org/doxygen-python/namespacepcbnew.html) is empty (v7 does not exist yet); it is a clunky SWIG/C-style API with custom datatypes for things like lists; its API changes for every KiCAD version; and it exposes too much functionality on equal footing.
@@ -13,10 +19,6 @@ Even if the perfect built-in KiCAD python API came tomorrow, new plugins written
 This package is a pythonic wrapper around the various `pcbnew` APIs. It implements patterns such as objects, properties, and iterables. It performs more intuitive unit and layer handling. It only exposes functionality most relevant to editing boards, the idea being that native functionality can always be accessed through the wrapped objects if needed.
 
 This package has been fully tested with KiCAD 5, 6, 7 and partially tested with 7.99.
-
-> [!CAUTION]
-> The atait fork is undergoing a refactor that will result in new package imports.
-> Instances of `from kicad.pcbnew.board import Board` must be replaced by `from kigadgets.board import Board` by version 0.5.0
 
 ### An excerpt
 A simple pythonic script might look like this
