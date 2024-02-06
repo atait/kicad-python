@@ -12,7 +12,8 @@
 
         (myenv) $ link_kigadgets_to_pcbnew [paste here]
 '''
-import os, sys
+import os
+import sys
 import argparse
 
 
@@ -99,13 +100,15 @@ import sys
 sys.path.append("{}")
 """
 
+if sys.platform.startswith('win'):
+    _print_file = print
+    _print_contents = print
+else:
+    def _print_file(arg):
+        print('\033[4m\033[91m' + arg + '\033[0m')
 
-def _print_file(arg):
-    print('\033[4m\033[91m' + arg + '\033[0m')
-
-
-def _print_contents(arg):
-    print('\033[92m' + arg + '\033[0m')
+    def _print_contents(arg):
+        print('\033[92m' + arg + '\033[0m')
 
 
 def create_link(pcbnew_module_path, kicad_config_path, dry_run=False):
@@ -113,6 +116,8 @@ def create_link(pcbnew_module_path, kicad_config_path, dry_run=False):
     # Determine what to put in the startup script
     my_package_path = os.path.dirname(__file__)
     my_search_path = os.path.dirname(my_package_path)
+    if sys.platform.startswith('win'):
+        my_search_path = '\\\\'.join(my_search_path.split('\\'))
     startup_contents = startup_script.format(my_search_path)
     # Determine where to put the startup script
     startup_file = os.path.join(kicad_config_path.strip(), 'PyShell_pcbnew_startup.py')
