@@ -27,11 +27,11 @@ class FootprintLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
 
     @visible.setter
     def visible(self, value):
-        return self._obj.SetVisible(value)
+        self._obj.SetVisible(value)
 
 
 class FootprintLine(HasLayer, Selectable, BoardItem):
-    """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
+    """Wrapper for `EDGE_MODULE` (old) or `FP_SHAPE`"""
     _wraps_native_cls = SWIGtype.FpShape
 
 
@@ -95,7 +95,8 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
                 return FootprintLabel.wrap(item)
             else:
                 raise Exception("Unknown module item type: {}".format(type(item)))
-        return [wrap_both(item) for item in self._obj.GraphicalItems()]
+        drawings = self._obj.GraphicalItems()
+        return [wrap_both(item) for item in drawings]
 
     def flip(self):
         if SWIG_version >= 7:

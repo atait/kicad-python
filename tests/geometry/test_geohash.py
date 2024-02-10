@@ -36,11 +36,33 @@ class TestGeohash(unittest.TestCase):
             new_pcb = Board.load(tfile.name)
         assert self.pcb.geohash() == new_pcb.geohash()
 
-    def test_difference(self):
+    @pytest.mark.skip(reason='Unknown. Need to investigate')
+    def test_surface_copy(self):
+        new_pcb = Board()
+        for item in self.pcb.items:
+            new_pcb.add(item)
+        assert new_pcb.geohash() == self.pcb.geohash()
+
+    def test_nitems_difference(self):
         new_pcb = self.pcb.copy()
         new_pcb.remove(new_pcb.tracks[0])
         assert self.pcb.geohash() != new_pcb.geohash()
 
+    def test_value_difference(self):
+        new_pcb = self.pcb.copy()
+        tt = new_pcb.tracks[0]
+        tt.start = tt.start + (0.001, 0)
+        assert self.pcb.geohash() != new_pcb.geohash()
+
+    @pytest.mark.skip(reason='Unknown. Need to investigate')
+    def test_deletion(self):
+        blank_pcb = Board()
+        new_pcb = self.pcb.copy()
+        for item in new_pcb.items:
+            new_pcb.remove(item)
+        assert new_pcb.geohash() == blank_pcb.geohash()
+        new_pcb.restore_removed()
+        assert new_pcb.geohash() == self.pcb.geohash()
 
 def test_track_startend():
     pcb1 = Board()

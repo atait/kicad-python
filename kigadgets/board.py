@@ -252,9 +252,8 @@ class Board(object):
         self._obj.Remove(element._obj)
 
     def restore_removed(self):
-        if hasattr(self, '_removed_elements'):
-            for element in self._removed_elements:
-                self._obj.Add(element._obj)
+        for element in self._removed_elements:
+            self._obj.Add(element._obj)
         self._removed_elements = []
 
     def deselect_all(self):
