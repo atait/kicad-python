@@ -46,7 +46,16 @@ v6+ only
 4. You are done
  -->
 
-## Installation via PyPI
+## Installation via PyPI (auto link)
+```bash
+pip install kigadgets
+link_kicad_to_pcbnew
+```
+The second command without arguments attempts to search paths typically used by KiCad when installing pcbnew.py. Automatic linking is not fully tested on all systems yet. It has been tested with at least one instance each of Mac/Windows/Linux with v6/v7.
+
+> Use the `--dry-run` or `-n` flag to do a dry run.
+
+## Installation via PyPI (manual link)
 
 1. 
 ```
