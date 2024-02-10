@@ -89,6 +89,8 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             else:
                 raise Exception("Unknown module item type: {}".format(type(item)))
         drawings = self._obj.GraphicalItems()
+        if SWIG_version >= 8:
+            wrap_both = wrap_drawing
         return [wrap_both(item) for item in drawings]
 
     def flip(self):
