@@ -86,6 +86,14 @@ class Pad(HasPosition, HasConnection, HasLayer, Selectable, BoardItem):
             # self.drill_shape = DrillShape.Circle
         self._obj.SetSize(size.native_obj)
 
+    @property
+    def name(self):
+        return self._obj.GetName()
+
+    @name.setter
+    def name(self, value):
+        self._obj.SetName(value)
+
     def geohash(self):
         mine = hash((
             self.pad_type,

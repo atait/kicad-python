@@ -133,7 +133,7 @@ def populate_existing_default_paths():
     # Constrain to first existing
     for k, v in _paths.items():
         for path in v:
-            if os.path.exists(path):
+            if path and os.path.exists(path):
                 _paths[k] = path
                 break
         else:
@@ -180,7 +180,7 @@ def populate_optimal_paths():
         else:
             _paths['user'] = pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()
     else:
-        raise ValueError('Default installation of pcbnew.py and kicad:kipython not found. Must find paths manually')
+            raise ValueError('Default installation of pcbnew.py and kicad:kipython not found. Must find paths manually')
 
 
 # --- Define scripts and do linking
