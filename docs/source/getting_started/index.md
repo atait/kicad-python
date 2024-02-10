@@ -16,10 +16,17 @@ v6+ only
 3. Double click. Apply transaction.
 4. You are done
 
-## Installation via PyPI
-
-1. 
+## Installation via PyPI (auto link)
+```bash
+pip install kigadgets
+link_kicad_to_pcbnew
 ```
+Use the `--dry-run` or `-n` flag to do a dry run.
+The second command without arguments attempts to search paths typically used by KiCad when installing pcbnew.py. Automatic linking is not fully tested on all systems yet. It has been tested with at least one instance each of Mac/Windows/Linux with v6/v7.
+
+## Installation via PyPI (manual link)
+1.
+```bash
 pip install kigadgets
 ```
 
@@ -30,6 +37,8 @@ import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPat
 This will print 2 paths. *Copy that entire line.*
 
 > For kicad 5, replace that last command with `pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()` (note the last underscore).
+
+> If these paths have any spaces, you must put double quotes around it
 
 3. Go back to your external command line or Terminal shell, and run this command, replacing \[paste here\] with what you copied
 ```bash
