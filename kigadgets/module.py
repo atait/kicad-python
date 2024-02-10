@@ -4,19 +4,12 @@ from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version, ins
 from kigadgets.item import HasPosition, HasOrientation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
 from kigadgets.layer import get_board_layer_name
+from kigadgets.drawing import wrap_drawing, TextPCB
 
 
-class FootprintLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
-    """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
+class FootprintLabel(TextPCB):
+    """wrapper for `TEXTE_MODULE` (old) or `FP_TEXT`"""
     _wraps_native_cls = SWIGtype.FpText
-
-    def __init__(self, mod, text=None, layer=None):
-        self._obj = SWIGtype.FpText(mod.native_obj)
-        mod.native_obj.Add(self._obj)
-        if text:
-            self.text = text
-        if layer:
-            self.layer = layer
 
     @property
     def visible(self):

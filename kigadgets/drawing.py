@@ -468,7 +468,7 @@ class TextPCB(HasLayer, HasPosition, Selectable, BoardItem, TextEsque):
 
     def __init__(self, position, text=None, layer='F.SilkS',
                  size=1.0, thickness=0.15, board=None):
-        self._obj = SWIGtype.Text(board and board.native_obj)
+        self._obj = self._wraps_native_cls(board and board.native_obj)
         self.position = position
         if text:
             self.text = text
