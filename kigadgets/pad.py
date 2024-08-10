@@ -25,7 +25,7 @@ class PadType():
 
 class Pad(HasPosition, HasConnection, HasLayer, Selectable, BoardItem):
     def __init__(self):
-        raise NotImplementedError('Direct instantiation of Pad is not supported')
+        raise NotImplementedError('Direct instantiation of Pad is not supported. See KicadModTree to make new footprints.')
 
     @property
     def pad_type(self):
