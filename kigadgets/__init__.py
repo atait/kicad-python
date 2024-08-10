@@ -49,7 +49,6 @@ def pcbnew_version(asstr=False):
         ver = (ver[0], 0)
     return ver
 
-
 # Unify v5/6/7 APIs
 if pcbnew_bare is None:
     SWIG_version = None

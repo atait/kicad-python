@@ -1,7 +1,7 @@
 :py:mod:`kigadgets` Documentation
 ============================================
 
-kigadgets is designed to let you interact design files or extend kicad to fit your purposes without the need to write C++ code.
+kigadgets makes KiCad and Python work better together.
 
 .. image:: media/kiga-light-1024.png
   :width: 500
@@ -24,6 +24,9 @@ Once you have a `Board`, all other operations behave exactly the same within the
     [F.Cu, B.Cu, B.Cu]
     >>> print([track.width for track in pcb.tracks if track.is_selected])
     [0.8, 0.6]
+
+
+[Under construction]
 
 
 .. toctree::

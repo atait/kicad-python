@@ -87,7 +87,13 @@ def get_pcbnew_module():
 
 # --- Searching defaults
 
-_paths = dict(kipython=None, pcbnew=None, user=None)
+_paths = None # dict(kipython=None, pcbnew=None, user=None)
+
+def needs_paths(func):
+    def wrapped(*args, **kwargs):
+        if _paths is None:
+            populate_optimal_paths()
+        return func(*args, **kwargs)
 
 def latest(config_path, subpath=None):
     dirs = list(os.listdir(config_path))
@@ -101,8 +107,10 @@ def latest(config_path, subpath=None):
     return out_path
 
 def populate_existing_default_paths():
+    global _paths
+    _paths = dict()
     if sys.platform.startswith("linux"):
-        _paths['kipython'] = None
+        _paths['kipython'] = "/usr/bin/python3"  # It can't be that easy
         _paths['pcbnew'] = [
             "/usr/lib/python3/dist-packages/pcbnew.py",
             "/usr/lib/python3/site-packages/pcbnew.py",
@@ -141,6 +149,8 @@ def populate_existing_default_paths():
             _paths[k] = None
 
 def one_liner(script):
+    if sys.platform.startswith("linux"):
+        return exec(script)
     import subprocess
     if _paths['kipython'] is None:
         raise ValueError('No kipython')
@@ -180,7 +190,7 @@ def populate_optimal_paths():
         else:
             _paths['user'] = pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()
     else:
-            raise ValueError('Default installation of pcbnew.py and kicad:kipython not found. Must find paths manually')
+        raise ValueError('Default installation of pcbnew.py and kicad:kipython not found. Must find paths manually')
 
 
 # --- Define scripts and do linking
