@@ -11,12 +11,14 @@
     3. In an external terminal, with environment of choice activated::
 
         (myenv) $ link_kigadgets_to_pcbnew [paste here]
+
+    kipython refers to the python executable that ships with KiCad installation
 '''
 import os
 import sys
 import argparse
 
-# Tells this package where to find pcbnew module
+# Tells this package where to find pcbnew module, locally stored after initial path finding
 pcbnew_path_store = os.path.join(os.path.dirname(__file__), '.path_to_pcbnew_module')
 
 
@@ -68,9 +70,9 @@ def get_pcbnew_module():
         try:
             pcbnew_bare = __import__('pcbnew')
         except ImportError as err:
-            print('Warning: pcbnew.py was located but could not be imported.'
-                  ' You will be able to use kigadgets within the pcbnew application,'
-                  ' but not as a standalone. Error was:\n')
+            print('kigadgets: Warning: pcbnew.py was located but could not be imported.'
+                  ' You will be able to use kigadgets within the pcbnew GUI application,'
+                  ' but not in this standalone environment. Error was:\n')
             print(err)
             print('\nContinuing with pcbnew = None')
             pcbnew_bare = None
@@ -95,13 +97,13 @@ def needs_paths(func):
             populate_optimal_paths()
         return func(*args, **kwargs)
 
-def latest(config_path, subpath=None):
-    dirs = list(os.listdir(config_path))
+def latest_version_configpath(config_rootpath, subpath=None):
+    dirs = list(os.listdir(config_rootpath))
     if len(dirs) == 0:
         # return None
-        raise ValueError('No contents found in {}'.format(config_path))
+        raise ValueError('No contents found in {}'.format(config_rootpath))
     latest_V = sorted(dirs)[-1]
-    out_path = os.path.join(config_path, latest_V)
+    out_path = os.path.join(config_rootpath, latest_V)
     if subpath:
         out_path = os.path.join(out_path, subpath)
     return out_path
@@ -117,21 +119,22 @@ def populate_existing_default_paths():
         ]
         _paths['user'] = os.path.expanduser("~/.config/kicad")
     elif sys.platform == "darwin":
-        application = "/Applications/KiCad/KiCad.app"
+        application = "/Applications/KiCad/KiCad.app"  # This is not guaranteed. User could have renamed it
         framework = os.path.join(application, "Contents/Frameworks/Python.framework/Versions/Current")
 
         _paths['kipython'] = os.path.join(framework, "bin/python3")
         _paths['pcbnew'] = os.path.join(framework, "lib/python3.9/site-packages/pcbnew.py")
         _paths['user'] = os.path.expanduser("~/Library/Preferences/kicad")
+        # _paths['user'] = os.path.expanduser("~/Documents/KiCad")  # Used in 8.0
     elif sys.platform == "win32":
         root = "C:/Program Files/KiCAD/"
 
-        _paths['kipython'] = latest(root, "bin/python.exe")
-        _paths['pcbnew'] = latest(root, "bin/Lib/site-packages/pcbnew.py")
-        _paths['user'] = latest(os.path.expanduser("~/AppData/Roaming/kicad"))
-        # PCM = latest(os.path.expanduser("~/OneDrive/Documents/KiCad"), "3rdparty")
+        _paths['kipython'] = latest_version_configpath(root, "bin/python.exe")
+        _paths['pcbnew'] = latest_version_configpath(root, "bin/Lib/site-packages/pcbnew.py")
+        _paths['user'] = latest_version_configpath(os.path.expanduser("~/AppData/Roaming/kicad"))
+        # PCM = latest_version_configpath(os.path.expanduser("~/OneDrive/Documents/KiCad"), "3rdparty")
     else:
-        raise RuntimeError('Unrecognized operating system: {}'.format(sys.platform))
+        raise RuntimeError('kigadgets: Unrecognized operating system: {}'.format(sys.platform))
 
     # Expand to lists
     for k, v in _paths.items():
@@ -148,7 +151,7 @@ def populate_existing_default_paths():
             # raise ValueError('Nothing found for {}'.format(k))
             _paths[k] = None
 
-def one_liner(script):
+def kipython_one_liner(script):
     if sys.platform.startswith("linux"):
         return exec(script)
     import subprocess
@@ -157,12 +160,12 @@ def one_liner(script):
     cmd = [_paths['kipython'], '-c', script]
     ret = subprocess.run(cmd, capture_output=True)
     if ret.returncode:
-        raise ValueError('One-liner failed\n' + cmd)
+        raise RuntimeError('kigadgets: One-liner failed\n' + cmd)
     return ret.stdout.decode().strip()
 
 def get_ver():
     assert _paths['kipython'] is not None
-    verstr = one_liner("import pcbnew; print(pcbnew.GetMajorMinorVersion())")
+    verstr = kipython_one_liner("import pcbnew; print(pcbnew.GetMajorMinorVersion())")
     ver = tuple(int(x) for x in verstr.split('.'))
     majver = ver[0]
     if ver[1] == 99:
@@ -258,7 +261,7 @@ def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False):
             with open(startup_file, 'w') as fx:
                 fx.write(startup_contents)
     else:
-        print('Warning: Startup file is not empty:\n', startup_file)
+        print('kigadgets: Warning: Startup file is not empty:\n', startup_file)
         print('You can delete this file with')
         print('\n    rm {}'.format(startup_file))
         print('\n or manually write it with these contents')
@@ -300,7 +303,7 @@ def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False):
         get_pcbnew_path()
     except ImportError as err:
         if err.args[0].startswith('dynamic module does not define'):
-            print('You are likely using Mac or Windows,'
+            print('kigadgets: You are likely using Mac or Windows,'
                   ' which means kicad does not yet support python 3 on your system.'
                   ' You will be able to use kigadgets in the pcbnew application,'
                   ' but not outside of it for batch processing.')

@@ -11,21 +11,16 @@ Outside the GUI, the workaround is to use the `python` that comes bundled with K
 alias kipython="/Applications/KiCad/KiCad.app/Contents/Frameworks/ython.framework/Versions/Current/bin/python3"
 ...
 ```
-
-or symlinking it. Bonus points for encapsulating in a conda environment.
+or symlinking it.
 ```bash
-(base) $ kipython_path="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
-(base) $ conda_envbin_path="~/miniconda3/envs/ki/bin/kipython"
-(base) $ ln -s $kipython_path $conda_envbin_path
+# One time, anywhere
+ln -s "/Applications/KiCad/KiCad.app/Contents/Frameworks/ython.framework/Versions/Current/bin/python3" /usr/local/bin/kipython
 ```
-replacing "miniconda3" with your conda (or mamba) root; replacing "ki" with the name of desired environment.
+You can replace `/usr/local/bin` with anything on your `PATH`.
 
-## Configuring builtin environment
-You will need to reinstall all needed packages using kicad's pip like this
 ```bash
-(base) $ conda activate ki
-(ki) $ kipython -m pip install -e .  # For kigadgets development
-(ki) $ kipython -m pip install <other packages>
+$ kipython -m pip install -e .  # For kigadgets development
+$ kipython -m pip install <other packages>  # Things get installed Application-wide
 ```
 
 | Caution |
