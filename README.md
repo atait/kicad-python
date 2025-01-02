@@ -236,24 +236,24 @@ pcbnew.Refresh()
 ```
 Go ahead and try this out in the pcbnew terminal, although this type of thing is better to stick in a user library (see above). The sky is the limit when it comes to procedural layout!
 
-## Regression testing
+## Regression testing with `geohash`
 KiCAD does not guarantee binary equivalence of .kicad_pcb files. kigadgets `Board` and `BoardItem`s implement `geohash`, which returns a hash value that depends on every item in the PCB. It provides a fast and well-defined way to detect whether two boards are logically equivalent or not.
 
-Geometry hashing enables layout regression testing, git-diff, CI, and behavioral verification. We want to know that `kigadgets` is importing *and also* that it is producing correct behavior. Ok, "correct" is subjective. What we can do is ensure that behavior is logically unchanged when there are other changes: user code, kigadgets code, pcbnew.so, KiCAD version, operating system, .kicad_pcb encoding, dependency updates, and so on.
+Geometry hashing enables layout regression testing, git-diff, CI, and behavioral verification. We want to know that `kigadgets` is importing *and also* that it is producing correct behavior. Ok, "correct" is subjective. What we can do is ensure that behavior is logically unchanged when there are other changes: user code, kigadgets code, pcbnew.so, KiCAD version, operating system, kicad_pcb encoding, dependency updates, and so on.
 
 ```python
 pcb1 = Board()
 pcb1.add_track([(1, 1), (1, 2)])
 pcb2 = Board()
 pcb2.add_track([(1, 2), (1, 1)])
-assert pcb1.geohash() == pcb2.geohash()
+assert pcb1.geohash() == pcb2.geohash()  # Succeeds
 ```
 
 Utilities specific to automated regression testing are provided by [`lytest`](https://github.com/atait/lytest). See kigadgets tests for examples.
 
 Note, for security reasons, `geohash` uses a random seed that changes when python is invoked. It is not repeatable between interpreter sessions. That means:
 - do not store the geohash value for reference; instead store the .kicad_pcb for reference. When loaded, it will get the seed corresponding to this session.
-- `geohash` should not be used for checksums; instead use md5 on the file itself
+- `geohash` should not be used for autenthification checksums; instead use md5 on the file itself
 
 > [!TIP]
 > If you don't view yourself as a coder, you can become one! Have a look at the snippets above - do you understand what they are doing? If so, you can code.
