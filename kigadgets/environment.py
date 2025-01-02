@@ -1,22 +1,13 @@
 ''' Automatic linker to pcbnew GUI and pcbnew python package
-    Use this one time to create the link.
+    Use this one time to create the link by running python -m kigadgets
 
-    1. In pcbnew's terminal window:
-
-        >>> import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
-        /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
-
-    2. Copy the entire output.
-
-    3. In an external terminal, with environment of choice activated::
-
-        (myenv) $ link_kigadgets_to_pcbnew [paste here]
-
+    It will also symlink "kipython" for Mac users
     kipython refers to the python executable that ships with KiCad installation
 '''
 import os
 import sys
 import argparse
+import shutil
 
 # Tells this package where to find pcbnew module, locally stored after initial path finding
 pcbnew_path_store = os.path.join(os.path.dirname(__file__), '.path_to_pcbnew_module')
@@ -27,7 +18,6 @@ def get_pcbnew_path_from_file():
         return None
     with open(pcbnew_path_store) as fx:
         return fx.read().strip()
-
 
 def get_pcbnew_path():
     ''' Look for the real pcbnew.py from
@@ -80,6 +70,8 @@ def get_pcbnew_module(verbose=True):
                     ' but not in this standalone environment. Error was:\n')
                 print(err)
                 print()
+            if sys.platform.startswith('darwin'):
+                mac_on_dlopen_error()
     else:
         # failed to find pcbnew
         if verbose:
@@ -202,21 +194,114 @@ def populate_optimal_paths():
         Runs pcbnew or kipython to ensure they are synchronized with one another.
     '''
     populate_existing_default_paths()
-    if _paths['kipython']:
-        # if _paths['pcbnew'] is None:
-        _paths['pcbnew'] = one_liner("import pcbnew; print(pcbnew.__file__)")
-        _paths['user'] = one_liner(get_cfg_script())
-    elif _paths['pcbnew']:
-        # This fallback won't work on Mac/Windows
+    if _paths['pcbnew'] and not sys.platform.startswith('darwin'):
+        # This fallback might not work on Mac/Windows
         sys.path.insert(0, os.path.dirname(_paths['pcbnew']))
         import pcbnew
         if get_ver() >= 6:
             _paths['user'] = pcbnew.SETTINGS_MANAGER.GetUserSettingsPath()
         else:
             _paths['user'] = pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()
+    elif _paths['kipython']:
+        _paths['pcbnew'] = kipython_one_liner("import pcbnew; print(pcbnew.__file__)")
+        _paths['user'] = kipython_one_liner(get_cfg_script())
     else:
-        raise ValueError('Default installation of pcbnew.py and kicad:kipython not found. Must find paths manually')
+        raise ValueError('Default installation of pcbnew.py and kipython not found. Must find paths manually')
 
+
+# --- Symbolic linking for MacOS
+def mac_on_dlopen_error():
+    ''' If this is called, we have given up on importing pcbnew.py.
+        Almost always this is because non-KiCAD python is being used on Mac.
+    '''
+    if not sys.platform.startswith('darwin'):
+        return False
+    populate_existing_default_paths()
+    if not _paths['kipython']:
+        print('kipython executable not found. Is KiCAD installed in /Applications/KiCad/KiCad.app?')
+        return False
+    # Most likely, they just forgot to call kipython
+    print('To use pcbnew outside of GUI, you need to run this with'
+            '\n  kipython <your script> instead of  python <your script>\n')
+    if not shutil.which("kipython"):
+        print(f'kipython is not yet symlinked to {_paths["kipython"]}. To do this, in any python interpreter, run:')
+        print('    python -m kigadgets\n')
+    return True
+
+def input_preferred_PATH():
+    ''' Prompts the user to select a preferred PATH for symbolic linking of 'kipython'.
+
+        If no existing symlink is found, it lists valid destination paths for creating
+        the 'kipython' symlink and prompts the user to select one. The user can cancel
+        the operation by entering 'q' or press enter to select the default path.
+    '''
+    shell_paths = os.environ['PATH'].split(':')
+    valid_paths = []
+    for pp in shell_paths:
+        if not os.path.isdir(pp): continue
+        if not os.access(pp, os.W_OK): continue
+        if 'brew' in pp: continue
+        ppath = pp.replace(os.path.expanduser('~'), '~', 1)
+        pclean = os.path.join(ppath, 'kipython')
+        if pp == '/usr/local/bin':
+            valid_paths.insert(0, pclean)
+        else:
+            valid_paths.append(pclean)
+
+    print('Valid destination paths for symbolic linking kipython:')
+    for i, pp in enumerate(valid_paths):
+        line = f'  {i}. {pp}'
+        if os.path.exists(pp):
+            line += ' (exists)'
+        if pp == '/usr/local/bin/kipython':
+            line += ' (recommended)'
+        print(line)
+
+    def input_number():
+        select_index = input('Pick a path [q to cancel] [Press enter for 0]: ')
+        if not select_index:
+            select_index = 0
+        if select_index == 'q':
+            return None
+        try:
+            select_index = int(select_index)
+        except ValueError:
+            print('Invalid selection. Try again')
+            return input_number()
+        if select_index < 0 or select_index >= len(valid_paths):
+            print('Invalid selection. Try again')
+            return input_number()
+        return select_index
+
+    select_index = input_number()
+    if select_index is None:
+        return None
+    else:
+        return valid_paths[select_index]
+
+def symlink_kipython_executable(dest_path=None):
+    ''' Creates a symbolic link to the kipython executable in a location that is in the PATH
+    '''
+    if not _paths['kipython']:
+        print('Default bundled python executable is not available. Is KiCAD installed?')
+        return None
+    # print('Bundled python executable exists at', _paths['kipython'])
+    if dest_path is None and shutil.which("kipython"):
+        print('kipython is already on your PATH')
+        return None
+    if dest_path is None:
+        print('kipython is not on your PATH. Let\'s create a symlink, or press q to cancel')
+        dest_path = input_preferred_PATH()
+    if not dest_path:
+        print('No path selected. Exiting')
+        return None
+    try:
+        os.symlink(_paths['kipython'], dest_path)
+        print('Success: ln -s {} {}'.format(_paths['kipython'], dest_path))
+    except OSError as err:
+        print('kigadgets: Error creating symlink:', err)
+        dest_path = None
+    return dest_path
 
 # --- Define scripts and do linking
 
@@ -353,21 +438,19 @@ def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False):
 # --- CLI
 
 help_msg = """
-Create bidirectional link between kigadgets and pcbnew
-To get the arguments correct, copy this and run it in pcbnew application console:
+Create bidirectional link between kigadgets and pcbnew.
 
-    import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
-    # which produces output like
-    /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
+Usage:
+    python -m kigadgets [pcbnew_module_path] [kicad_config_path] [-n]
 
-    2. Copy the entire output.
+Arguments:
+    pcbnew_module_path   Path to the pcbnew.py module
+    kicad_config_path   Path to the KiCad user configuration directory you want to use
+    -n, --dry-run       Do not write any files, just show what would be done
 
-    3. In an external terminal, with environment of choice activated::
-
-        (myenv) $ link_kigadgets_to_pcbnew [paste here]
-
-For kicad 5, replace that last command with `pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()`
-    - Note the last underscore
+Path arguments are usually detected automatically.
+To use explicit arguments or custom install locations, see
+kigadgets.readthedocs.io/en/latest/installation.html#optional-installation-steps
 """
 
 

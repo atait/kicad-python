@@ -73,46 +73,17 @@ v6+ only
 ## Installation via PyPI (auto link)
 ```bash
 pip install kigadgets
-link_kicad_to_pcbnew
-```
-The second command without arguments attempts to search paths typically used by KiCad when installing pcbnew.py. Automatic linking is not fully tested on all systems yet. It has been tested with at least one instance each of Mac/Windows/Linux with v6/v7.
-
-> Use the `--dry-run` or `-n` flag to do a dry run.
-
-## Installation via PyPI (manual link)
-
-1.
-```
-pip install kigadgets
+python -m kigadgets
 ```
 
-2. Open the pcbnew GUI application. Open its terminal ![](docs/source/media/pcbnew_terminal_icon.png) or ![](docs/source/media/pcbnew_terminal_icon2.png) and run this command in kicad 6+
-```python
-import pcbnew; print(pcbnew.__file__, pcbnew.SETTINGS_MANAGER.GetUserSettingsPath())
-```
-This will print 2 paths. *Copy that entire line.*
+> **Mac users:** There is an extra step. The above command will walk you through it. Read more about python on Mac [here](./macos_workaround).
 
-For kicad 5, replace that last command with `pcbnew.SETTINGS_MANAGER_GetUserSettingsPath()` (note the last underscore).
-
-3. Go back to your external command line or Terminal shell, and run this command, replacing \[paste here\] with what you copied
-```bash
-link_kigadgets_to_pcbnew [paste here]
-```
-For example,
-```bash
-link_kigadgets_to_pcbnew /usr/lib/python3/dist-packages/pcbnew.py /home/username/.config/kicad
-```
-
-4. Try it out! Quit and reopen pcbnew application. Open its terminal, then run
+Try it out! Quit and reopen pcbnew application. Open its terminal, then run
 ```python
 pcb.add_circle((100, 100), 20, 'F.Silkscreen'); pcbnew.Refresh()
 ```
 
-### Troubleshooting
-See details in [the documentation](kigadgets.readthedocs.io/en/4.99-refactor/getting_started/troubleshooting.html).
-
-### What is `link_kigadgets_to_pcbnew` doing for you?
-As long as the above procedure works, you do not have to read this part. If curious, see [the documentation](kigadgets.readthedocs.io/en/4.99-refactor/design/linker_underthehood.html).
+The `python -m kigadgets` command links paths needed for headless scripts to find `pcbnew` and for GUI plugins to find python packages external to KiCad, including `kigadgets`. For more detail on what the linker is doing, why, and advanced options, see [here](../design/linker_underthehood).
 
 ## Snippet examples
 These snippets are run in the GUI terminal. They are common automations that aren't worth making dedicated action plugins. There is no preceding context; the linking step above provides `pcb` to the terminal. These all should work in pcbnew 5, 6, or 7 on Mac, Windows, or Linux.

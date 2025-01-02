@@ -8,7 +8,7 @@ except IOError:
 
 def readme():
     with open('README.md', 'r') as fx:
-      return fx.read()
+        return fx.read()
 
 setuptools.setup(
         name='kigadgets',
@@ -22,5 +22,4 @@ setuptools.setup(
         url='https://github.com/atait/kicad-python/',
         packages=setuptools.find_packages(exclude=['tests']),
         install_requires=reqs,
-        entry_points={'console_scripts': 'link_kigadgets_to_pcbnew=kigadgets.environment:cl_main'},
     )
