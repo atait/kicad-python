@@ -209,3 +209,8 @@ Note, for security reasons, `geohash` uses a random seed that changes when pytho
 ## Related Projects
 KiCAD has a rich landscape of user-developed tools, libraries, and plugins. It is worth understanding this landscape in order to use the right tool for the job, whether it turns out to be `kigadgets`, others, or multiple.
 See discussion of the landscape in [the documentation](kigadgets.readthedocs.io/en/4.99-refactor/design/related_projects.html).
+
+## KiCad 9.0 and IPC API
+KiCad 9 will introduce a python API based on inter-process communication (IPC) between an external python executable and an open pcbnew application. There are pros/cons to the IPC approach vs. the child process approach used here. Here, an external process launches a new process that has the `pcbnew` module available. This allows for scripts that work the same within and outside GUI, concurrent/multiprocess scripting, python environment customization, processing over SSH, and so on. `kigadgets` attempts to provide a stable API to `pcbnew` SWIG.
+
+Later versions of `kigadgets` might use the IPC API as a backend but will maintain its frontend API throughout the 8->9->10 transition.

@@ -56,7 +56,9 @@ if pcbnew_bare is None:
 else:
     # Determine version and map equivalent objects into consistent names
     ver = pcbnew_version()
-    if ver[0] == 8 or (ver[0] == 7 and ver[1] == 99):
+    if ver[0] >= 9 or (ver[0] == 8 and ver[1] == 99):
+        SWIG_version = 9
+    elif ver[0] == 8 or (ver[0] == 7 and ver[1] == 99):
         SWIG_version = 8
     elif ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
         SWIG_version = 7
@@ -68,6 +70,8 @@ else:
         print('Version {} not supported by kigadgets. Some functionality might not work'.format(ver))
         SWIG_version = 8
 
+    # if SWIG_version == 9:
+    #     # TODO
     if SWIG_version == 8:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE
