@@ -13,8 +13,8 @@ from kigadgets.exceptions import put_import_warning_on_kicad
 try:
     pcbnew_bare = get_pcbnew_module()
 except EnvironmentError:
-    print('Warning: pcbnew.py is not found or PCBNEW_PATH is corrupted. '
-        'Only environment commands will be available')
+    print('kigadgets: pcbnew.py is not found or PCBNEW_PATH is corrupted. '
+        'Only kigadget.environment commands will be available')
     pcbnew_bare = None
 
 
@@ -65,8 +65,8 @@ else:
     elif ver[0] == 5 or (ver[0] == 4 and ver[1] == 99):
         SWIG_version = 5
     else:
-        print('Version {} not supported by kigadgets. Some functionality might not work'.format(SWIG_version))
-        SWIG_version = 8 if ver[0] > 8 else 5
+        print('Version {} not supported by kigadgets. Some functionality might not work'.format(ver))
+        SWIG_version = 8
 
     if SWIG_version == 8:
         class SWIGtype:
