@@ -1,4 +1,10 @@
 import traceback
+import os
+import sys
+
+ap_dir = os.path.dirname(os.path.abspath(__file__))
+if ap_dir not in sys.path:
+    sys.path.insert(0, ap_dir)
 
 try:
     from onepush.action_onepush import OnePush

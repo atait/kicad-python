@@ -193,7 +193,7 @@ class HasWidth(_ABC):
         mine = hash(self.width)
         return mine + super().geohash()
 
-if SWIG_version >= 8:
+if SWIG_version < 7:
     just_lookups_vcurrent = dict(
         left='GR_TEXT_HJUSTIFY_LEFT',
         center='GR_TEXT_HJUSTIFY_CENTER',
