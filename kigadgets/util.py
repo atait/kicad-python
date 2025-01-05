@@ -68,7 +68,7 @@ def query_user(prompt=None, default=''):
     return dialog.GetValue()
 
 
-def get_app_frame():
+def get_app_window():
     ''' Get a parent for action plugin dialogs.
         Returns None if outside of GUI
     '''
@@ -82,4 +82,4 @@ def get_app_frame():
 
 
 def in_GUI():
-    return get_app_frame() is not None
+    return get_app_window() is not None

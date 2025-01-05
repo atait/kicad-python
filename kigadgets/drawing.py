@@ -4,7 +4,7 @@ import cmath
 import math
 
 from kigadgets import units, Size, SWIGtype, SWIG_version, Point, instanceof
-from kigadgets.layer import get_board_layer_id
+from kigadgets.layer import get_board_layer_id, get_std_layer_name
 from kigadgets.item import HasLayer, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
 
 class ShapeType():

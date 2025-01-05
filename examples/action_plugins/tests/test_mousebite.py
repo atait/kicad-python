@@ -1,3 +1,4 @@
+# Run this using pytest
 import os
 import sys
 from lytest.utest_buds import get_src_dir

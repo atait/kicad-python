@@ -193,14 +193,8 @@ class HasWidth(_ABC):
         mine = hash(self.width)
         return mine + super().geohash()
 
-
-class TextEsque(_ABC):
-    ''' Base class for items with text-like properties
-
-        Note:
-            Text orientation and object rotation/orientation mean different things
-    '''
-    justification_lookups = dict(
+if SWIG_version >= 8:
+    just_lookups_vcurrent = dict(
         left='GR_TEXT_HJUSTIFY_LEFT',
         center='GR_TEXT_HJUSTIFY_CENTER',
         right='GR_TEXT_HJUSTIFY_RIGHT',
@@ -208,6 +202,23 @@ class TextEsque(_ABC):
         middle='GR_TEXT_VJUSTIFY_CENTER',
         top='GR_TEXT_VJUSTIFY_TOP',
     )
+else:
+    just_lookups_vcurrent = dict(
+        left='GR_TEXT_H_ALIGN_LEFT',
+        center='GR_TEXT_H_ALIGN_CENTER',
+        right='GR_TEXT_H_ALIGN_RIGHT',
+        bottom='GR_TEXT_V_ALIGN_BOTTOM',
+        middle='GR_TEXT_V_ALIGN_CENTER',
+        top='GR_TEXT_V_ALIGN_TOP',
+    )
+
+class TextEsque(_ABC):
+    ''' Base class for items with text-like properties
+
+        Note:
+            Text orientation and object rotation/orientation mean different things
+    '''
+    justification_lookups = just_lookups_vcurrent
 
     @property
     def text(self):
@@ -226,6 +237,7 @@ class TextEsque(_ABC):
 
     @thickness.setter
     def thickness(self, value):
+        assert value > 0, "Thickness must be positive"
         if SWIG_version >= 7:
             return self._obj.SetTextThickness(int(value * DEFAULT_UNIT_IUS))
         else:
@@ -274,7 +286,7 @@ class TextEsque(_ABC):
             except KeyError:
                 raise ValueError('Invalid justification {} of available {}'.format(value, list(TextEsque.justification_lookups.keys())))
             enum_val = getattr(pcbnew, token)
-            if 'HJUSTIFY' in token:
+            if '_H' in token:
                 self._obj.SetHorizJustify(enum_val)
             else:
                 self._obj.SetVertJustify(enum_val)
