@@ -31,7 +31,7 @@
     - to reinit that module, use "reload(that_module)"
     The entry point will reload this script, thus reinitializing and running it every time
 '''
-from kigadgets import kireload, notify
+from kigadgets import notify
 import sys
 import time
 import pcbnew
@@ -40,7 +40,7 @@ from kigadgets.board import Board
 
 def default():
     notify(
-        'This is kicad-sandwiches, the one-push macro script. '
+        'This is kigadgets, the one-push macro script. '
         'Edit the script directly at \n\n{}\n\n'
         'Use it to develop your own code without '
         'having to restart pcbnew every time.'.format(__file__)
@@ -50,14 +50,28 @@ def default():
 
 ### the most basic test that paths and links and board loading are working correctly
 def hello_world():
-    notify("One push hello world")
-    board = pcbnew.GetBoard()
-    textobj = pcbnew.TEXTE_PCB(board)
-    textobj.SetPosition(pcbnew.wxPoint(pcbnew.FromMils(0), pcbnew.FromMils(0)))
-    textobj.SetText('One push hello world')
-    textobj.SetLayer(pcbnew.Cmts_User)
-    board.Add(textobj)
-# hello_world()
+    # notify("One push hello world")
+    from kigadgets.drawing import TextPCB
+    pcb = Board.from_editor()
+    full_text = 'One push hello world'
+    pcb_text = TextPCB((0, 0), '')
+    pcb.add(pcb_text)
+    pcb_text.justification = 'left'
+    for i in range(len(full_text)):
+        pcb_text.text = full_text[:i]
+        pcbnew.Refresh()
+        time.sleep(0.1)
+    pcb_text.x += (len(full_text) - 1) * pcb_text.size[0]
+    pcb_text.justification = 'right'
+    for i in range(1, len(full_text)+1):
+        pcb_text.text = full_text[i:]
+        pcb_text.thickness *= .9
+        pcbnew.Refresh()
+        time.sleep(0.1)
+    time.sleep(1)
+    pcb.remove(pcb_text)
+    pcbnew.Refresh()
+hello_world()
 
 n_errors = 10
 def crawl_API(base=None, regex='Get', levels=2):
@@ -134,12 +148,15 @@ def crawl_API(base=None, regex='Get', levels=2):
 
 # Verify autoreloading
 def test_autoreload():
+    pcb = Board.from_editor()
     try:
         notify(pcb.temporary_attribute)
     except AttributeError:
         notify(
 '''
-Add the attribute to kicad.pcbnew.board:Board at this line:
+Add the attribute to kigadgets.board:Board at this line,
+then rerun this script to see if the library has been reloaded.
+(It depends on your version of KiCAD):
 
 class Board(object):
     temporary_attribute = 'hey there'
@@ -150,13 +167,12 @@ class Board(object):
 
 # get a module already present and move it
 def move_footprint():
-    from kigadgets.board import Board
     pcb = Board.from_editor()
     mod = pcb.moduleByRef('D1')
     mod.position = (50, 30)
 # move_footprint()
 
-'''
+''' Other examples:
 # add test track with via
 track1 = [(30, 26), (30, 50), (60, 80)]
 track2 = [(60, 80), (80, 80)]
