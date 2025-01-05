@@ -139,7 +139,7 @@ class Zone(RuleArea, HasConnection):
         self._obj.SetMinThickness(int(value * DEFAULT_UNIT_IUS))
 
     @property
-    def filled_area():
+    def filled_area(self):
         ''' The area of all poured polygons, not the zone outline polygon
             Returns in units of square mm
         '''
