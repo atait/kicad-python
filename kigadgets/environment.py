@@ -90,7 +90,7 @@ def get_pcbnew_module(verbose=True):
 
 # --- Searching defaults
 
-_paths = dict(kipython=None, pcbnew=None, user=None)
+_paths = dict(kipython=None, pcbnew=None, user=None, mac_app=None)
 
 def latest_version_configpath(config_rootpath, subpath=None):
     ''' Returns the latest version of a directory in the config_rootpath
@@ -123,6 +123,7 @@ def get_default_paths():
         default_locations['user'] = os.path.expanduser("~/.config/kicad")
     elif sys.platform.startswith("darwin"):
         application = "/Applications/KiCad/KiCad.app"  # This is not guaranteed. User could have renamed it
+        default_locations['mac_app'] = application
         framework = os.path.join(application, "Contents/Frameworks/Python.framework/Versions/Current")
 
         default_locations['kipython'] = os.path.join(framework, "bin/python3")
@@ -136,8 +137,10 @@ def get_default_paths():
 
         default_locations['kipython'] = latest_version_configpath(root, "bin/python.exe")
         default_locations['pcbnew'] = latest_version_configpath(root, "bin/Lib/site-packages/pcbnew.py")
-        default_locations['user'] = latest_version_configpath(os.path.expanduser("~/AppData/Roaming/kicad"))
-        # PCM = latest_version_configpath(os.path.expanduser("~/OneDrive/Documents/KiCad"), "3rdparty")
+        default_locations['user'] = [
+            latest_version_configpath(os.path.expanduser("~/kicad")),
+            latest_version_configpath(os.path.expanduser("~/AppData/Roaming/kicad")),
+        ]
     else:
         raise RuntimeError('kigadgets: Unsupported operating system: {}'.format(sys.platform))
     # Expand to lists
@@ -194,7 +197,7 @@ def populate_optimal_paths():
         Runs pcbnew or kipython to ensure they are synchronized with one another.
     '''
     populate_existing_default_paths()
-    if _paths['pcbnew'] and not sys.platform.startswith('darwin'):
+    if _paths['pcbnew'] and sys.platform.startswith('linux'):
         # This fallback might not work on Mac/Windows
         sys.path.insert(0, os.path.dirname(_paths['pcbnew']))
         import pcbnew
@@ -212,7 +215,7 @@ def populate_optimal_paths():
 # --- Symbolic linking for MacOS
 def mac_on_dlopen_error():
     ''' If this is called, we have given up on importing pcbnew.py.
-        Almost always this is because non-KiCAD python is being used on Mac.
+        Almost always this is because non-KiCAD python is being used on Mac or Windows
     '''
     if not sys.platform.startswith('darwin'):
         return False
@@ -224,7 +227,7 @@ def mac_on_dlopen_error():
     print('To use pcbnew outside of GUI, you need to run this with'
             '\n  kipython <your script> instead of  python <your script>\n')
     if not shutil.which("kipython"):
-        print(f'kipython is not yet symlinked to {_paths["kipython"]}. To do this, in any python interpreter, run:')
+        print(f'kipython is not yet symlinked to {_paths["kipython"]}. To do this, in any command line, run:')
         print('    python -m kigadgets\n')
     return True
 
@@ -285,6 +288,10 @@ def symlink_kipython_executable(dest_path=None):
     if not _paths['kipython']:
         print('Default bundled python executable is not available. Is KiCAD installed?')
         return None
+    if sys.platform.startswith('win'):
+        print('Your bundled kipython executable was found at {}'.format(_paths['kipython']))
+        print('Use that version of python. Recommend creating a symbolic link to the bundled python')
+        return None
     # print('Bundled python executable exists at', _paths['kipython'])
     if dest_path is None and shutil.which("kipython"):
         print('kipython is already on your PATH')
@@ -330,13 +337,13 @@ else:
     def _print_contents(arg):
         print('\033[92m' + arg + '\033[0m')
 
-def write_PyShell_startup_script(kicad_config_path, dry_run=False):
+def write_PyShell_startup_script(kicad_config_path, dry_run=False, cleanup=False):
     # Determine what to put in the startup script
-    my_package_path = os.path.dirname(__file__)
-    my_search_path = os.path.dirname(my_package_path)
+    kigadgets_package_path = os.path.dirname(__file__)
+    kigadgets_search_path = os.path.dirname(kigadgets_package_path)
     if sys.platform.startswith('win'):
-        my_search_path = '\\\\'.join(my_search_path.split('\\'))
-    startup_contents = startup_script.format(my_search_path)
+        kigadgets_search_path = '\\\\'.join(kigadgets_search_path.split('\\'))
+    startup_contents = startup_script.format(kigadgets_search_path)
     # Determine where to put the startup script
     startup_file = os.path.join(kicad_config_path.strip(), 'PyShell_pcbnew_startup.py')
 
@@ -361,33 +368,41 @@ def write_PyShell_startup_script(kicad_config_path, dry_run=False):
     _print_file(startup_file)
     if write_is_safe:
         if not dry_run:
-            with open(startup_file, 'w') as fx:
-                fx.write(startup_contents)
+            if cleanup:
+                os.remove(startup_file)
+            else:
+                with open(startup_file, 'w') as fx:
+                    fx.write(startup_contents)
     else:
         print('kigadgets: Warning: Startup file is not empty:\n', startup_file)
         print('You can delete this file with')
         print('\n    rm {}'.format(startup_file))
         print('\n or manually write it with these contents')
-    _print_contents(startup_contents)
+    if not cleanup:
+        _print_contents(startup_contents)
 
-def write_plugin_importer_script(kicad_config_path, dry_run=False):
+def write_plugin_importer_script(kicad_config_path, dry_run=False, cleanup=False):
     ''' Mac: this has no effect because you have to install kigadgets using kipython
     '''
     # Write the plugin importer
-    my_package_path = os.path.dirname(__file__)
-    my_search_path = os.path.dirname(my_package_path)
+    kigadgets_package_path = os.path.dirname(__file__)
+    kigadgets_search_path = os.path.dirname(kigadgets_package_path)
     if sys.platform.startswith('win'):
-        my_search_path = '\\\\'.join(my_search_path.split('\\'))
+        kigadgets_search_path = '\\\\'.join(kigadgets_search_path.split('\\'))
     plugin_dir = os.path.join(kicad_config_path.strip(), 'scripting', 'plugins')
     os.makedirs(plugin_dir, exist_ok=True)
     plugin_file = os.path.join(plugin_dir, 'expose_kigadgets_plugin.py')
-    plugin_contents = plugin_script.format(my_search_path)
+    plugin_contents = plugin_script.format(kigadgets_search_path)
     _print_file(plugin_file)
 
     if not dry_run:
-        with open(plugin_file, 'w') as fx:
-            fx.write(plugin_contents)
-    _print_contents(plugin_contents)
+        if cleanup:
+            os.remove(plugin_file)
+        else:
+            with open(plugin_file, 'w') as fx:
+                fx.write(plugin_contents)
+    if not cleanup:
+        _print_contents(plugin_contents)
 
     # Cleanup old script if it exists
     old_plugin_file = os.path.join(plugin_dir, 'initialize_kicad_python_plugin.py')
@@ -399,9 +414,9 @@ def write_plugin_importer_script(kicad_config_path, dry_run=False):
             if os.path.isfile(old_plugin_file + 'c'):
                 os.remove(old_plugin_file + 'c')
 
-def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False):
+def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False, cleanup=False):
     ''' Create the link between kigadgets and pcbnew
-        All of this works with pcbnew=None
+        All of this works with pcbnew=None (i.e. not discoverable yet)
     '''
     if pcbnew_module_path is None or kicad_config_path is None:
         populate_optimal_paths()
@@ -417,21 +432,28 @@ def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False):
 
     # Write the scripts
     writing = 'Would write' if dry_run else 'Writing'
+    if cleanup:
+        writing = 'Would remove' if dry_run else 'Removing'
     print('\n1. {} console startup script: for GUI snippet scripting'.format(writing))
-    write_PyShell_startup_script(kicad_config_path, dry_run)
+    write_PyShell_startup_script(kicad_config_path, dry_run, cleanup=cleanup)
     print('2. {} plugin importer: for action plugin development'.format(writing))
-    write_plugin_importer_script(kicad_config_path, dry_run)
+    write_plugin_importer_script(kicad_config_path, dry_run, cleanup=cleanup)
 
     # Store the location of pcbnew module
     print('3. {} pcbnew path: for batch processing outside KiCAD'.format(writing))
     _print_file(pcbnew_path_store)
+
     if not dry_run:
-        with open(pcbnew_path_store, 'w') as fx:
-            fx.write(pcbnew_module_path.strip())
-    _print_contents(pcbnew_module_path)
+        if cleanup:
+            os.remove(pcbnew_path_store)
+        else:
+            with open(pcbnew_path_store, 'w') as fx:
+                fx.write(pcbnew_module_path.strip())
+    if not cleanup:
+        _print_contents(pcbnew_module_path)
 
     # Try it
-    if dry_run: return
+    if dry_run or cleanup: return
     print('Successfully linked kigadgets with pcbnew')
 
 
@@ -458,6 +480,7 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpForm
 parser.add_argument('pcbnew_module_path', type=str, nargs='?', default=None)
 parser.add_argument('kicad_config_path', type=str, nargs='?', default=None)
 parser.add_argument('-n', '--dry-run', action='store_true')
+parser.add_argument('-c', '--cleanup', action='store_true')
 
 def cl_main():
     from kigadgets import __version__, pcbnew_version
@@ -466,4 +489,4 @@ def cl_main():
     verz = vkga + '\n' + vpcb
     parser.add_argument("-v", "--version", action="version", version=verz)
     args = parser.parse_args()
-    create_link(args.pcbnew_module_path, args.kicad_config_path, dry_run=args.dry_run)
+    create_link(args.pcbnew_module_path, args.kicad_config_path, dry_run=args.dry_run, cleanup=args.cleanup)
