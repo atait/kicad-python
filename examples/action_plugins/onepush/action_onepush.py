@@ -14,9 +14,12 @@ class OnePush(pcbnew.ActionPlugin):
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__),
             "icons/photon-32.png")
+        self.has_run = False
 
     def Run(self):
         # The entry function of the plugin that is executed on user action
         import onepush_script
-        kireload(onepush_script)
+        if self.has_run:
+            kireload(onepush_script)
+        self.has_run = True
 
