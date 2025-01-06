@@ -1,4 +1,13 @@
+import os
 from lytest import contained_pcbnewBoard, difftest_it
+from lytest.kdb_xor import run_xor_pcbnew
+from lytest.utest_buds import get_ref_dir
+
+def test_lytest_xor_works():
+    ''' If this fails, the testing framework itself is broken. '''
+    file1 = 'simple_footprint.kicad_pcb'
+    file1 = os.path.join(get_ref_dir(), file1)
+    run_xor_pcbnew(file1, file1, tolerance=.001, verbose=False, hash_geom=True)
 
 @contained_pcbnewBoard
 def simple_track(pcb):
