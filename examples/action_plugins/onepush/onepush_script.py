@@ -19,7 +19,7 @@
         - keyboard > shortcuts
         - pick Application shortcuts from the menu
         - hit plus button, scroll to "Other..." at the bottom of the dropdown menu
-        - find "kicad.app" within the KiCAD folder
+        - find "kicad.app" within the KiCad folder
         - enter the menu item name (One Push) and key combo (for me, Cmd+Enter)
         - repeat for the "pcbnew.app" in case you run that as standalone
 
@@ -156,7 +156,7 @@ def test_autoreload():
 '''
 Add the attribute to kigadgets.board:Board at this line,
 then rerun this script to see if the library has been reloaded.
-(It depends on your version of KiCAD):
+(It depends on your version of KiCad):
 
 class Board(object):
     temporary_attribute = 'hey there'

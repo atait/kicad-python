@@ -13,7 +13,7 @@ sys.version_info(major=3, minor=10, ...)
 ```
 Then, in your external terminal, create a conda environment with that same python version. Run the shell commands again, and do the rest of your batch processing within this conda environment. Note, sometimes python 3.8 so-files will work with 3.10, but matching these versions is the best way to guarantee compatibility.
 
-\[**Upgrading KiCAD**\] User configuration directories are different for versions 6 and 7. You may not want to keep multiple copies of script code. One approach is to keep all 3rd party code in `~/.config/kicad/scripting` (Linux), and then symbolic link that into the specific version directory.
+\[**Upgrading KiCad**\] User configuration directories are different for versions 6 and 7. You may not want to keep multiple copies of script code. One approach is to keep all 3rd party code in `~/.config/kicad/scripting` (Linux), and then symbolic link that into the specific version directory.
 ```bash
 ln -s ~/.config/kicad/scripting ~/.config/kicad/7.0/scripting
 ```

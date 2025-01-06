@@ -29,7 +29,7 @@ For `import pcbnew` to work from outside the GUI, you must first `import kigadge
 
 
 ## Manual linking
-Regualar developers should not have to do this since kigadgets 5.0 unless you are using multiple and/or custom installations of KiCAD
+Regualar developers should not have to do this since kigadgets 5.0 unless you are using multiple and/or custom installations of KiCad
 
 1. Open the pcbnew GUI application. Open its terminal and run this command
 ```python

@@ -76,9 +76,9 @@ def get_pcbnew_module(verbose=True):
         # failed to find pcbnew
         if verbose:
             print(
-                'kigadgets: KiCAD\'s pcbnew.py not found. pcbnew.py is required to use kigadgets.'
-                ' If KiCAD is installed in a non-default location,'
-                ' It gets installed when you install the KiCAD application, but not necessarily on your python path.'
+                'kigadgets: KiCad\'s pcbnew.py not found. pcbnew.py is required to use kigadgets.'
+                ' If KiCad is installed in a non-default location,'
+                ' It gets installed when you install the KiCad application, but not necessarily on your python path.'
                 ' Link it to kigadgets by running the command'
                 '\n   python -m kigadgets'
                 '\nMore information on linking at https://kigadgets.readthedocs.io'
@@ -114,7 +114,7 @@ def latest_version_configpath(config_rootpath, subpath=None):
     return out_path
 
 def get_default_paths():
-    ''' This function will not execute anything from pcbnew or KiCAD.
+    ''' This function will not execute anything from pcbnew or KiCad.
         populate_optimal_paths() will do that
     '''
     default_locations = dict()
@@ -137,7 +137,7 @@ def get_default_paths():
             os.path.expanduser("~/Library/Preferences/kicad"),
         ]
     elif sys.platform.startswith("win"):
-        root = "C:/Program Files/KiCAD/"
+        root = "C:/Program Files/KiCad/"
 
         default_locations['kipython'] = latest_version_configpath(root, "bin/python.exe")
         default_locations['pcbnew'] = latest_version_configpath(root, "bin/Lib/site-packages/pcbnew.py")
@@ -219,13 +219,13 @@ def populate_optimal_paths():
 # --- Symbolic linking for MacOS
 def macwin_on_dlopen_error():
     ''' If this is called, we have given up on importing pcbnew.py.
-        Almost always this is because non-KiCAD python is being used on Mac or Windows
+        Almost always this is because non-KiCad python is being used on Mac or Windows
     '''
     if sys.platform.startswith('linux'):
         return False
     populate_existing_default_paths()
     if not _paths['kipython']:
-        print('kipython executable not found. Is KiCAD installed in /Applications/KiCad/KiCad.app?')
+        print('kipython executable not found. Is KiCad installed in /Applications/KiCad/KiCad.app?')
         return False
     # Most likely, they just forgot to call kipython
     print('To use pcbnew outside of GUI, you need to run this with'
@@ -296,7 +296,7 @@ def symlink_kipython_executable(dest_path=None):
     ''' Creates a symbolic link to the kipython executable in a location that is in the PATH
     '''
     if not _paths['kipython']:
-        print('Default bundled python executable is not available. Is KiCAD installed?')
+        print('Default bundled python executable is not available. Is KiCad installed?')
         return None
     if sys.platform.startswith('win'):
         print('Your bundled kipython executable was found at {}'.format(_paths['kipython']))
@@ -450,7 +450,7 @@ def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False, 
     write_plugin_importer_script(kicad_config_path, dry_run, cleanup=cleanup)
 
     # Store the location of pcbnew module
-    print('3. {} pcbnew path: for batch processing outside KiCAD'.format(writing))
+    print('3. {} pcbnew path: for batch processing outside KiCad'.format(writing))
     _print_file(pcbnew_path_store)
 
     if not dry_run:
@@ -500,3 +500,11 @@ def cl_main():
     parser.add_argument("-v", "--version", action="version", version=verz)
     args = parser.parse_args()
     create_link(args.pcbnew_module_path, args.kicad_config_path, dry_run=args.dry_run, cleanup=args.cleanup)
+
+def cl_geohash():
+    ''' Print geohash for a board - WIP '''
+    import sys
+    filename = sys.argv[1] if len(sys.argv) > 1 else 'my_board.kicad_pcb'
+    from kigadgets import Board, pcbnew_bare as pcbnew
+    pcb = Board.load(filename)
+    print('Geohash:', pcb.geohash())
