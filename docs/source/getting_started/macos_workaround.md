@@ -1,8 +1,8 @@
 # MacOS/v7 Bug Workaround
 
-`pcbnew.py` from KiCAD v7 does not import on MacOS because its Mach-O file uses @executable_path instead of relative linker paths. Everything works fine when inside the GUI, but not outside in headless mode. The workaround for now is to use KiCad's bundled `python3` executable and then give it a short name: `kipython`.
+`pcbnew.py` from KiCad v7 does not import on MacOS because its Mach-O file uses @executable_path instead of relative linker paths. Everything works fine when inside the GUI, but not outside in headless mode. The workaround for now is to use KiCad's bundled `python3` executable and then give it a short name: `kipython`.
 
-## KiCAD's builtin python
+## KiCad's builtin python
 ### Symlinking (one time)
 Run the usual setup `python -m kigadgets`, it will detect if you need this workaround and take care of it.
 
@@ -46,7 +46,7 @@ The best way is with `--user` flag with bundled `pip`
 ```bash
 $ kipython -m pip install --user numpy tensorflow
 ```
-That's it. It won't corrupt your system or your KiCAD.
+That's it. It won't corrupt your system or your KiCad.
 
 I know many install instructions include `--user` for the sake of good practice. Here, it is actually very important to use the `--user` flag. It will install somewhere safe like "~/Library/.../site-packages".
 

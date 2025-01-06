@@ -13,7 +13,7 @@ def readme():
 setuptools.setup(
         name='kigadgets',
         version='0.4.99',
-        description='Cross-version python wrapper for KiCAD pcbnew',
+        description='Cross-version python wrapper for KiCad pcbnew',
         long_description=readme(),
         long_description_content_type='text/markdown',
         author='Piers Titus van der Torren, Miguel Angel Ajo, Hasan Yavuz Ozderya, Alex Tait',
