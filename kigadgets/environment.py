@@ -70,8 +70,8 @@ def get_pcbnew_module(verbose=True):
                     ' but not in this standalone environment. Error was:\n')
                 print(err)
                 print()
-            if sys.platform.startswith('darwin'):
-                mac_on_dlopen_error()
+            if not sys.platform.startswith('linux'):
+                macwin_on_dlopen_error()
     else:
         # failed to find pcbnew
         if verbose:
@@ -99,14 +99,18 @@ def latest_version_configpath(config_rootpath, subpath=None):
             |_ 8.0
         will return "kicad/8.0"
     '''
-    dirs = list(os.listdir(config_rootpath))
+    try:
+        config_rootpath = os.path.normpath(config_rootpath)
+        dirs = list(os.listdir(config_rootpath))
+    except FileNotFoundError:
+        return None
     if len(dirs) == 0:
-        # return None
+        return None
         raise ValueError('No contents found in {}'.format(config_rootpath))
     latest_V = sorted(dirs)[-1]
     out_path = os.path.join(config_rootpath, latest_V)
     if subpath:
-        out_path = os.path.join(out_path, subpath)
+        out_path = os.path.join(out_path, os.path.normpath(subpath))
     return out_path
 
 def get_default_paths():
@@ -213,11 +217,11 @@ def populate_optimal_paths():
 
 
 # --- Symbolic linking for MacOS
-def mac_on_dlopen_error():
+def macwin_on_dlopen_error():
     ''' If this is called, we have given up on importing pcbnew.py.
         Almost always this is because non-KiCAD python is being used on Mac or Windows
     '''
-    if not sys.platform.startswith('darwin'):
+    if sys.platform.startswith('linux'):
         return False
     populate_existing_default_paths()
     if not _paths['kipython']:
@@ -226,9 +230,15 @@ def mac_on_dlopen_error():
     # Most likely, they just forgot to call kipython
     print('To use pcbnew outside of GUI, you need to run this with'
             '\n  kipython <your script> instead of  python <your script>\n')
-    if not shutil.which("kipython"):
-        print(f'kipython is not yet symlinked to {_paths["kipython"]}. To do this, in any command line, run:')
-        print('    python -m kigadgets\n')
+    if sys.platform.startswith('win'):
+        print(f'You should symlink or alias "kipython" to {_paths["kipython"]}. To do this,\n')
+        alias = " Function kipython [~ & '{}' $args ]~".format(_paths["kipython"])
+        alias = alias.replace('[~', '{').replace(']~', '}')
+        print('   ', alias)
+    else:
+        if not shutil.which("kipython"):
+            print(f'kipython is not yet symlinked to {_paths["kipython"]}. To do this, in any command line, run:')
+            print('    python -m kigadgets\n')
     return True
 
 def input_preferred_PATH():
