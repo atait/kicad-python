@@ -57,7 +57,7 @@ def zone_create(pcb):
     pcb.add(zz)
     pcb.fill_zones()
 
-@pytest.mark.skip(reason='Board.add is not working for Zone for some reason')
+@pytest.mark.skip(reason='Board.add is not working for Zone in some versions')
 def test_zone_create(): difftest_it(zone_create)()
 
 
