@@ -3,9 +3,13 @@ from kigadgets import SWIG_version, Point, Size, DEFAULT_UNIT_IUS, instanceof
 from kigadgets.layer import get_board_layer_name, get_board_layer_id
 import pcbnew
 
+
 class GeoHashable(object):
     def __init__(self):
-        raise NotImplementedError('{} has no __init__. It is an abstract and/or wrapper-only class'.format(type(self)))
+        raise NotImplementedError(
+            f"{type(self)} has no __init__. "
+            "It is an abstract and/or wrapper-only class"
+        )
 
     def geohash(self):
         return hash(type(self).__name__)  # The leaf class, not "_ABC"
@@ -30,12 +34,11 @@ class BoardItem(GeoHashable):
 
     @classmethod
     def wrap(cls, instance):
-        if cls._wraps_native_cls is not None:
-            if not instanceof(instance, cls._wraps_native_cls):
-                raise TypeError(
-                    '{} cannot wrap native class {}'
-                    '\nAllowed: {}'.format(cls.__name__, type(instance).__name__, cls._wraps_native_cls)
-                )
+        if cls._wraps_native_cls and not instanceof(instance, cls._wraps_native_cls):
+            raise TypeError(
+                f"{cls.__name__} cannot wrap native class {type(instance).__name__}.\n"
+                f"Allowed: {cls._wraps_native_cls}"
+            )
         return kigadgets.new(cls, instance)
 
 
@@ -87,7 +90,7 @@ class HasOrientation(GeoHashable):
         if SWIG_version >= 7:
             self._obj.SetOrientationDegrees(value)
         else:
-            self._obj.SetOrientation(value * 10.)
+            self._obj.SetOrientation(value * 10.0)
 
     def geohash(self):
         mine = hash(self.orientation)
@@ -95,8 +98,8 @@ class HasOrientation(GeoHashable):
 
 
 class HasLayer(GeoHashable):
-    """ Layer handling based on strings like `'F.Cu'`, `'B.Silkscreen'`, `'User.12'`, etc.
-        If the layer is not present, it will be caught at runtime, rather than disallowed.
+    """Layer handling based on strings like `'F.Cu'`, `'B.Silkscreen'`, `'User.12'`, etc.
+    If the layer is not present, it will be caught at runtime, rather than disallowed.
     """
     @property
     def layer(self):
@@ -133,7 +136,7 @@ class HasConnection(GeoHashable):
 
     @net_name.setter
     def net_name(self, value):
-        """ Takes a name and attempts to look it up based on the containing board """
+        """Takes a name and attempts to look it up based on the containing board"""
         if not self._obj:
             raise TypeError("Cannot set net_name without a containing Board.")
         try:
@@ -154,15 +157,16 @@ class HasConnection(GeoHashable):
         mine = hash(self.net_name)
         return mine + super().geohash()
 
+
 class Selectable(GeoHashable):
-    """ This influences the main window. Make sure to pcbnew.Refresh() to see it """
+    """This influences the main window. Make sure to pcbnew.Refresh() to see it"""
     @property
     def is_selected(self):
         return bool(self._obj.IsSelected())
 
     def select(self, value=True):
-        """ Selecting changes the appearance and also plays a role in determining
-            what will be the subject of a subsequent command (delete, move to layer, etc.)
+        """Selecting changes the appearance and also plays a role in determining
+        what will be the subject of a subsequent command (delete, move to layer, etc.)
         """
         if value:
             self._obj.SetSelected()
@@ -173,7 +177,7 @@ class Selectable(GeoHashable):
         self.select(False)
 
     def brighten(self, value=True):
-        """ Brightening gives a bright green appearance """
+        """Brightening gives a bright green appearance"""
         if value:
             self._obj.SetBrightened()
         else:
@@ -193,31 +197,34 @@ class HasWidth(GeoHashable):
         mine = hash(self.width)
         return mine + super().geohash()
 
+
 if SWIG_version < 7:
     just_lookups_vcurrent = dict(
-        left='GR_TEXT_HJUSTIFY_LEFT',
-        center='GR_TEXT_HJUSTIFY_CENTER',
-        right='GR_TEXT_HJUSTIFY_RIGHT',
-        bottom='GR_TEXT_VJUSTIFY_BOTTOM',
-        middle='GR_TEXT_VJUSTIFY_CENTER',
-        top='GR_TEXT_VJUSTIFY_TOP',
+        left="GR_TEXT_HJUSTIFY_LEFT",
+        center="GR_TEXT_HJUSTIFY_CENTER",
+        right="GR_TEXT_HJUSTIFY_RIGHT",
+        bottom="GR_TEXT_VJUSTIFY_BOTTOM",
+        middle="GR_TEXT_VJUSTIFY_CENTER",
+        top="GR_TEXT_VJUSTIFY_TOP",
     )
 else:
     just_lookups_vcurrent = dict(
-        left='GR_TEXT_H_ALIGN_LEFT',
-        center='GR_TEXT_H_ALIGN_CENTER',
-        right='GR_TEXT_H_ALIGN_RIGHT',
-        bottom='GR_TEXT_V_ALIGN_BOTTOM',
-        middle='GR_TEXT_V_ALIGN_CENTER',
-        top='GR_TEXT_V_ALIGN_TOP',
+        left="GR_TEXT_H_ALIGN_LEFT",
+        center="GR_TEXT_H_ALIGN_CENTER",
+        right="GR_TEXT_H_ALIGN_RIGHT",
+        bottom="GR_TEXT_V_ALIGN_BOTTOM",
+        middle="GR_TEXT_V_ALIGN_CENTER",
+        top="GR_TEXT_V_ALIGN_TOP",
     )
 
-class TextEsque(GeoHashable):
-    ''' Base class for items with text-like properties
 
-        Note:
-            Text orientation and object rotation/orientation mean different things
-    '''
+class TextEsque(GeoHashable):
+    """Base class for items with text-like properties
+
+    Note:
+        Text orientation and object rotation/orientation mean different things
+    """
+
     justification_lookups = just_lookups_vcurrent
 
     @property
@@ -284,9 +291,10 @@ class TextEsque(GeoHashable):
             try:
                 token = TextEsque.justification_lookups[value]
             except KeyError:
-                raise ValueError('Invalid justification {} of available {}'.format(value, list(TextEsque.justification_lookups.keys())))
+                valids = list(TextEsque.justification_lookups.keys())
+                raise ValueError(f"Invalid justification {value} of available {valids}")
             enum_val = getattr(pcbnew, token)
-            if '_H' in token:
+            if "_H" in token:
                 self._obj.SetHorizJustify(enum_val)
             else:
                 self._obj.SetVertJustify(enum_val)

@@ -69,8 +69,7 @@ class Board(object):
 
     @property
     def rule_areas(self):
-        """ A list of both zone and keepout objects
-        """
+        """A list of both zone and keepout objects"""
         return [RuleArea.wrap(t) for t in self._obj.Zones() if instanceof(t, SWIGtype.Zone)]
 
     @property
@@ -83,12 +82,12 @@ class Board(object):
 
     @property
     def drawings(self):
-        """ list of drawings, including all shapes and text """
+        """List of drawings, including all shapes and text"""
         return [wrap_drawing(dwg) for dwg in self._obj.GetDrawings()]
 
     @property
     def items(self):
-        """ Everything on the board """
+        """Everything on the board"""
         return self.modules + self.vias + self.tracks + self.drawings + self.rule_areas
 
     @staticmethod
@@ -103,8 +102,8 @@ class Board(object):
 
     def save(self, filename=None):
         """Save the board to a file.
-           The filename should have .kicad_pcb extention, but it is not enforced.
-           If filename=None, the board's GetFileName value is used.
+        The filename should have .kicad_pcb extention, but it is not enforced.
+        If filename=None, the board's GetFileName value is used.
         """
         if filename is None:
             filename = self._obj.GetFileName()
@@ -117,7 +116,7 @@ class Board(object):
         else:
             # Fallback to save/load
             with tempfile.TemporaryDirectory() as temp_dir:
-                temp_pcbfile = os.path.join(temp_dir, 'kigadgets_copying.kicad_pcb')
+                temp_pcbfile = os.path.join(temp_dir, "kigadgets_copying.kicad_pcb")
                 self.save(temp_pcbfile)
                 return Board.load(temp_pcbfile)
 
@@ -128,7 +127,7 @@ class Board(object):
         return self._obj.GetFileName()
 
     def geohash(self):
-        """ Geometric hash """
+        """Geometric hash"""
         item_hashes = []
         for item in self.items:
             try:
@@ -138,7 +137,7 @@ class Board(object):
         item_hashes.sort()
         res = hash(tuple(item_hashes))
         if res == 0:
-            print('You won a bitcoin!')
+            print("You won a bitcoin!")
         return res
 
     def add_footprint(self, ref, pos=(0, 0)):
@@ -151,15 +150,14 @@ class Board(object):
 
     @property
     def default_width(self, width=None):
-        b = self._obj
-        return (
-            float(b.GetDesignSettings().GetCurrentTrackWidth()) /
-            units.DEFAULT_UNIT_IUS)
+        pcb_settings = self._obj.GetDesignSettings()
+        width_ius = float(pcb_settings.GetCurrentTrackWidth())
+        width_mm = width_ius / units.DEFAULT_UNIT_IUS
+        return width_mm
 
-    def add_track_segment(self, start, end, layer='F.Cu', width=None):
+    def add_track_segment(self, start, end, layer="F.Cu", width=None):
         """Create a track segment."""
-        track = Track(start, end, layer,
-                      width or self.default_width, board=self)
+        track = Track(start, end, layer, width or self.default_width, board=self)
         self._obj.Add(track.native_obj)
         return track
 
@@ -167,40 +165,41 @@ class Board(object):
         lid = self._obj.GetLayerID(name)
         if lid == -1:
             # Try to recover from silkscreen rename
-            if name == 'F.SilkS':
-                lid = self._obj.GetLayerID('F.Silkscreen')
-            elif name == 'F.Silkscreen':
-                lid = self._obj.GetLayerID('F.SilkS')
-            elif name == 'B.SilkS':
-                lid = self._obj.GetLayerID('B.Silkscreen')
-            elif name == 'B.Silkscreen':
-                lid = self._obj.GetLayerID('B.Silkscreen')
+            if name == "F.SilkS":
+                lid = self._obj.GetLayerID("F.Silkscreen")
+            elif name == "F.Silkscreen":
+                lid = self._obj.GetLayerID("F.SilkS")
+            elif name == "B.SilkS":
+                lid = self._obj.GetLayerID("B.Silkscreen")
+            elif name == "B.Silkscreen":
+                lid = self._obj.GetLayerID("B.Silkscreen")
         if lid == -1:
-            raise ValueError('Layer {} not found in this board'.format(name))
+            raise ValueError(f"Layer {name} not found in this board")
         return lid
 
     def get_layer_name(self, layer_id):
         return self._obj.GetLayerName(layer_id)
 
-    def add_track(self, coords, layer='F.Cu', width=None):
+    def add_track(self, coords, layer="F.Cu", width=None):
         """Create a track polyline.
 
         Create track segments from each coordinate to the next.
         """
         for n in range(len(coords) - 1):
-            self.add_track_segment(coords[n], coords[n + 1],
-                                   layer=layer, width=width)
+            self.add_track_segment(coords[n], coords[n + 1], layer=layer, width=width)
 
     @property
     def default_via_size(self):
-        return (float(self._obj.GetDesignSettings().GetCurrentViaSize()) /
-                units.DEFAULT_UNIT_IUS)
+        pcb_settings = self._obj.GetDesignSettings()
+        size_ius = float(pcb_settings.GetCurrentViaSize())
+        size_mm = size_ius / units.DEFAULT_UNIT_IUS
+        return size_mm
 
     @property
     def default_via_drill(self):
         via_drill = self._obj.GetDesignSettings().GetCurrentViaDrill()
         if via_drill > 0:
-            return (float(via_drill) / units.DEFAULT_UNIT_IUS)
+            return float(via_drill) / units.DEFAULT_UNIT_IUS
         else:
             return 0.2
 
@@ -215,40 +214,40 @@ class Board(object):
         :returns: the created Via
         """
         return self.add(
-            Via(coord, size or self.default_via_size,
-                drill or self.default_via_drill, layer_pair, board=self))
+            Via(
+                coord,
+                size or self.default_via_size,
+                drill or self.default_via_drill,
+                layer_pair,
+                board=self,
+            )
+        )
 
-    def add_line(self, start, end, layer='F.SilkS', width=0.15):
+    def add_line(self, start, end, layer="F.SilkS", width=0.15):
         """Create a graphic line on the board"""
-        return self.add(
-            Segment(start, end, layer, width, board=self))
+        return self.add(Segment(start, end, layer, width, board=self))
 
-    def add_polyline(self, coords, layer='F.SilkS', width=0.15):
+    def add_polyline(self, coords, layer="F.SilkS", width=0.15):
         """Create a graphic polyline on the board"""
         for n in range(len(coords) - 1):
             self.add_line(coords[n], coords[n + 1], layer=layer, width=width)
 
-    def add_circle(self, center, radius, layer='F.SilkS', width=0.15):
+    def add_circle(self, center, radius, layer="F.SilkS", width=0.15):
         """Create a graphic circle on the board"""
-        return self.add(
-            Circle(center, radius, layer, width, board=self))
+        return self.add(Circle(center, radius, layer, width, board=self))
 
-    def add_arc(self, center, radius, start_angle, stop_angle,
-                layer='F.SilkS', width=0.15):
+    def add_arc(self, center, radius, start_angle, stop_angle, layer="F.SilkS", width=0.15):
         """Create a graphic arc on the board"""
-        return self.add(
-            Arc(center, radius, start_angle, stop_angle,
-                        layer, width, board=self))
+        return self.add(Arc(center, radius, start_angle, stop_angle, layer, width, board=self))
 
-    def add_text(self, position, text, layer='F.SilkS', size=1.0, thickness=0.15):
-        return self.add(
-            TextPCB(position, text, layer, size, thickness, board=self))
+    def add_text(self, position, text, layer="F.SilkS", size=1.0, thickness=0.15):
+        return self.add(TextPCB(position, text, layer, size, thickness, board=self))
 
     def remove(self, element, permanent=False):
-        ''' Makes it so Ctrl-Z works.
-            Keeps a reference to the element in the python pcb object,
-            so it persists for the life of that object
-        '''
+        """Makes it so Ctrl-Z works.
+        Keeps a reference to the element in the python pcb object,
+        so it persists for the life of that object
+        """
         if not permanent:
             self._removed_elements.append(element)
         self._obj.Remove(element._obj)
@@ -263,14 +262,14 @@ class Board(object):
 
     @property
     def selected_items(self):
-        ''' This useful for duck typing in the interactive terminal
-            Suppose you want to set some drill radii. Iterating everything would cause attribute errors,
-            so it is easier to just select the vias you want, then use this method for convenience.
+        """This useful for duck typing in the interactive terminal
+        Suppose you want to set some drill radii. Iterating everything would cause attribute errors,
+        so it is easier to just select the vias you want, then use this method for convenience.
 
-            To get one item that you selected, use
+        To get one item that you selected, use
 
-            >>> xx = pcb.selected_items[0]
-        '''
+        >>> xx = pcb.selected_items[0]
+        """
         selected = []
         for item in self.items:
             try:
@@ -281,6 +280,6 @@ class Board(object):
         return selected
 
     def fill_zones(self):
-        ''' fills all zones in this board '''
+        """fills all zones in this board"""
         filler = pcbnew.ZONE_FILLER(self._obj)
         filler.Fill(self._obj.Zones())

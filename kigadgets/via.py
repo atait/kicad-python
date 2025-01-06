@@ -5,21 +5,21 @@ from kigadgets.item import HasPosition, HasConnection, Selectable, BoardItem
 from kigadgets.layer import get_board_layer_id, get_board_layer_name
 
 if SWIG_version >= 6:
-    class ViaType():
+    class ViaType:
         Through = pcbnew.VIATYPE_THROUGH
         Micro = pcbnew.VIATYPE_MICROVIA
         Blind = pcbnew.VIATYPE_BLIND_BURIED
 else:
-    class ViaType():
+    class ViaType:
         Through = pcbnew.VIA_THROUGH
         Micro = pcbnew.VIA_MICROVIA
         Blind = pcbnew.VIA_BLIND_BURIED
 
 
 class Via(HasPosition, HasConnection, Selectable, BoardItem):
-    ''' Careful setting top_layer, then getting top_layer may
-        return different values if the new top_layer is below the existing bottom layer
-    '''
+    """Careful setting top_layer, then getting top_layer may
+    return different values if the new top_layer is below the existing bottom layer
+    """
     _wraps_native_cls = SWIGtype.Via
 
     def __init__(self, center, size=None, drill=None, layer_pair=None, board=None):
@@ -33,8 +33,8 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         self.drill = drill
 
         if layer_pair is None:
-            layer_pair = ['F.Cu', 'B.Cu']
-        self.is_through = 'F.Cu' in layer_pair and 'B.Cu' in layer_pair
+            layer_pair = ["F.Cu", "B.Cu"]
+        self.is_through = "F.Cu" in layer_pair and "B.Cu" in layer_pair
         self.set_layer_pair(layer_pair)
 
     @property
@@ -78,8 +78,9 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
             if layer_pair[0] == layer_pair[1]:
                 raise TypeError
         except TypeError:
-            raise TypeError('layer_pair must have two uniqe layers as strings')
-        self.top_layer, self.bottom_layer = sorted(layer_pair, key=lambda name: get_board_layer_id(self.board, name))
+            raise TypeError("layer_pair must have two uniqe layers as strings")
+        sorting_key = lambda name: get_board_layer_id(self.board, name)
+        self.top_layer, self.bottom_layer = sorted(layer_pair, key=sorting_key)
 
     @property
     def top_layer(self):
@@ -87,9 +88,9 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
 
     @top_layer.setter
     def top_layer(self, value):
-        assert value.endswith('.Cu')
+        assert value.endswith(".Cu")
         self._obj.SetTopLayer(get_board_layer_id(self.board, value))
-        if value.startswith('In'):
+        if value.startswith("In"):
             self.is_through = False
 
     @property
@@ -98,9 +99,9 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
 
     @bottom_layer.setter
     def bottom_layer(self, value):
-        assert value.endswith('.Cu')
+        assert value.endswith(".Cu")
         self._obj.SetBottomLayer(get_board_layer_id(self.board, value))
-        if value.startswith('In'):
+        if value.startswith("In"):
             self.is_through = False
 
     @property

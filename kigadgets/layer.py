@@ -5,6 +5,7 @@ from kigadgets import SWIG_version, instanceof
 # dicts for converting layer name to id, used by _get_layer
 _std_layer_dict = None
 _std_layer_names = None
+
 def load_std_layers():
     # lazy import for Sphinx to run properly
     global _std_layer_dict, _std_layer_names
@@ -13,16 +14,15 @@ def load_std_layers():
             native_get_layername = pcbnew.BOARD.GetStandardLayerName
         else:
             native_get_layername = pcbnew.BOARD_GetStandardLayerName
-        _std_layer_dict = {native_get_layername(n): n
-                           for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
+        _std_layer_dict = {native_get_layername(n): n for n in range(pcbnew.PCB_LAYER_ID_COUNT)}
         try:
             # For backwards compatibility with silkscreen renames
-            _std_layer_dict['F.SilkS'] = _std_layer_dict['F.Silkscreen']
-            _std_layer_dict['B.SilkS'] = _std_layer_dict['B.Silkscreen']
+            _std_layer_dict["F.SilkS"] = _std_layer_dict["F.Silkscreen"]
+            _std_layer_dict["B.SilkS"] = _std_layer_dict["B.Silkscreen"]
         except KeyError:
             # Forwards compatibility
-            _std_layer_dict['F.Silkscreen'] = _std_layer_dict['F.SilkS']
-            _std_layer_dict['B.Silkscreen'] = _std_layer_dict['B.SilkS']
+            _std_layer_dict["F.Silkscreen"] = _std_layer_dict["F.SilkS"]
+            _std_layer_dict["B.Silkscreen"] = _std_layer_dict["B.SilkS"]
     if _std_layer_names is None:
         _std_layer_names = {s: n for n, s in _std_layer_dict.items()}
 
@@ -44,7 +44,7 @@ def get_board_layer_name(board, layer_id):
 
 
 def get_std_layer_name(layer_id):
-    """Get layer name from layer id. """
+    """Get layer name from layer id."""
     load_std_layers()
     return _std_layer_names[layer_id]
 
@@ -59,6 +59,9 @@ def get_std_layer_id(layer_name):
 
 
 class LayerSet:
+
+    _wraps_native_cls = pcbnew.LSET
+
     def __init__(self, layer_names, board=None):
         self._board = board
         self._build_layer_set(layer_names)
@@ -69,10 +72,10 @@ class LayerSet:
 
     @classmethod
     def wrap(cls, instance):
-        if not instanceof(instance, pcbnew.LSET):
+        if cls._wraps_native_cls and not instanceof(instance, cls._wraps_native_cls):
             raise TypeError(
-                '{} cannot wrap native class {}'
-                '\n  Allowed: {}'.format(cls.__name__, type(instance).__name__, pcbnew.LSET)
+                f"{cls.__name__} cannot wrap native class {type(instance).__name__}.\n"
+                f"Allowed: {cls._wraps_native_cls}"
             )
         return kigadgets.new(cls, instance)
 
@@ -81,7 +84,7 @@ class LayerSet:
         bit_mask = 0
         for layer_name in layers:
             bit_mask |= 1 << get_board_layer_id(self._board, layer_name)
-        hex_mask = '{0:013x}'.format(bit_mask)
+        hex_mask = "{0:013x}".format(bit_mask)
         self._obj = pcbnew.LSET()
         self._obj.ParseHex(hex_mask, len(hex_mask))
 
@@ -103,6 +106,6 @@ class LayerSet:
 
     def remove_layer(self, layer_name):
         if layer_name not in self.layers:
-            raise KeyError('Layer {} not present in {}'.format(layer_name, self.layer_names))
+            raise KeyError(f"Layer {layer_name} not present in {self.layer_names}")
         self._obj.RemoveLayer(get_board_layer_id(self._board, layer_name))
         return self

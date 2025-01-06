@@ -1,11 +1,14 @@
 import kigadgets
 from kigadgets import units, SWIGtype
 
+
 class Size(units.BaseUnitTuple):
 
     def __init__(self, width, height):
-        self._obj = SWIGtype.Size(int(width * units.DEFAULT_UNIT_IUS),
-                                  int(height * units.DEFAULT_UNIT_IUS))
+        self._obj = SWIGtype.Size(
+            int(width * units.DEFAULT_UNIT_IUS),
+            int(height * units.DEFAULT_UNIT_IUS)
+        )
 
     @property
     def native_obj(self):

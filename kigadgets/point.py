@@ -12,8 +12,10 @@ class Point(units.BaseUnitTuple):
         :param x: x coordinate.
         :param y: y coordinate.
         """
-        self._obj = SWIGtype.Point(int(x * units.DEFAULT_UNIT_IUS),
-                                   int(y * units.DEFAULT_UNIT_IUS))
+        self._obj = SWIGtype.Point(
+            int(x * units.DEFAULT_UNIT_IUS),
+            int(y * units.DEFAULT_UNIT_IUS)
+        )
 
     def __str__(self):
         return self.__repr__()

@@ -3,11 +3,13 @@ from kigadgets import pcbnew_bare as pcbnew
 from kigadgets import Size
 from kigadgets.item import HasPosition, HasConnection, HasLayer, Selectable, BoardItem
 
-class DrillShape():
+
+class DrillShape:
     Circle = pcbnew.PAD_DRILL_SHAPE_CIRCLE
     Oval = pcbnew.PAD_DRILL_SHAPE_OBLONG
 
-class PadShape():
+
+class PadShape:
     Circle = pcbnew.PAD_SHAPE_CIRCLE
     Oval = pcbnew.PAD_SHAPE_OVAL
     Rectangle = pcbnew.PAD_SHAPE_RECT
@@ -16,7 +18,8 @@ class PadShape():
     Chamfered = pcbnew.PAD_SHAPE_CHAMFERED_RECT
     Custom = pcbnew.PAD_SHAPE_CUSTOM
 
-class PadType():
+
+class PadType:
     Through = pcbnew.PAD_ATTRIB_PTH
     SMD = pcbnew.PAD_ATTRIB_SMD
     Connector = pcbnew.PAD_ATTRIB_CONN
@@ -25,7 +28,7 @@ class PadType():
 
 class Pad(HasPosition, HasConnection, HasLayer, Selectable, BoardItem):
     def __init__(self):
-        raise NotImplementedError('Direct instantiation of Pad is not supported. See KicadModTree to make new footprints.')
+        raise NotImplementedError("Direct instantiation of Pad is not supported. See KicadModTree to make new footprints.")
 
     @property
     def pad_type(self):
