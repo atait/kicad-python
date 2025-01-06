@@ -1,12 +1,12 @@
-# MacOS/v7 Bug Workaround
+# MacOS and Windows python Workaround
 
-`pcbnew.py` from KiCad v7 does not import on MacOS because its Mach-O file uses @executable_path instead of relative linker paths. Everything works fine when inside the GUI, but not outside in headless mode. The workaround for now is to use KiCad's bundled `python3` executable and then give it a short name: `kipython`.
+`pcbnew.py` from KiCad v7+ does not import on MacOS because its Mach-O file uses @executable_path instead of relative linker paths. On Windows, it gives unspecified DLL error. Everything works fine when inside the GUI, but not outside in headless mode. The workaround for now is to use KiCad's bundled `python3` executable and then give it a short name: `kipython`.
 
 ## KiCad's builtin python
 ### Symlinking (one time)
 Run the usual setup `python -m kigadgets`, it will detect if you need this workaround and take care of it.
 
-What is happening is effectively this
+**On MacOS**, it will make the symlink for you, effectively this command
 ```bash
 ln -s "/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3" /usr/local/bin/kipython
 ```
@@ -15,6 +15,14 @@ plus checks to make sure those places exist and are writable. It will prompt you
 $ which kipython
 /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
 ```
+
+**On Windows**, automatic symlinking is disabled. The kigadgets command will print a command you can use to alias "kipython" to the correct executable.
+```bash
+You should symlink or alias "kipython" to {_paths["kipython"]}. To do this,\n')
+
+    Function kipython { & 'C:\\Program Files\\KiCad\\8.0\\bin\\python.exe $args }
+```
+This is the PowerShell command. It is up to you how to make that alias persistent. The best way depends on which shell you like to use.
 
 ### External python packages
 `kipython` is within KiCad.app, so modifications made will be installed Application-wide. It is the same python used in the GUI by action plugins. `kipython` *does not* see your venv or conda environment packages active in a given Terminal. It does see your shell environment variables, including `$PYTHONPATH`.

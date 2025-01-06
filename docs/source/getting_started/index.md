@@ -3,7 +3,6 @@
 ```{toctree}
 :titlesonly:
 snippet_examples
-geohashing
 troubleshooting
 macos_workaround
 ```
