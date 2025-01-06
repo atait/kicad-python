@@ -142,7 +142,7 @@ def get_default_paths():
         default_locations['kipython'] = latest_version_configpath(root, "bin/python.exe")
         default_locations['pcbnew'] = latest_version_configpath(root, "bin/Lib/site-packages/pcbnew.py")
         default_locations['user'] = [
-            latest_version_configpath(os.path.expanduser("~/kicad")),
+            latest_version_configpath(os.path.expanduser("~/Documents/KiCad")),
             latest_version_configpath(os.path.expanduser("~/AppData/Roaming/kicad")),
         ]
     else:
@@ -232,9 +232,9 @@ def macwin_on_dlopen_error():
             '\n  kipython <your script> instead of  python <your script>\n')
     if sys.platform.startswith('win'):
         print(f'You should symlink or alias "kipython" to {_paths["kipython"]}. To do this,\n')
-        alias = " Function kipython [~ & '{}' $args ]~".format(_paths["kipython"])
+        alias = "    Function kipython [~ & '{}' $args ]~\n".format(_paths["kipython"])
         alias = alias.replace('[~', '{').replace(']~', '}')
-        print('   ', alias)
+        print(alias)
     else:
         if not shutil.which("kipython"):
             print(f'kipython is not yet symlinked to {_paths["kipython"]}. To do this, in any command line, run:')

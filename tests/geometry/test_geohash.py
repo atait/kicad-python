@@ -1,3 +1,4 @@
+import os
 import unittest
 from kigadgets.board import Board
 from kigadgets.via import Via
@@ -31,9 +32,10 @@ class TestGeohash(unittest.TestCase):
         assert self.pcb.geohash() == new_pcb.geohash()
 
     def test_saveload(self):
-        with tempfile.NamedTemporaryFile(suffix='.kicad_pcb') as tfile:
-            self.pcb.save(tfile.name)
-            new_pcb = Board.load(tfile.name)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_pcbfile = os.path.join(temp_dir, 'kigadgets_copying.kicad_pcb')
+            self.pcb.save(temp_pcbfile)
+            new_pcb = Board.load(temp_pcbfile)
         assert self.pcb.geohash() == new_pcb.geohash()
 
     @pytest.mark.skip(reason='Unknown. Need to investigate')
