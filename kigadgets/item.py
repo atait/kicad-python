@@ -3,7 +3,7 @@ from kigadgets import SWIG_version, Point, Size, DEFAULT_UNIT_IUS, instanceof
 from kigadgets.layer import get_board_layer_name, get_board_layer_id
 import pcbnew
 
-class _ABC(object):
+class GeoHashable(object):
     def __init__(self):
         raise NotImplementedError('{} has no __init__. It is an abstract and/or wrapper-only class'.format(type(self)))
 
@@ -11,7 +11,7 @@ class _ABC(object):
         return hash(type(self).__name__)  # The leaf class, not "_ABC"
 
 
-class BoardItem(_ABC):
+class BoardItem(GeoHashable):
     _obj = None
     _wraps_native_cls = None
 
@@ -39,7 +39,7 @@ class BoardItem(_ABC):
         return kigadgets.new(cls, instance)
 
 
-class HasPosition(_ABC):
+class HasPosition(GeoHashable):
     """Board items that has valid position property should inherit
     this."""
 
@@ -72,7 +72,7 @@ class HasPosition(_ABC):
         return mine + super().geohash()
 
 
-class HasOrientation(_ABC):
+class HasOrientation(GeoHashable):
     """Board items that has orientation property should inherit this."""
     @property
     def orientation(self):
@@ -94,7 +94,7 @@ class HasOrientation(_ABC):
         return mine + super().geohash()
 
 
-class HasLayer(_ABC):
+class HasLayer(GeoHashable):
     """ Layer handling based on strings like `'F.Cu'`, `'B.Silkscreen'`, `'User.12'`, etc.
         If the layer is not present, it will be caught at runtime, rather than disallowed.
     """
@@ -125,7 +125,7 @@ class HasLayer(_ABC):
         return mine + super().geohash()
 
 
-class HasConnection(_ABC):
+class HasConnection(GeoHashable):
     """All BOARD_CONNECTED_ITEMs should inherit this."""
     @property
     def net_name(self):
@@ -154,7 +154,7 @@ class HasConnection(_ABC):
         mine = hash(self.net_name)
         return mine + super().geohash()
 
-class Selectable(_ABC):
+class Selectable(GeoHashable):
     """ This influences the main window. Make sure to pcbnew.Refresh() to see it """
     @property
     def is_selected(self):
@@ -180,7 +180,7 @@ class Selectable(_ABC):
             self._obj.ClearBrightened()
 
 
-class HasWidth(_ABC):
+class HasWidth(GeoHashable):
     @property
     def width(self):
         return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
@@ -212,7 +212,7 @@ else:
         top='GR_TEXT_V_ALIGN_TOP',
     )
 
-class TextEsque(_ABC):
+class TextEsque(GeoHashable):
     ''' Base class for items with text-like properties
 
         Note:
