@@ -3,7 +3,8 @@ import os
 import lytest
 # lytest.kdb_xor.run_xor = lytest.kdb_xor.run_xor_pcbnew
 lytest.utest_buds.default_file_ext = '.kicad_pcb'
-lytest.utest_buds.test_root = os.path.dirname(__file__)
+from kigadgets import SWIG_version
+lytest.utest_buds.test_root = os.path.join(os.path.dirname(__file__), f'{SWIG_version}.0')
 
 
 if os.getenv('PYTHONHASHSEED') != '0':
