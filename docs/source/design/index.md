@@ -1,4 +1,4 @@
-# Design Rationale
+# Package Design Rationale
 
 ```{toctree}
 :titlesonly:

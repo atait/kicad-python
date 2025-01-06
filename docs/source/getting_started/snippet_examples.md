@@ -1,16 +1,16 @@
-## Snippet examples
+# Snippet examples
 These snippets are run in the GUI terminal. They are common automations that aren't worth making dedicated action plugins. There is no preceding context; the linking step above provides `pcb` to the terminal. These all should work in pcbnew 5, 6, 7, 8, and 8.99 on Mac, Windows, or Linux.
 
-### Hide silkscreen labels of selected footprints
+## Hide silkscreen labels of selected footprints
 ```python
 for fp in pcb.footprints:
     if fp.is_selected:
         fp.reference_label.visible = False
 pcbnew.Refresh()
 ```
-![](doc/simple_script.png)
+![](../../simple_script.png)
 
-### Move all silk labels to fab layers
+## Move all silk labels to fab layers
 Instead, we can keep them on Fab layers so we can still see them while designing the PCB.
 ```python
 for m in pcb.footprints:
@@ -20,7 +20,7 @@ for m in pcb.footprints:
 pcbnew.Refresh()
 ```
 
-### Select similar vias
+## Select similar vias
 This snippet assumes you have selected one via
 ```python
 og_via = pcb.selected_items[0]
@@ -33,7 +33,7 @@ pcbnew.Refresh()
 ```
 See `via.py` for additional functionality related to micro and blind vias.
 
-### Change all drill diameters
+## Change all drill diameters
 Because planning ahead doesn't always work
 ```python
 for v in pcb.vias:
@@ -42,7 +42,7 @@ for v in pcb.vias:
 pcbnew.Refresh()
 ```
 
-### Put silkscreen over tracks
+## Put silkscreen over tracks
 Not sure why to do this besides a nice look.
 ```python
 for t in pcb.tracks:
@@ -51,7 +51,7 @@ for t in pcb.tracks:
 pcbnew.Refresh()
 ```
 
-### Select everything schematically connected to this footprint
+## Select everything schematically connected to this footprint
 ```python
 footprint = pcb.selected_items[0]
 nets = {pad.net_name for pad in footprint.pads}
@@ -61,7 +61,7 @@ for mod in pcb.footprints:
         mod.select()
 ```
 
-### Keep track of live editor state
+## Keep track of live editor state
 In GUI, `kigadgets` stays synchronized with the state of the underlying native objects even when they are modified elsewhere because it is wrapping the C++ state rather than holding a Python state.
 ```python
 from kigadgets.drawing import Rectangle
@@ -77,7 +77,7 @@ pcbnew.Refresh()
 ```
 This gives some cool options for capturing user input interactively based on their actions in the layout editor.
 
-### Procedural layout
+## Procedural layout
 Suppose you want to test various track width resistances.
 ```python
 y = 0

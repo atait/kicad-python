@@ -3,7 +3,7 @@ A simple example of an action plugin based on `kigadgets`. This example illustra
 
 It is also useful in itself for script-assisted GUI layout design. If you are on MacOS, you can hotkey the menu item "One Push" via System Settings > Keyboard > Keyboard Shortcuts > App Shortcuts.
 
-![Onepush Icon](icons/photon-256.png)
+![Onepush Icon](../media/photon-256.png)
 
 onepush_script.py is executed in the GUI environment when the action plugin button is pushed. Edit it yourself in any external editor, save the file, and behavioral changes will take effect immediately. No need to restart KiCad or reload the plugins from the menu.
 

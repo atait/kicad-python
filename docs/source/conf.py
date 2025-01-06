@@ -28,12 +28,12 @@ import sphinx_rtd_theme
 extensions = [
     'sphinx.ext.autodoc',
     'autoapi.extension',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
     'sphinx.ext.doctest',
     'myst_parser',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.graphviz',
 ]
@@ -235,7 +235,7 @@ html_static_path = []
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'KiCadPythonAPIdoc'
+htmlhelp_basename = 'KigadgetsAPIdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -257,7 +257,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'KiCadPythonAPI.tex', u'KiCad Python API Documentation',
+  ('index', 'KigadgetsAPI.tex', u'Kigadgets API Documentation',
    u'KiCad Community', 'manual'),
 ]
 
@@ -322,7 +322,7 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'KiCad Python API'
+epub_title = u'Kigadgets API'
 epub_author = u'KiCad Community'
 epub_publisher = u'KiCad Community'
 epub_copyright = u'2015, KiCad Community'
