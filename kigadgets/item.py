@@ -270,7 +270,7 @@ class TextEsque(_ABC):
         for k, v in TextEsque.justification_lookups.items():
             if hj == getattr(pcbnew, v):
                 hjs = k
-            if vj in getattr(pcbnew, v):
+            if vj == getattr(pcbnew, v):
                 vjs = k
         return hjs, vjs
 
