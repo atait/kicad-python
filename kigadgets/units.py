@@ -46,8 +46,7 @@ class BaseUnitTuple(object):
     """
     @classmethod
     def wrap(cls, instance):
-        """Wraps a point or size native object
-        """
+        """Wraps a point or size native object"""
         return kigadgets.new(cls, instance)
 
     @property
@@ -80,16 +79,14 @@ class BaseUnitTuple(object):
             raise IndexError
 
     def __sub__(self, b):
-        return type(self).build_from((self[0] - b[0],
-                                       self[1] - b[1]))
+        return type(self).build_from((self[0] - b[0], self[1] - b[1]))
 
     def __add__(self, b):
-        return type(self).build_from((self[0] + b[0],
-                                       self[1] + b[1]))
+        return type(self).build_from((self[0] + b[0], self[1] + b[1]))
 
     def __eq__(self, _other):
         other = type(self).build_from(_other)
-        return (self.native_obj == other.native_obj)
+        return self.native_obj == other.native_obj
 
     def __hash__(self):
         return hash((self.x, self.y))
@@ -102,8 +99,7 @@ class BaseUnitTuple(object):
 
     def _unit_tuple(self, unit_multiplier):
         unit_multiplier_float = float(unit_multiplier)
-        return (self.x / unit_multiplier_float,
-                self.y / unit_multiplier_float)
+        return (self.x / unit_multiplier_float, self.y / unit_multiplier_float)
 
     @property
     def nm(self):

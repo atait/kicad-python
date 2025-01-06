@@ -1,4 +1,4 @@
-__version__ = '0.4.99'
+__version__ = "0.4.99"
 
 #: centralized import with fallback.
 #: Necessary for documentation and environment patching outside of application
@@ -13,8 +13,10 @@ from kigadgets.exceptions import put_import_warning_on_kicad
 try:
     pcbnew_bare = get_pcbnew_module()
 except EnvironmentError:
-    print('kigadgets: pcbnew.py is not found or PCBNEW_PATH is corrupted. '
-        'Only kigadget.environment commands will be available')
+    print(
+        "kigadgets: pcbnew.py is not found or PCBNEW_PATH is corrupted. "
+        "Only kigadget.environment commands will be available"
+    )
     pcbnew_bare = None
 
 
@@ -41,18 +43,22 @@ def pcbnew_version(asstr=False):
     try:
         verstr = pcbnew_bare.GetMajorMinorVersion()
     except AttributeError:
-        verstr = '5.0'
+        verstr = "5.0"
     if asstr:
         return verstr
-    ver = tuple(int(x) for x in verstr.split('.'))
+    ver = tuple(int(x) for x in verstr.split("."))
     if len(ver) < 2:
         ver = (ver[0], 0)
     return ver
 
+
 # Unify v5/6/7 APIs
 if pcbnew_bare is None:
     SWIG_version = None
-    class SWIGtype: pass
+
+    class SWIGtype:
+        pass
+
 else:
     # Determine version and map equivalent objects into consistent names
     ver = pcbnew_version()
@@ -67,7 +73,10 @@ else:
     elif ver[0] == 5 or (ver[0] == 4 and ver[1] == 99):
         SWIG_version = 5
     else:
-        print('Version {} not supported by kigadgets. Some functionality might not work'.format(ver))
+        print(
+            "Version {} not supported by kigadgets. "
+            "Some functionality might not work".format(ver)
+        )
         SWIG_version = 8
 
     # if SWIG_version == 9:
@@ -140,12 +149,13 @@ def instanceof(item, klass):
                 return True
     if isinstance(item, klass):  # This should hit in v6
         return True
-    class_of_name = klass.__name__ + '_ClassOf'
+    class_of_name = klass.__name__ + "_ClassOf"
     try:
         class_of_fun = getattr(pcbnew_bare, class_of_name)
         return class_of_fun(item)
     except AttributeError:
         return False
+
 
 # Alters sys.modules so that `import kicad` gives more information
 put_import_warning_on_kicad()

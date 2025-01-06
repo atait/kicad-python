@@ -7,7 +7,7 @@ from kigadgets import units, Size, SWIGtype, SWIG_version, Point, instanceof
 from kigadgets.layer import get_board_layer_id, get_std_layer_name
 from kigadgets.item import HasLayer, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
 
-class ShapeType():
+class ShapeType:
     Segment = pcbnew.S_SEGMENT
     Circle = pcbnew.S_CIRCLE
     Arc = pcbnew.S_ARC
@@ -16,14 +16,14 @@ class ShapeType():
 
 
 def wrap_drawing(instance):
-    ''' Handles anything found in BOARD.GetDrawings
-        Feeds through to shape wrap methods based on the type of shape.
-        It also detects and feeds through text.
-    '''
+    """Handles anything found in BOARD.GetDrawings
+    Feeds through to shape wrap methods based on the type of shape.
+    It also detects and feeds through text.
+    """
     if instanceof(instance, SWIGtype.Text):
         return TextPCB.wrap(instance)
     if not instanceof(instance, SWIGtype.Shape):
-        raise TypeError('Invalid drawing class: {}'.format(type(instance)))
+        raise TypeError(f"Invalid drawing class: {type(instance)}")
 
     obj_shape = instance.GetShape()
     if obj_shape == ShapeType.Segment:
@@ -39,22 +39,22 @@ def wrap_drawing(instance):
 
     # Time to fail
     layer = get_std_layer_name(instance.GetLayer())
-    unsupported = ['S_CURVE', 'S_LAST']
+    unsupported = ["S_CURVE", "S_LAST"]
     for unsup in unsupported:
         if not hasattr(pcbnew, unsup):
             continue
         if obj_shape is getattr(pcbnew, unsup):
-            raise TypeError('Unsupported shape type: pcbnew.{} on layer {}.'.format(unsup, layer))
-    raise TypeError('Unrecognized shape type on layer {}'.format(layer))
+            raise TypeError(f"Unsupported shape type: pcbnew.{unsup} on layer {layer}.")
+    raise TypeError(f"Unrecognized shape type on layer {layer}")
 
 
 class Drawing(HasLayer, HasPosition, HasWidth, Selectable, BoardItem):
-    ''' Base class of shape drawings, not including text '''
+    """Base class of shape drawings, not including text"""
     _wraps_native_cls = SWIGtype.Shape
 
 
 class Segment(Drawing):
-    def __init__(self, start, end, layer='F.SilkS', width=0.15, board=None):
+    def __init__(self, start, end, layer="F.SilkS", width=0.15, board=None):
         line = SWIGtype.Shape(board and board.native_obj)
         line.SetShape(ShapeType.Segment)
         self._obj = line
@@ -90,8 +90,7 @@ class Segment(Drawing):
 
 
 class Circle(Drawing):
-    def __init__(self, center, radius, layer='F.SilkS', width=0.15,
-                 board=None):
+    def __init__(self, center, radius, layer="F.SilkS", width=0.15, board=None):
         circle = SWIGtype.Shape(board and board.native_obj)
         circle.SetShape(ShapeType.Circle)
         self._obj = circle
@@ -99,8 +98,7 @@ class Circle(Drawing):
         self.width = width
         self.layer = layer
 
-        start_coord = Point.native_from(
-            (center[0], center[1] + radius))
+        start_coord = Point.native_from((center[0], center[1] + radius))
         if SWIG_version >= 6:
             circle.SetEnd(start_coord)
             circle.SetModified()
@@ -149,8 +147,10 @@ class Circle(Drawing):
 
 # --- Logic for Arc changed a lot in version 6, so there are two classes
 class Arc_v5(Drawing):
-    def __init__(self, center, radius, start_angle, stop_angle,
-                 layer='F.SilkS', width=0.15, board=None):
+    def __init__(
+        self, center, radius, start_angle, stop_angle,
+        layer="F.SilkS", width=0.15, board=None,
+    ):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
         start_coord = Point.native_from((start_coord.real, start_coord.imag))
         center_coord = Point.native_from(center)
@@ -218,8 +218,10 @@ class Arc_v5(Drawing):
 
 
 class Arc_v6(Drawing):
-    def __init__(self, center, radius, start_angle, stop_angle,
-                 layer='F.SilkS', width=0.15, board=None):
+    def __init__(
+        self, center, radius, start_angle, stop_angle,
+        layer="F.SilkS", width=0.15, board=None
+    ):
         start_coord = radius * cmath.exp(math.radians(start_angle - 90) * 1j)
         abs_start = (start_coord.real + center[0], start_coord.imag + center[1])
 
@@ -299,8 +301,7 @@ else:
 
 
 class Polygon(Drawing):
-    def __init__(self, coords,
-                 layer='F.SilkS', width=0.15, board=None):
+    def __init__(self, coords, layer="F.SilkS", width=0.15, board=None):
         poly_obj = SWIGtype.Shape(board and board.native_obj)
         poly_obj.SetShape(ShapeType.Polygon)
         self._obj = poly_obj
@@ -316,12 +317,12 @@ class Polygon(Drawing):
 
     @classmethod
     def _from_polyset(cls, shape_poly_set, multiple=False, **pkwds):
-        ''' If multiple=True, returns a list that can be any length (possibly zero).
-            Otherwise, it checks that there is only one Outline and returns one Polygon, no list
+        """If multiple=True, returns a list that can be any length (possibly zero).
+        Otherwise, it checks that there is only one Outline and returns one Polygon, no list
 
-            shape_poly_set is a `pcbnew.SHAPE_POLY_SET` native to `pcbnew`,
-            so this constructor is not intended for direct usage
-        '''
+        shape_poly_set is a `pcbnew.SHAPE_POLY_SET` native to `pcbnew`,
+        so this constructor is not intended for direct usage
+        """
         poly_builder = []
         for iout in range(shape_poly_set.OutlineCount()):
             outline = shape_poly_set.Outline(iout)
@@ -336,9 +337,9 @@ class Polygon(Drawing):
             return poly_builder
         else:
             if len(poly_builder) == 0:
-                raise ValueError('Given SHAPE_POLY_SET has no Outlines')
+                raise ValueError("Given SHAPE_POLY_SET has no Outlines")
             elif len(poly_builder) > 1:
-                raise ValueError('SHAPE_POLY_SET contains multiple Outlines. Use Polygon.from_polyset(..., multiple=True)')
+                raise ValueError("SHAPE_POLY_SET contains multiple Outlines. Use Polygon.from_polyset(..., multiple=True)")
             return poly_builder[0]
 
     @property
@@ -353,9 +354,9 @@ class Polygon(Drawing):
         poly = self._obj.GetPolyShape()
         noutlines = poly.OutlineCount()
         if noutlines == 0:
-            raise RuntimeError('Polygon\'s SHAPE_POLY_SET has no Outlines')
+            raise RuntimeError("Polygon's SHAPE_POLY_SET has no Outlines")
         elif noutlines > 1:
-            raise ValueError('Polygon contains multiple Outlines which is not supported')
+            raise ValueError("Polygon contains multiple Outlines which is not supported")
         outline = poly.Outline(0)
         pts = []
         for ipt in range(outline.PointCount()):
@@ -364,12 +365,12 @@ class Polygon(Drawing):
         return pts
 
     def to_segments(self, replace=False):
-        ''' If replace is true, removes the original polygon
-        '''
+        """If replace is true, removes the original polygon"""
         segs = []
         verts = self.get_vertices()
         for iseg in range(len(verts)):
-            new_seg = Segment(verts[iseg-1], verts[iseg],
+            new_seg = Segment(
+                verts[iseg - 1], verts[iseg],
                 self.layer, self.width, self.board
             )
             segs.append(new_seg)
@@ -379,19 +380,22 @@ class Polygon(Drawing):
             self.board.remove(self)
         return segs
 
-    def fillet(self, radius_mm, tol_mm=.01):
+    def fillet(self, radius_mm, tol_mm=0.01):
         poly = self.native_obj.GetPolyShape()
-        smoothed = poly.Fillet(int(radius_mm * units.DEFAULT_UNIT_IUS), int(tol_mm * units.DEFAULT_UNIT_IUS))
+        smoothed = poly.Fillet(
+            int(radius_mm * units.DEFAULT_UNIT_IUS),
+            int(tol_mm * units.DEFAULT_UNIT_IUS),
+        )
         self.native_obj.SetPolyShape(smoothed)
 
     def contains(self, point):
-        ''' Does this shape contain the point
+        """Does this shape contain the point
 
-            Args:
-                point (tuple, Point): the point as a tuple or kigadgets.Point
-            Returns:
-                bool: True if contained
-        '''
+        Args:
+            point (tuple, Point): the point as a tuple or kigadgets.Point
+        Returns:
+            bool: True if contained
+        """
         poly = self._obj.GetPolyShape()
         return poly.Contains(Point.native_from(point))
 
@@ -401,9 +405,8 @@ class Polygon(Drawing):
 
 
 class Rectangle(Polygon):
-    ''' Inherits x,y get/set from HasPosition '''
-    def __init__(self, corner_nw, corner_se,
-                 layer='F.SilkS', width=0.15, board=None):
+    """Inherits x,y get/set from HasPosition"""
+    def __init__(self, corner_nw, corner_se, layer="F.SilkS", width=0.15, board=None):
         rect_obj = SWIGtype.Shape(board and board.native_obj)
         rect_obj.SetShape(ShapeType.Rect)
         self._obj = rect_obj
@@ -413,8 +416,10 @@ class Rectangle(Polygon):
         self.width = width
 
     @classmethod
-    def from_centersize(cls, xcent, ycent, xsize, ysize,
-                     layer='F.SilkS', width=0.15, board=None):
+    def from_centersize(
+        cls, xcent, ycent, xsize, ysize,
+        layer="F.SilkS", width=0.15, board=None
+    ):
         center = Point(xcent, ycent)
         half_size = Point(xsize / 2, ysize / 2)
         corner_nw = center - half_size
@@ -444,21 +449,21 @@ class Rectangle(Polygon):
             self.board.remove(self)
         return poly
 
-    def fillet(self, radius_mm, tol_mm=.01):
-        ''' Deletes the rectangle but that is ok in most situations
-            It can be undone IF it is run inside an action plugin
-        '''
+    def fillet(self, radius_mm, tol_mm=0.01):
+        """Deletes the rectangle but that is ok in most situations
+        It can be undone IF it is run inside an action plugin
+        """
         poly = self.to_polygon(replace=True)
         poly.fillet(radius_mm, tol_mm)
 
     def contains(self, point):
-        ''' Does this shape contain the point
+        """Does this shape contain the point
 
-            Args:
-                point (tuple, Point): the point as a tuple or kigadgets.Point
-            Returns:
-                bool: True if contained
-        '''
+        Args:
+            point (tuple, Point): the point as a tuple or kigadgets.Point
+        Returns:
+            bool: True if contained
+        """
         poly = self.to_polygon(replace=False)
         return poly.contains(point)
 
@@ -466,8 +471,10 @@ class Rectangle(Polygon):
 class TextPCB(HasLayer, HasPosition, Selectable, BoardItem, TextEsque):
     _wraps_native_cls = SWIGtype.Text
 
-    def __init__(self, position, text=None, layer='F.SilkS',
-                 size=1.0, thickness=0.15, board=None):
+    def __init__(
+        self, position, text=None, layer="F.SilkS",
+        size=1.0, thickness=0.15, board=None
+    ):
         self._obj = self._wraps_native_cls(board and board.native_obj)
         self.position = position
         if text:

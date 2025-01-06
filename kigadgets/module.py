@@ -22,7 +22,7 @@ class FootprintLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
         try:
             return self._obj.IsVisible()
         except AttributeError:
-            raise AttributeError('FootprintLabel.visible is write only in KiCad v{}'.format(SWIG_version))
+            raise AttributeError(f"FootprintLabel.visible is write only in KiCad v{SWIG_version}")
 
     @visible.setter
     def visible(self, value):
@@ -124,7 +124,7 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     def layer(self, value):
         if value == self.layer:
             return
-        if value not in ['F.Cu', 'B.Cu']:
+        if value not in ["F.Cu", "B.Cu"]:
             raise ValueError("You can place a module only on 'F.Cu' or 'B.Cu' layers!")
         # Using flip will make sure all components of the module are
         # switched to correct layer
@@ -140,12 +140,12 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
 
     def copy(self, ref, pos=None, board=None):
         """Create a copy of an existing module on the board
-            A new reference designator is required, example::
+        A new reference designator is required, example::
 
-                mod2 = mod1.copy('U2')
-                mod2.reference == 'U2'  # True
+            mod2 = mod1.copy('U2')
+            mod2.reference == 'U2'  # True
 
-            mod2 is automatically placed in mod1.board
+        mod2 is automatically placed in mod1.board
         """
         if not board:
             board = self.board
@@ -168,18 +168,18 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             yield Pad.wrap(p)
 
     def remove(self, element, permanent=False):
-        ''' Makes it so Ctrl-Z works.
-            Keeps a reference to the element in the python pcb object,
-            so it persists for the life of that object
-        '''
+        """Makes it so Ctrl-Z works.
+        Keeps a reference to the element in the python pcb object,
+        so it persists for the life of that object
+        """
         if not permanent:
-            if not hasattr(self, '_removed_elements'):
+            if not hasattr(self, "_removed_elements"):
                 self._removed_elements = []
             self._removed_elements.append(element)
         self._obj.Remove(element._obj)
 
     def restore_removed(self):
-        if hasattr(self, '_removed_elements'):
+        if hasattr(self, "_removed_elements"):
             for element in self._removed_elements:
                 self._obj.Add(element._obj)
         self._removed_elements = []

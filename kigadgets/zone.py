@@ -10,13 +10,13 @@ from kigadgets.drawing import Polygon
 class RuleArea(Selectable, BoardItem):
     _wraps_native_cls = SWIGtype.Zone
 
-    def __init__(self, coords, name='', layers=None, board=None):
+    def __init__(self, coords, name="", layers=None, board=None):
         if board is None:
-            raise RuntimeError('{} must be given a board argument that is not None'.format(type(self).__name__))
+            raise RuntimeError(f"{type(self).__name__} must be given a board argument that is not None")
         if type(self) is RuleArea:
-            raise NotImplementedError('RuleArea is an abstract class. Instantiate using Zone(...) or Keepout(...)')
+            raise NotImplementedError("RuleArea is an abstract class. Instantiate using Zone(...) or Keepout(...)")
         if layers is None:
-            layers = ['F.Cu']
+            layers = ["F.Cu"]
         if not isinstance(layers, (list, tuple)):
             layers = [layers]
         self._obj = SWIGtype.Zone(board and board.native_obj)
@@ -25,10 +25,10 @@ class RuleArea(Selectable, BoardItem):
 
     @classmethod
     def wrap(cls, instance):
-        if not instanceof(instance, cls._wraps_native_cls):
+        if cls._wraps_native_cls and not instanceof(instance, cls._wraps_native_cls):
             raise TypeError(
-                '{} cannot wrap native class {}'
-                '\nAllowed: {}'.format(cls.__name__, type(instance).__name__, cls._wraps_native_cls)
+                f"{cls.__name__} cannot wrap native class {type(instance).__name__}.\n"
+                f"Allowed: {cls._wraps_native_cls}"
             )
         if SWIG_version >= 6:
             is_keepout = bool(instance.GetIsRuleArea())
@@ -49,12 +49,12 @@ class RuleArea(Selectable, BoardItem):
 
     @property
     def layerset(self):
-        ''' Zones can have multiple layers
-            Changing this layerset will not propagate back to this zone
-            until you set layerset again. Common pattern::
+        """Zones can have multiple layers
+        Changing this layerset will not propagate back to this zone
+        until you set layerset again. Common pattern::
 
-                zone.layerset = zone.layerset.add_layer('F.Cu')
-        '''
+            zone.layerset = zone.layerset.add_layer('F.Cu')
+        """
         lset = LayerSet.wrap(self._obj.GetLayerSet())
         lset._board = self.board
         return lset
@@ -66,9 +66,10 @@ class RuleArea(Selectable, BoardItem):
     @property
     def layer(self):
         raise RuntimeError(
-            'Zone does not have a valid layer because there might be multiple layers. '
+            "Zone does not have a valid layer because there might be multiple layers. "
             'Use "zone.layers" property instead for lists of strings, '
-            'or use "zone.layerset" to interact with LayerSet.add_layer and LayerSet.remove_layer')
+            'or use "zone.layerset" to interact with LayerSet.add_layer and LayerSet.remove_layer'
+        )
 
     @property
     def layers(self):
@@ -83,7 +84,7 @@ class RuleArea(Selectable, BoardItem):
         coords = poly.get_vertices()
         return cls(coords, **zkws)
 
-    def to_polygon(self, layer='Margin'):
+    def to_polygon(self, layer="Margin"):
         poly = self._obj.Outline()
         return Polygon._from_polyset(poly, multiple=False, layer=layer, board=self.board)
 
@@ -102,7 +103,7 @@ class RuleArea(Selectable, BoardItem):
 
 
 class Zone(RuleArea, HasConnection):
-    def __init__(self, coords, name='', layers=None, board=None):
+    def __init__(self, coords, name="", layers=None, board=None):
         RuleArea.__init__(self, coords, name=name, layers=layers, board=board)
         self._set_is_keepout(False)
 
@@ -140,15 +141,14 @@ class Zone(RuleArea, HasConnection):
 
     @property
     def filled_area(self):
-        ''' The area of all poured polygons, not the zone outline polygon
-            Returns in units of square mm
-        '''
+        """The area of all poured polygons, not the zone outline polygon
+        Returns in units of square mm
+        """
         native = self._obj.GetFilledArea()
-        return float(native) / DEFAULT_UNIT_IUS ** 2
+        return float(native) / DEFAULT_UNIT_IUS**2
 
     def get_fill_polygons(self):
-        ''' Returns polygons on all layers. The Polygons have corresponding layers
-        '''
+        """Returns polygons on all layers. The Polygons have corresponding layers"""
         all_polys = []
         for lay in self.layers:
             layid = get_board_layer_id(self.board, lay)
@@ -174,11 +174,11 @@ class Zone(RuleArea, HasConnection):
 
 
 class _KeepoutAllowance(object):
-    """ Gives key-value and dot interfaces of the form
+    """Gives key-value and dot interfaces of the form
 
-            zz.is_keepout = True
-            zz.allow['tracks'] = False
-            print(my_zone.allow.tracks)
+    zz.is_keepout = True
+    zz.allow['tracks'] = False
+    print(my_zone.allow.tracks)
     """
     def __init__(self, zone):
         self._zone = zone
@@ -222,14 +222,14 @@ class _KeepoutAllowance(object):
         setattr(self, attr, value)
 
     def __str__(self):
-        return str({k: self[k] for k in ['tracks', 'pour', 'vias', 'footprints']})
+        return str({k: self[k] for k in ["tracks", "pour", "vias", "footprints"]})
 
     def __repr__(self):
         return type(self).__name__ + str(self)
 
 
 class Keepout(RuleArea):
-    def __init__(self, coords, name='', layers=None, board=None):
+    def __init__(self, coords, name="", layers=None, board=None):
         RuleArea.__init__(self, coords, name=name, layers=layers, board=board)
         self._set_is_keepout(True)
 
