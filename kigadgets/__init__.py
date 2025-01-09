@@ -81,7 +81,7 @@ else:
 
     # if SWIG_version == 9:
     #     # TODO
-    if SWIG_version == 8:
+    if SWIG_version >= 8:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE
             Track = pcbnew_bare.PCB_TRACK
