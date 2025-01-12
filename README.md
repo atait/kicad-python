@@ -12,7 +12,7 @@ KiCad and pcbnew expose a python interface that allows plugins and other procedu
 It constructs an environment where `pcbnew.py` functionality can be used headless (outside the GUI), and the pcbnew GUI can import external python packages at runtime.
 Furthermore, it enables patterns for more advanced software engineering such as multiple entry points, layout hashes, and regression tests.
 
-This package has been fully tested with KiCad 5, 6, 7, 8 (Mac/Windows/Linux), and tested with 8.99 (Linux).
+This package has been fully tested with KiCad 5.0-9.0 (Mac/Windows/Linux). See `tests` to reproduce headless behavior and `examples` to reproduce GUI behavior. Note that v9 will give warnings about SWIG.
 
 ### An excerpt
 A simple pythonic script might look like this
