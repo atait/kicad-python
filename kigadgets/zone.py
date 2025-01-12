@@ -170,7 +170,7 @@ class Zone(RuleArea, HasConnection):
             self.to_polygon().geohash(),
             tuple(sorted(fill_hashes)),
         ))
-        return super().geohash()
+        return mine + super().geohash()
 
 
 class _KeepoutAllowance(object):

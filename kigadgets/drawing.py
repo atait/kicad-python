@@ -83,9 +83,9 @@ class Segment(Drawing):
         hstart = hash(self.start)
         hend = hash(self.end)
         if hstart < hend:
-            mine = hstart + hend
+            mine = hash((self.start, self.end))
         else:
-            mine = hend + hstart
+            mine = hash((self.end, self.start))
         return mine + super().geohash()
 
 
@@ -400,7 +400,10 @@ class Polygon(Drawing):
         return poly.Contains(Point.native_from(point))
 
     def geohash(self):
-        mine = hash((self.get_vertices, self.filled))
+        mine = hash((
+            tuple(self.get_vertices()),
+            self.filled,
+        ))
         return mine + super().geohash()
 
 

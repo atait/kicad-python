@@ -30,7 +30,7 @@ except ImportError:
 
 def notify(*args):
     """Show text in a popup window while in the GUI.
-    Arguments act the same as print(\*args).
+    Arguments act the same as print(*args).
     Not the best debugging tool ever created, but
     it is handy for debugging action plugins::
 

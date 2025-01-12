@@ -194,10 +194,10 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
         ))
 
         child_hashes = []
-        for p in self.pads:
-            child_hashes.append(p.geohash())
-        for d in self.graphical_items:
-            child_hashes.append(d.geohash())
+        for pad in self.pads:
+            child_hashes.append(pad.geohash())
+        for dwg in self.graphical_items:
+            child_hashes.append(dwg.geohash())
         child_hashes.sort()
         mine += hash(tuple(child_hashes))
         return mine + super().geohash()

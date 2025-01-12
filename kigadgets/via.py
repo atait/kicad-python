@@ -79,8 +79,14 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
                 raise TypeError
         except TypeError:
             raise TypeError("layer_pair must have two uniqe layers as strings")
+        self.top_layer = layer_pair[0]
+        self.bottom_layer = layer_pair[1]
+
+    def get_layer_pair_hash(self):
+        layer_pair = self.top_layer, self.bottom_layer
         sorting_key = lambda name: get_board_layer_id(self.board, name)
-        self.top_layer, self.bottom_layer = sorted(layer_pair, key=sorting_key)
+        sorted_pair = sorted(layer_pair, key=sorting_key)
+        return hash(tuple(sorted_pair))
 
     @property
     def top_layer(self):
@@ -120,8 +126,7 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
             self.drill,
             self.size,
             self.center,
-            self.top_layer,
-            self.bottom_layer,
+            self.get_layer_pair_hash(),
             self.is_through,
         ))
         return mine + super().geohash()
