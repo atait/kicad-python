@@ -49,24 +49,26 @@ def default():
 # default()  # Comment this line when ready to run your own code below
 
 def hello_world():
-    # notify("One push hello world")
+    full_text = 'kigadgets hola world'
+
     from kigadgets.drawing import TextPCB
     pcb = Board.from_editor()
-    full_text = 'One push hello world'
-    pcb_text = TextPCB((0, 0), '')
+    pcb_text = TextPCB((0, 0), '', justification='left')
     pcb.add(pcb_text)
-    pcb_text.justification = 'left'
     for i in range(len(full_text)):
         pcb_text.text = full_text[:i]
         pcbnew.Refresh()
         time.sleep(0.1)
-    pcb_text.x += (len(full_text) - 1) * pcb_text.size[0]
+    pcb_text.x += (len(full_text) - 1) * pcb_text.size[0]*.85
     pcb_text.justification = 'right'
     for i in range(1, len(full_text)+1):
         pcb_text.text = full_text[i:]
 
-        pcb_text.thickness *= .9
-        # pcb_text.size = (pcb_text.size[0] * 1.05, pcb_text.size[1] * .9)
+        # pcb_text.thickness *= .9
+        pcb_text.size = (
+            pcb_text.size[0] * 1.02,
+            pcb_text.size[1] * .96
+        )
 
         pcbnew.Refresh()
         time.sleep(0.1)

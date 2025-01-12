@@ -14,5 +14,6 @@
 from kigadgets import kireload
 from onepush import onepush_script_examples
 kireload(onepush_script_examples)  # Forces reimport, rerunning, and any updates to source
-# onepush_script_examples.default()
+
 onepush_script_examples.hello_world()
+onepush_script_examples.default()
