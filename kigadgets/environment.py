@@ -36,15 +36,17 @@ def get_pcbnew_path():
         return None
     # Validate pcbnew.py file characteristics
     if not os.path.basename(pcbnew_swig_path).startswith("pcbnew.py"):
-        raise EnvironmentError(
-            "Incorrect location for 'PCBNEW_PATH' ({})."
+        print(
+            "kigadgets: Incorrect location for 'PCBNEW_PATH' ({})."
             " It should point to a file called pcbnew.py".format(pcbnew_swig_path)
         )
+        return None
     if not os.path.isfile(pcbnew_swig_path):
-        raise EnvironmentError(
-            "Incorrect location for 'PCBNEW_PATH' ({})."
+        print(
+            "kigadgets: Incorrect location for 'PCBNEW_PATH' ({})."
             " File does not exist".format(pcbnew_swig_path)
         )
+        return None
     return pcbnew_swig_path
 
 
@@ -133,7 +135,11 @@ def get_default_paths():
             "/usr/lib/python3/dist-packages/pcbnew.py",
             "/usr/lib/python3/site-packages/pcbnew.py",
         ]
-        default_locations["user"] = os.path.expanduser("~/.config/kicad")
+        root = os.path.expanduser("~/.config/kicad")
+        default_locations["user"] = [
+            latest_version_configpath(root),
+            root
+        ]
     elif sys.platform.startswith("darwin"):
         application = "/Applications/KiCad/KiCad.app"  # This is not guaranteed. User could have renamed it
         default_locations["mac_app"] = application
@@ -184,7 +190,10 @@ def populate_existing_default_paths():
 def kipython_one_liner(script):
     # This works whether or not "kipython" is on the PATH
     if sys.platform.startswith("linux"):
-        return exec(script)
+        try:
+            return exec(script)
+        except ImportError:
+            return None
     import subprocess
 
     if _paths["kipython"] is None:
@@ -198,7 +207,11 @@ def kipython_one_liner(script):
 
 def get_ver():
     assert _paths["kipython"] is not None
-    verstr = kipython_one_liner("import pcbnew; print(pcbnew.GetMajorMinorVersion())")
+    try:
+        verstr = kipython_one_liner("import pcbnew; print(pcbnew.GetMajorMinorVersion())")
+        assert verstr is not None
+    except (ImportError, AssertionError):
+        verstr = '1.0'
     ver = tuple(int(x) for x in verstr.split("."))
     majver = ver[0]
     if ver[1] == 99:
@@ -469,7 +482,10 @@ def create_link(pcbnew_module_path=None, kicad_config_path=None, dry_run=False, 
     All of this works with pcbnew=None (i.e. not discoverable yet)
     """
     if pcbnew_module_path is None or kicad_config_path is None:
-        populate_optimal_paths()
+        if cleanup:
+            populate_existing_default_paths()
+        else:
+            populate_optimal_paths()
         if pcbnew_module_path is None:
             pcbnew_module_path = _paths["pcbnew"]
         if kicad_config_path is None:
