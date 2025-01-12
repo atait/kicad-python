@@ -11,6 +11,7 @@ class RuleArea(Selectable, BoardItem):
     _wraps_native_cls = SWIGtype.Zone
 
     def __init__(self, coords, name="", layers=None, board=None):
+        raise NotImplementedError("kigadgets Zone instantiation through __init__ not supported. Wrap an existing pcbnew Zone")
         if board is None:
             raise RuntimeError(f"{type(self).__name__} must be given a board argument that is not None")
         if type(self) is RuleArea:

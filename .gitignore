@@ -59,3 +59,4 @@ target/
 
 # Record of pcbnew module location
 kigadgets/.path_to_pcbnew_module
+_autosave*.kicad_pcb

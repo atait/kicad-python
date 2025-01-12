@@ -112,7 +112,7 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
 
     def flip(self):
         if SWIG_version >= 7:
-            self._obj.Flip(self._obj.GetCenter(), True)
+            self._obj.Flip(self._obj.GetCenter(), False)
         else:
             self._obj.Flip(self._obj.GetCenter())
 
