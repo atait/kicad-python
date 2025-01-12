@@ -264,11 +264,18 @@ class TextEsque(GeoHashable):
 
     @property
     def orientation(self):
-        return self._obj.GetTextAngle() / 10
+        """Rotation of the item in degrees."""
+        if SWIG_version >= 8:
+            return float(self._obj.GetTextAngleDegrees())
+        else:
+            return float(self._obj.GetTextAngle()) / 10
 
     @orientation.setter
     def orientation(self, value):
-        self._obj.SetTextAngle(value * 10)
+        if SWIG_version >= 8:
+            self._obj.SetTextAngleDegrees(value)
+        else:
+            self._obj.SetTextAngle(value * 10.0)
 
     @property
     def justification(self):

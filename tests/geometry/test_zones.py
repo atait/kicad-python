@@ -54,7 +54,7 @@ def zone_create(pcb):
     pcb.add(zz)
     pcb.fill_zones()
 
-@pytest.mark.skip(reason='Board.add is not working for Zone in some versions')
+@pytest.mark.skip(reason='__init__ not supported. It needs a way to turn coords into Outline')
 def test_zone_create(): difftest_it(zone_create)()
 
 
