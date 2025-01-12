@@ -33,22 +33,19 @@ def test_keepout_allowance():
     assert not ko.allow.tracks and not ko.allow['tracks']
 
 
-@pytest.mark.skip(reason='fill_zones/get_fill_polygons seem to be working, something in geohash is not')
 def test_fillpoly_geohash():
     src_file = os.path.join(get_src_dir(), 'zone_mutate.kicad_pcb')
     pcb = Board.load(src_file)
+    pcb.fill_zones()
     original = pcb.copy()
     zz = list(pcb.zones)[0]
 
     zz.clearance /= 2
+    pcb.fill_zones()
+    assert pcb.geohash() != original.geohash()
     zz.clearance *= 2
     pcb.fill_zones()
     assert pcb.geohash() == original.geohash()
-
-    zz.clearance /= 2
-    pcb.fill_zones()
-    zz.clearance *= 2
-    assert pcb.geohash() != original.geohash()
 
 
 @contained_pcbnewBoard
@@ -83,6 +80,7 @@ def zone_mutate(pcb):
     # for poly in inner_zone.get_fill_polygons():
     #     poly.layer = 'User.4' if poly.layer == 'F.Cu' else 'User.5'
     #     pcb.add(poly)
+    # assert inner_zone.filled_area > 0
     inner_zone.priority = 0
 
     pcb.fill_zones()
