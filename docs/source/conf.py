@@ -35,7 +35,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.graphviz',
+    # 'sphinx.ext.graphviz',
 ]
 
 
@@ -129,7 +129,7 @@ autoapi_options = [
 ]
 
 from unittest.mock import MagicMock
-MOCK_MODULES = ['pcbnew']
+MOCK_MODULES = ['pcbnew', 'reload']
 sys.modules.update((mod_name, MagicMock()) for mod_name in MOCK_MODULES)
 
 napoleon_google_docstring = True
