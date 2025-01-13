@@ -107,7 +107,7 @@ pcbnew.Refresh()
 ### Mousebite in 200 lines
 It is not feature-rich, but it works with very little code, basic user input, multiple entry points, and GUI Ctrl-Z behavior. It is included primarily as a template for making and packaging your own action plugins with `kigadgets`. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/mousebite_readme.html).
 
-![Mousebite demo](/examples/action_plugins/mousebite/icons/mousebite-demo.gif?raw=true)
+![Mousebite demo](/examples/action_plugins/mousebite_kigadget/icons/mousebite-demo.gif?raw=true)
 
 ### Onepush action
 This demonstrates a GUI design workflow that is tightly integrated with external code: on-the-fly external module reloading, layout animation, and how to hotkey arbitrary code. The plugin is useful in its own right in addition to being a demonstration of some GUI-related functionality. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/onepush_readme.html).

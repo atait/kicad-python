@@ -5,7 +5,7 @@ A simple example of an action plugin based on `kigadgets`. It illustrates
 - Use of Ctrl-Z and action plugins
 - simple custom GUI: fbp design, user input, state caching
 
-![Mousebite demo](https://github.com/atait/kicad-python/blob/main/examples/action_plugins/mousebite/icons/mousebite-demo.gif?raw=true)
+![Mousebite demo](https://github.com/atait/kicad-python/blob/main/examples/action_plugins/mousebite_kigadget/icons/mousebite-demo.gif?raw=true)
 
 mousebite_script.py can be applied either in GUI or in CLI. One implication is that we can put it in non-GUI pytest integrations, and it is testing the *same code* that the GUI will use.
 
