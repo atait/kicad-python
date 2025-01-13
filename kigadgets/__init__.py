@@ -1,4 +1,4 @@
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 #: centralized import with fallback.
 #: Necessary for documentation and environment patching outside of application
