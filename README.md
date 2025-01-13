@@ -2,7 +2,7 @@
 **a.k.a. kicad-python: atait fork**
 Development of a stable Python scripting API for KiCad based on Piers Titus van der Torren work and community feedback.
 
-[v4.99 Documentation](https://kigadgets.readthedocs.io/en/4.99-refactor)
+[Documentation](https://kigadgets.readthedocs.io)
 
 <img src="docs/source/media/kiga-dark-1024.png" width="40%" margin="auto">
 
@@ -12,7 +12,9 @@ KiCad and pcbnew expose a python interface that allows plugins and other procedu
 It constructs an environment where `pcbnew.py` functionality can be used headless (outside the GUI), and the pcbnew GUI can import external python packages at runtime.
 Furthermore, it enables patterns for more advanced software engineering such as multiple entry points, layout hashes, and regression tests.
 
-This package has been fully tested with KiCad 5.0-9.0 (Mac/Windows/Linux). See `tests` to reproduce headless behavior and `examples` to reproduce GUI behavior. Note that v9 will give warnings about SWIG.
+This package has been fully tested with KiCad 5.0 through KiCad 9.0 (Mac/Windows/Linux).
+
+See `tests` to reproduce headless behavior and `examples` to reproduce GUI behavior. Note that v9 will give warnings about SWIG.
 
 ### An excerpt
 A simple pythonic script might look like this
@@ -136,4 +138,4 @@ TODO verify this link:
 
 ## Related Projects
 KiCad has a rich landscape of user-developed tools, libraries, and plugins. It is worth understanding this landscape in order to use the right tool for the job, whether it turns out to be `kigadgets`, others, or multiple.
-See discussion of the landscape in [the documentation](kigadgets.readthedocs.io/en/4.99-refactor/design/related_projects.html).
+See discussion of the landscape in [the documentation](kigadgets.readthedocs.io/design/related_projects.html).
