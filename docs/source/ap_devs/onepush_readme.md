@@ -15,4 +15,6 @@ ln -s /the/full/path/to/examples/action_plugins/onepush ~/.config/kicad/9.0/scri
 ```
 reload action plugins (or restart pcbnew), then click the button.
 
+KiCad does not have a way to hotkey action plugins. Mac users, you can hotkey the menu item through the OS. Go to System Settings > Keyboard > App Shortcuts > KiCad.app, and give it the exact name "One Push".
+
 ![Onepush Icon](../media/onepush-menu.png)

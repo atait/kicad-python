@@ -3,4 +3,5 @@
 *.kicad_*
 fp-info-cache
 !*.kicad_pcb
+_autosave*.kicad_pcb
 *.zip
