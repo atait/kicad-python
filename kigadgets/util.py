@@ -22,9 +22,8 @@ except ImportError:
     try:
         from imp import reload as kireload
     except ImportError:
-        try:
-            kireload = reload
-        except NameError as err:
+        kireload = locals().get('reload', None)
+        if kireload is None:
             def kireload(mod):
                 pass
 

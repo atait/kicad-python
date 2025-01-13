@@ -129,7 +129,7 @@ autoapi_options = [
 ]
 
 from unittest.mock import MagicMock
-MOCK_MODULES = ['pcbnew', 'reload']
+MOCK_MODULES = ['pcbnew']
 sys.modules.update((mod_name, MagicMock()) for mod_name in MOCK_MODULES)
 
 napoleon_google_docstring = True
