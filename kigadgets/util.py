@@ -1,12 +1,13 @@
 """ Utilities for interacting with the pcbnew GUI application
 
-    `reload` is the builtin reload, which comes from different places depending on python version.
-    `kireload` is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
+    "reload" is the builtin reload, which comes from different places depending on python version.
+    "kireload" is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
 
         from kigadgets import kireload
         def run(self):
             import action_script  # Only runs the first time during this instance of pcbnew, even if file changed
             kireload(action_script)  # Forces reimport, rerunning, and any updates to source
+
 """
 
 try:
@@ -30,11 +31,12 @@ except ImportError:
 
 def notify(*args):
     """Show text in a popup window while in the GUI.
-    Arguments act the same as print(*args).
+    Arguments act the same as print(args).
     Not the best debugging tool ever created, but
     it is handy for debugging action plugins::
 
         notify('Debug info:', 'x =', x)
+
     """
     text = " ".join(str(arg) for arg in args)
     if wx:
@@ -54,6 +56,7 @@ def query_user(prompt=None, default=""):
         if retstr is None:
             return
         drill = float(retstr)
+
     """
     if not wx:
         print("Skipping query_user outside of GUI")

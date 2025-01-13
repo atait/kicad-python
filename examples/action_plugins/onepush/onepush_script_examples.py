@@ -49,7 +49,7 @@ def default():
 # default()  # Comment this line when ready to run your own code below
 
 def hello_world():
-    full_text = 'kigadgets hola world'
+    full_text = 'kigadgets hello world'
 
     from kigadgets.drawing import TextPCB
     pcb = Board.from_editor()

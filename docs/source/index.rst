@@ -28,7 +28,7 @@ Once you have a `Board`, all other operations behave exactly the same within the
 This package has been fully tested with KiCad 5.0-9.0 (Mac/Windows/Linux). See ./tests to reproduce headless behavior and ./examples to reproduce GUI behavior. Note that v9 will give warnings about SWIG.
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 2
 
    getting_started/index
    ap_devs/index

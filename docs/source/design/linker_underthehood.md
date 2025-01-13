@@ -2,7 +2,8 @@
 
 The KiCad application comes with its own isolated version of python. It is not designed to manage nontrivial python environments. Furthermore, its python interface is not installed in a place that your external python or pip can find.
 
-`python -m kigadgets` creates a bidirectional link, telling `kigadgets` (this package) and `pcbnew.py` (their builtin C++ wrapper) where to find each other. The script all does this for you.
+## Auto-linker
+`python -m kigadgets` creates a bidirectional link, telling `kigadgets` (this package) and `pcbnew.py` (their builtin C++ wrapper) where to find each other. The script all does this for you. The auto-linker is new in kigadgets 5.0 and is based on best guess with default install locations. For more advanced use, read this section on what it does and the following section on finding paths manually.
 
 ### 1. GUI startup script
 First, it writes an initialization script for the pcbnew GUI's application terminal. It runs automatically when the shell opens and looks like this

@@ -53,13 +53,10 @@ def pcbnew_version(asstr=False):
 
 
 # Unify v5/6/7 APIs
-if pcbnew_bare is None:
-    SWIG_version = None
-
-    class SWIGtype:
-        pass
-
-else:
+SWIG_version = None
+class SWIGtype:
+    pass
+if pcbnew_bare is not None:
     # Determine version and map equivalent objects into consistent names
     ver = pcbnew_version()
     if ver[0] >= 9 or (ver[0] == 8 and ver[1] == 99):
@@ -80,7 +77,7 @@ else:
         SWIG_version = 8
 
     # if SWIG_version == 9:
-    #     # TODO
+    #     # It appears to be the same as 8, based on the pytests.
     if SWIG_version >= 8:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE
@@ -157,12 +154,15 @@ def instanceof(item, klass):
         return False
 
 
-# Alters sys.modules so that `import kicad` gives more information
+# Alters sys.modules so that "import kicad" gives more information
 put_import_warning_on_kicad()
 
 # Expose the basic classes to this package's top level
+from kigadgets.units import DEFAULT_UNIT_IUS
 if pcbnew_bare:
-    from kigadgets.units import DEFAULT_UNIT_IUS
     from kigadgets.point import Point
     from kigadgets.size import Size
     # CAD modules must be imported explicitly
+else:
+    Point = None
+    Size = None

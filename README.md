@@ -1,5 +1,6 @@
 # kigadgets
 **a.k.a. kicad-python: atait fork**
+
 Development of a stable Python scripting API for KiCad based on Piers Titus van der Torren work and community feedback.
 
 [Documentation](https://kigadgets.readthedocs.io)
@@ -31,30 +32,6 @@ The python wrapper is handling things like calling the (sometimes hard to find) 
 
 `track` and `board` use properties to give an intuition of state, but they are dynamically interacting with the underlying C++ `PCB_TRACK` and `BOARD` that you see in the layout editor.
 
-> [!CAUTION]
-> **MacOS Users:**
-> pcbnew.py from KiCAD v7 does not import due to something in the linking process to pcbnew.so. Everything works fine when inside the GUI. Outside the GUI, the workaround is to use the `python` that comes bundled with KiCAD. I recommend aliasing/symlinking it. Bonus points for encapsulating in a conda environment.
->
-```bash
-(base) $ kipython_path="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
-(base) $ conda_envbin_path="~/miniconda3/envs/ki/bin/kipython"
-(base) $ ln -s $kipython_path $conda_envbin_path
-```
-> Replacing "miniconda3" with your conda (or mamba) root; replacing "ki" with the name of desired environment.
-> You will need to reinstall all needed packages using kicad's pip like this
-```bash
-(base) $ conda activate ki
-(ki) $ kipython -m pip install kigadgets ...
-```
-> Now you can run tests with
-```bash
-kipython -m pip install tests/requirements.txt
-kipython -m pip install -e .
-kipython -m pytest tests
-```
-> Double caution: installing things with `kipython` will get installed in the GUI's environment as well. The packages will not be encapsulated between particular conda environments.
-> That is potentially bad but can be purged by reinstalling KiCAD.
-
 <!-- ## Installation via package manager
 **IN PROGRESS**
 
@@ -65,7 +42,6 @@ v6+ only
 3. Double click. Apply transaction.
 4. You are done
  -->
-
 
 ## Installation via PyPI
 ```bash
@@ -83,7 +59,7 @@ pcb.add_circle((100, 100), 20, 'F.Silkscreen'); pcbnew.Refresh()
 ```
 
 ## Snippet examples
-These snippets are run in the GUI terminal. There is no preceding context; the linking step above provides `pcb` to the terminal. [More examples in the docs](kigadgets.readthedocs.io/getting_started/snippet_examples.html).
+These snippets are run in the GUI terminal. There is no preceding context; the linking step above provides `pcb` to the terminal. [More examples in the docs](https://kigadgets.readthedocs.io/getting_started/snippet_examples.html).
 
 ### Hide silkscreen labels of selected footprints
 ```python
@@ -127,15 +103,23 @@ pcb.remove(my_rect)
 pcbnew.Refresh()
 ```
 
+## Action plugin examples
+### Mousebite in 200 lines
+It is not feature-rich, but it works with very little code, basic user input, multiple entry points, and GUI Ctrl-Z behavior. It is included primarily as a template for making and packaging your own action plugins with `kigadgets`. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/mousebite_readme.html).
+
+### Onepush action
+This demonstrates a GUI design workflow that is tightly integrated with external code: on-the-fly external module reloading, layout animation, and how to hotkey arbitrary code. The plugin is useful in its own right in addition to being a demonstration of some GUI-related functionality. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/onepush_readme.html).
+
+![Onepush demo](https://github.com/atait/kicad-python/blob/main/examples/action_plugins/onepush/icons/onepush-hello.gif?raw=true)
+
 ## Stodgier features
-While helpful for small scripting (above), `kigadgets` also provides significant support for maintaining more complicated codebases that use `pcbnew.py`. It can give cross-version compatibility, code that reads better, and multiple CLI/API/GUI entry points.
+While helpful for small scripting (above), `kigadgets` also provides significant support for maintaining more complicated codebases that use `pcbnew.py`. It can give cross-version compatibility, code that is concise and modular (i.e. easier to maintain), and multiple CLI/API/GUI entry points.
 All `kigadgets.BoardItem`s are hashable based on their geometric contents.
 
 Together with [`lytest`](https://github.com/atait/lytest), these enable automated testing and things like diff --stat, ultimately giving more workflow options for developing action plugins and batch processing scripts.
 
-TODO verify this link:
-[See discussion on software engineering features in the docs.](kigadgets.readthedocs.io/ap_devs/developer_guide.html)
+[See discussion on software engineering features in the docs.](https://kigadgets.readthedocs.io/ap_devs/developer_guide.html)
 
 ## Related Projects
 KiCad has a rich landscape of user-developed tools, libraries, and plugins. It is worth understanding this landscape in order to use the right tool for the job, whether it turns out to be `kigadgets`, others, or multiple.
-See discussion of the landscape in [the documentation](kigadgets.readthedocs.io/design/related_projects.html).
+See discussion of the landscape in [the documentation](https://kigadgets.readthedocs.io/design/related_projects.html).

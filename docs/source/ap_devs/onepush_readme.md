@@ -1,7 +1,7 @@
 # Kigadgets OnePush action plugin
 A simple example of an action plugin based on `kigadgets`. This example illustrates concepts of code interpretation and file reloading from the KiCad GUI using the `kireload` alias (version/platform independent). It is also useful in itself for script-assisted GUI layout design. Shown here, One Push is hotkeyed to Shift-Ctrl-R.
 
-![Onpush gif](../media/onepush-hello.gif)
+![Onpush gif](https://github.com/atait/kicad-python/blob/main/examples/action_plugins/onepush/icons/onepush-hello.gif?raw=true)
 
 onepush_script.py is executed in the GUI environment when the action plugin button is pushed. Edit it yourself in any external editor, save the file, and behavioral changes will take effect immediately. No need to restart KiCad or reload the plugins from the menu.
 

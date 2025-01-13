@@ -26,6 +26,7 @@ def get_pcbnew_path():
         1. environment variable PCBNEW_PATH, then
         2. cached file ./.path_to_pcbnew_module
         3. default install locations (platform dependent)
+
     If none of these work, return None
     """
     pcbnew_swig_path = os.environ.get("PCBNEW_PATH", get_pcbnew_path_from_file())
@@ -51,8 +52,8 @@ def get_pcbnew_path():
 
 
 def get_pcbnew_module(verbose=True):
-    """returns the imported <module>. Modifies sys.path so that
-    subsequent `import pcbnew` will work as expected.
+    """returns the imported module. Modifies sys.path so that
+    subsequent "import pcbnew" will work as expected.
     """
     # os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = "/Applications/KiCad/KiCad.app/Contents/Frameworks"
     pcbnew_bare = None
@@ -104,10 +105,11 @@ _paths = dict(kipython=None, pcbnew=None, user=None, mac_app=None)
 
 def latest_version_configpath(config_rootpath, subpath=None):
     """Returns the latest version of a directory in the config_rootpath
-        kicad/
-        |_ 7.0
-        |_ 8.0
-    will return "kicad/8.0"
+        parent/kicad/
+        - 7.0
+        - 8.0
+
+    latest_version_configpath('parent/kicad')  will return 'parent/kicad/8.0'
     """
     try:
         config_rootpath = os.path.normpath(config_rootpath)
