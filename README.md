@@ -110,7 +110,7 @@ It is not feature-rich, but it works with very little code, basic user input, mu
 ### Onepush action
 This demonstrates a GUI design workflow that is tightly integrated with external code: on-the-fly external module reloading, layout animation, and how to hotkey arbitrary code. The plugin is useful in its own right in addition to being a demonstration of some GUI-related functionality. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/onepush_readme.html).
 
-![Onepush demo](https://github.com/atait/kicad-python/blob/main/examples/action_plugins/onepush/icons/onepush-hello.gif?raw=true)
+![Onepush demo](/examples/action_plugins/onepush/icons/onepush-hello.gif?raw=true)
 
 ## Stodgier features
 While helpful for small scripting (above), `kigadgets` also provides significant support for maintaining more complicated codebases that use `pcbnew.py`. It can give cross-version compatibility, code that is concise and modular (i.e. easier to maintain), and multiple CLI/API/GUI entry points.
