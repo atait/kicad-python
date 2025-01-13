@@ -55,7 +55,7 @@ source_suffix = {
 master_doc = 'index'
 
 # General information about the project.
-project = u'KiCad Python API'
+project = u'kigadgets'
 copyright = u'2015, KiCad Community'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -115,7 +115,7 @@ autoapi_root = 'API'
 autoapi_dirs = ['../../kigadgets']
 # autoapi_template_dir = '../templates'  # Not working
 autoapi_member_order = 'bysource'
-autoapi_add_toctree_entry = False
+# autoapi_add_toctree_entry = False
 autoapi_options = [
     'members',
     'undoc-members',

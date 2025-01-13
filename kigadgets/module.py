@@ -1,21 +1,15 @@
 from kigadgets import pcbnew_bare as pcbnew
 
-import kigadgets
-from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version
+from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version, instanceof
 from kigadgets.item import HasPosition, HasOrientation, Selectable, HasLayer, BoardItem, TextEsque
 from kigadgets.pad import Pad
 from kigadgets.layer import get_board_layer_name
+from kigadgets.drawing import wrap_drawing, TextPCB
 
 
-class FootprintLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
-    """wrapper for `TEXTE_MODULE` or (old) `FP_TEXT`"""
-    def __init__(self, mod, text=None, layer=None):
-        self._obj = SWIGtype.FpText(mod.native_obj)
-        mod.native_obj.Add(self._obj)
-        if text:
-            self.text = text
-        if layer:
-            self.layer = layer
+class FootprintLabel(TextPCB):
+    """wrapper for `TEXTE_MODULE` (old) or `FP_TEXT`"""
+    _wraps_native_cls = SWIGtype.FpText
 
     @property
     def visible(self):
@@ -26,25 +20,18 @@ class FootprintLabel(HasPosition, HasLayer, Selectable, BoardItem, TextEsque):
 
     @visible.setter
     def visible(self, value):
-        return self._obj.SetVisible(value)
-
-    @staticmethod
-    def wrap(instance):
-        if type(instance) is SWIGtype.FpText:
-            return kigadgets.new(ModuleLabel, instance)
+        self._obj.SetVisible(value)
 
 
 class FootprintLine(HasLayer, Selectable, BoardItem):
-    """Wrapper for `EDGE_MODULE` or (old) `FP_SHAPE`"""
-    @staticmethod
-    def wrap(instance):
-        if type(instance) is SWIGtype.FpShape:
-            return kigadgets.new(ModuleLine, instance)
+    """Wrapper for `EDGE_MODULE` (old) or `FP_SHAPE`"""
+    _wraps_native_cls = SWIGtype.FpShape
 
 
 class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     _ref_label = None
     _val_label = None
+    _wraps_native_cls = SWIGtype.Footprint
 
     def __init__(self, ref=None, pos=None, board=None):
         if not board:
@@ -102,13 +89,17 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     @property
     def graphical_items(self):
         """Text and drawings of module iterator."""
-        for item in self._obj.GraphicalItems():
-            if type(item) == SWIGtype.FpShape:
-                yield FootprintLine.wrap(item)
-            elif type(item) == SWIGtype.FpText:
-                yield FootprintLabel.wrap(item)
+        def wrap_both(item):
+            if instanceof(item, SWIGtype.FpShape):
+                return FootprintLine.wrap(item)
+            elif instanceof(item, SWIGtype.FpText):
+                return FootprintLabel.wrap(item)
             else:
-                raise Exception("Unknown module item type: %s" % type(item))
+                raise Exception("Unknown module item type: {}".format(type(item)))
+        drawings = self._obj.GraphicalItems()
+        if SWIG_version >= 8:
+            wrap_both = wrap_drawing
+        return [wrap_both(item) for item in drawings]
 
     def flip(self):
         if SWIG_version >= 7:
@@ -164,8 +155,7 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
 
     @property
     def pads(self):
-        for p in self._obj.Pads():
-            yield Pad.wrap(p)
+        return [Pad.wrap(p) for p in self._obj.Pads()]
 
     def remove(self, element, permanent=False):
         """Makes it so Ctrl-Z works.
