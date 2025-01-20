@@ -119,8 +119,16 @@ def latest_version_configpath(config_rootpath, subpath=None):
     if len(dirs) == 0:
         return None
         # raise ValueError("No contents found in {}".format(config_rootpath))
-    latest_V = sorted(dirs)[-1]
-    out_path = os.path.join(config_rootpath, latest_V)
+    if 'Current' in dirs:
+        out_path = os.path.join(config_rootpath, 'Current')
+    else:
+        latest_V = sorted(dirs)[-1]
+        try:
+            ver, zero = latest_V.split('.')
+            assert zero == '0'
+            out_path = os.path.join(config_rootpath, latest_V)
+        except (ValueError, AssertionError):
+            out_path = config_rootpath
     if subpath:
         out_path = os.path.join(out_path, os.path.normpath(subpath))
     return out_path
@@ -192,10 +200,17 @@ def populate_existing_default_paths():
 def kipython_one_liner(script):
     # This works whether or not "kipython" is on the PATH
     if sys.platform.startswith("linux"):
+        from io import StringIO
+        old_stdout = sys.stdout
+        redirected_stdout = sys.stdout = StringIO()
         try:
-            return exec(script)
+            exec(script)
         except ImportError:
             return None
+        finally:
+            sys.stdout = old_stdout
+        return redirected_stdout.getvalue()
+
     import subprocess
 
     if _paths["kipython"] is None:
@@ -214,6 +229,7 @@ def get_ver():
         assert verstr is not None
     except (ImportError, AssertionError):
         verstr = '1.0'
+        raise
     ver = tuple(int(x) for x in verstr.split("."))
     majver = ver[0]
     if ver[1] == 99:
@@ -423,8 +439,8 @@ def write_PyShell_startup_script(kicad_config_path, dry_run=False, cleanup=False
 
     # Check for write access
     if not os.access(kicad_config_path, os.W_OK):
-        print(f"No write access to {kicad_config_path}. Continuing without writing.")
-        return
+        print(f"kigadgets: Warning: No write access to {kicad_config_path}.")
+        # return
 
     # Write the startup script
     _print_file(startup_file)
