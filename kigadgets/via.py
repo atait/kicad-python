@@ -49,11 +49,24 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
     @property
     def size(self):
         """Via diameter"""
-        return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
+        if SWIG_version >= 9:
+            alayer = get_board_layer_id(self.board, self.top_layer)
+            return float(self._obj.GetWidth(alayer)) / DEFAULT_UNIT_IUS
+        else:
+            return float(self._obj.GetWidth()) / DEFAULT_UNIT_IUS
 
     @size.setter
     def size(self, value):
-        self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
+        if SWIG_version >= 9:
+            alayer = get_board_layer_id(self.board, self.top_layer)
+            self._obj.SetWidth(alayer, int(value * DEFAULT_UNIT_IUS))
+            alayer = get_board_layer_id(self.board, self.bottom_layer)
+            self._obj.SetWidth(alayer, int(value * DEFAULT_UNIT_IUS))
+        else:
+            self._obj.SetWidth(int(value * DEFAULT_UNIT_IUS))
+
+    width = size
+    diameter = size
 
     @property
     def center(self):

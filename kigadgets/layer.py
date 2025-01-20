@@ -81,12 +81,16 @@ class LayerSet:
 
     def _build_layer_set(self, layers):
         """Create LayerSet used for defining pad layers"""
-        bit_mask = 0
-        for layer_name in layers:
-            bit_mask |= 1 << get_board_layer_id(self._board, layer_name)
-        hex_mask = "{0:013x}".format(bit_mask)
         self._obj = pcbnew.LSET()
-        self._obj.ParseHex(hex_mask, len(hex_mask))
+        if SWIG_version < 9:
+            bit_mask = 0
+            for layer_name in layers:
+                bit_mask |= 1 << get_board_layer_id(self._board, layer_name)
+            hex_mask = "{0:013x}".format(bit_mask)
+            self._obj.ParseHex(hex_mask, len(hex_mask))
+        else:
+            for layer_name in layers:
+                self.add_layer(layer_name)
 
     @property
     def layers(self):
