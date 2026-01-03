@@ -25,7 +25,7 @@ class __BareClass(object):
     pass
 
 
-def new(class_type, instance):
+def new(class_type: type, instance: object) -> object:
     """Returns an object of class without calling __init__.
 
     This could lead to inconsistent objects, use only when you
@@ -39,7 +39,7 @@ def new(class_type, instance):
     return obj
 
 
-def pcbnew_version(asstr=False):
+def pcbnew_version(asstr=False) -> tuple[int, int]:
     try:
         verstr = pcbnew_bare.GetMajorMinorVersion()
     except AttributeError:
@@ -139,7 +139,7 @@ if pcbnew_bare is not None:
 
 
 # Broken isinstance detection of inheritance in v7
-def instanceof(item, klass):
+def instanceof(item, klass) -> bool:
     if isinstance(klass, (tuple, list)):
         for kls in klass:
             if instanceof(item, kls):

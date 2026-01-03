@@ -1,30 +1,32 @@
 import cmath
+from typing import Union, Tuple, Any
 
 import kigadgets
 from kigadgets import units, SWIGtype
+from kigadgets.units import CoordinateLike
 
 
 class Point(units.BaseUnitTuple):
 
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float) -> None:
         """Creates a point.
 
-        :param x: x coordinate.
-        :param y: y coordinate.
+        :param x: x coordinate in mm
+        :param y: y coordinate in mm
         """
         self._obj = SWIGtype.Point(
             int(x * units.DEFAULT_UNIT_IUS),
             int(y * units.DEFAULT_UNIT_IUS)
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Point(%g, %g)" % (self.x, self.y)
 
     @staticmethod
-    def build_from(t):
+    def build_from(t: CoordinateLike) -> 'Point':
         """Return a point object from a tuple.
 
         It can transparently receive either a Point or a tuple,
@@ -33,7 +35,7 @@ class Point(units.BaseUnitTuple):
         return Point._tuple_to_class(t, Point)
 
     @staticmethod
-    def native_from(t):
+    def native_from(t: CoordinateLike) -> Any:
         """Return a native C++/old API object from a tuple/Point.
 
         Generally not to be used, but provided for compatibility
@@ -42,11 +44,11 @@ class Point(units.BaseUnitTuple):
         return Point._tuple_to_class(t, Point).native_obj
 
     @property
-    def native_obj(self):
+    def native_obj(self) -> Any:
         """Returns the native wxPoint object Point is wrapping."""
         return self._obj
 
-    def rotate(self, angle, around=(0, 0)):
+    def rotate(self, angle: float, around: CoordinateLike = (0, 0)) -> None:
         """Rotate the point.
 
         :param angle: rotation angle in degrees.
@@ -54,7 +56,7 @@ class Point(units.BaseUnitTuple):
         """
         self.x, self.y = self._rotated(angle, around)
 
-    def rotated(self, angle, around=(0, 0)):
+    def rotated(self, angle: float, around: CoordinateLike = (0, 0)) -> 'Point':
         """Generate a new Point.
 
         :param angle: rotation angle in degrees.
@@ -64,7 +66,7 @@ class Point(units.BaseUnitTuple):
         x, y = self._rotated(angle, around)
         return Point(x, y)
 
-    def _rotated(self, angle, around=(0, 0)):
+    def _rotated(self, angle: float, around: CoordinateLike = (0, 0)) -> Tuple[float, float]:
         """Rotate coordinate around another point"""
         around = Point.build_from(around)
         p0 = self - around

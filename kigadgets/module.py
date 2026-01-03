@@ -1,3 +1,15 @@
+"""Footprint (module) handling for KiCad PCB components.
+
+This module provides classes for representing PCB footprints, which contain
+pads, graphical elements, text labels, and electrical connections.
+
+Key features:
+- Footprint creation from libraries and copying existing footprints
+- Management of reference designators and component values
+- Access to pads and graphical items within footprints
+- Geohashing for layout comparison
+"""
+
 from kigadgets import pcbnew_bare as pcbnew
 
 from kigadgets import Point, Size, DEFAULT_UNIT_IUS, SWIGtype, SWIG_version, instanceof
@@ -5,6 +17,8 @@ from kigadgets.item import HasPosition, HasOrientation, Selectable, HasLayer, Bo
 from kigadgets.pad import Pad
 from kigadgets.layer import get_board_layer_name
 from kigadgets.drawing import wrap_drawing, TextPCB
+from kigadgets.units import CoordinateLike
+from typing import Optional, List, Union, Any
 
 
 class FootprintLabel(TextPCB):
@@ -12,14 +26,14 @@ class FootprintLabel(TextPCB):
     _wraps_native_cls = SWIGtype.FpText
 
     @property
-    def visible(self):
+    def visible(self) -> bool:
         try:
             return self._obj.IsVisible()
         except AttributeError:
             raise AttributeError(f"FootprintLabel.visible is write only in KiCad v{SWIG_version}")
 
     @visible.setter
-    def visible(self, value):
+    def visible(self, value: bool) -> None:
         self._obj.SetVisible(value)
 
 
@@ -28,7 +42,7 @@ class FootprintLine(HasLayer, Selectable, BoardItem):
     _wraps_native_cls = SWIGtype.FpShape
 
 
-def wrap_footprint_item(item):
+def wrap_footprint_item(item: Any) -> Union['FootprintLine', FootprintLabel]:
     if SWIG_version >= 8:
         return wrap_drawing(item)
     else:
@@ -44,7 +58,7 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     _val_label = None
     _wraps_native_cls = SWIGtype.Footprint
 
-    def __init__(self, ref=None, pos=None, board=None):
+    def __init__(self, ref: Optional[str] = None, pos: Optional[CoordinateLike] = None, board: Optional['Board'] = None) -> None:
         if not board:
             from kigadgets.board import Board
             try:
@@ -68,53 +82,55 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             return Footprint.wrap(mod)
 
     @property
-    def reference(self):
+    def reference(self) -> str:
         return self._obj.GetReference()
 
     @reference.setter
-    def reference(self, value):
+    def reference(self, value: str) -> None:
         self._obj.SetReference(value)
 
     @property
-    def reference_label(self):
+    def reference_label(self) -> FootprintLabel:
+        """Caches the wrapped FootprintLabel so that subsequent accesses return the same object."""
         native = self._obj.Reference()
         if self._ref_label is None or self._ref_label.native_obj is not native:
             self._ref_label = FootprintLabel.wrap(native)
         return self._ref_label
 
     @property
-    def value(self):
+    def value(self) -> str:
         return self._obj.GetValue()
 
     @value.setter
-    def value(self, value):
+    def value(self, value: str) -> None:
         self._obj.SetValue(value)
 
     @property
-    def value_label(self):
+    def value_label(self) -> FootprintLabel:
+        """Caches the wrapped FootprintLabel so that subsequent accesses return the same object."""
         native = self._obj.Value()
         if self._val_label is None or self._val_label.native_obj is not native:
             self._val_label = FootprintLabel.wrap(native)
         return self._val_label
 
     @property
-    def graphical_items(self):
+    def graphical_items(self) -> List[Union['FootprintLine', FootprintLabel]]:
         """Text and drawings of module iterator."""
         drawings = self._obj.GraphicalItems()
         return [wrap_footprint_item(item) for item in drawings]
 
-    def flip(self):
+    def flip(self) -> None:
         if SWIG_version >= 7:
             self._obj.Flip(self._obj.GetCenter(), False)
         else:
             self._obj.Flip(self._obj.GetCenter())
 
     @property
-    def layer(self):
+    def layer(self) -> str:
         return get_board_layer_name(self.board, self._obj.GetLayer())
 
     @layer.setter
-    def layer(self, value):
+    def layer(self, value: str) -> None:
         if value == self.layer:
             return
         if value not in ["F.Cu", "B.Cu"]:
@@ -124,15 +140,15 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
         self.flip()
 
     @property
-    def lib_name(self):
+    def lib_name(self) -> str:
         return self._obj.GetFPID().GetLibNickname().GetChars()
 
     @property
-    def fp_name(self):
+    def fp_name(self) -> str:
         return self._obj.GetFPID().GetLibItemName().GetChars()
 
-    def copy(self, ref, pos=None, board=None):
-        """Create a copy of an existing module on the board
+    def copy(self, ref: str, pos: Optional[CoordinateLike] = None, board: Optional['Board'] = None) -> 'Footprint':
+        """Create a copy of an existing module on the same board
         A new reference designator is required, example::
 
             mod2 = mod1.copy('U2')
@@ -156,10 +172,10 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
         return module
 
     @property
-    def pads(self):
+    def pads(self) -> List[Pad]:
         return [Pad.wrap(p) for p in self._obj.Pads()]
 
-    def remove(self, element, permanent=False):
+    def remove(self, element: Union[Pad, 'FootprintLine', FootprintLabel], permanent: bool = False) -> None:
         """Makes it so Ctrl-Z works.
         Keeps a reference to the element in the python pcb object,
         so it persists for the life of that object
@@ -170,13 +186,13 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             self._removed_elements.append(element)
         self._obj.Remove(element._obj)
 
-    def restore_removed(self):
+    def restore_removed(self) -> None:
         if hasattr(self, "_removed_elements"):
             for element in self._removed_elements:
                 self._obj.Add(element._obj)
         self._removed_elements = []
 
-    def geohash(self):
+    def geohash(self) -> int:
         mine = hash((
             self.reference,
             self.value,

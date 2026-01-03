@@ -3,6 +3,8 @@ from kigadgets import pcbnew_bare as pcbnew
 from kigadgets import SWIGtype, SWIG_version, Point, DEFAULT_UNIT_IUS
 from kigadgets.item import HasPosition, HasConnection, Selectable, BoardItem
 from kigadgets.layer import get_board_layer_id, get_board_layer_name
+from kigadgets.units import CoordinateLike
+from typing import Optional, List, Tuple, Any, Union
 
 if SWIG_version >= 6:
     class ViaType:
@@ -22,7 +24,7 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
     """
     _wraps_native_cls = SWIGtype.Via
 
-    def __init__(self, center, size=None, drill=None, layer_pair=None, board=None):
+    def __init__(self, center: CoordinateLike, size: Optional[float] = None, drill: Optional[float] = None, layer_pair: Optional[List[str]] = None, board: Optional['Board'] = None) -> None:
         self._obj = SWIGtype.Via(board and board.native_obj)
         if size is None:
             size = self.board.default_via_size if self.board else 0.6
@@ -38,16 +40,16 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         self.set_layer_pair(layer_pair)
 
     @property
-    def drill(self):
+    def drill(self) -> float:
         """Via drill diameter"""
         return float(self._obj.GetDrill()) / DEFAULT_UNIT_IUS
 
     @drill.setter
-    def drill(self, value):
+    def drill(self, value: float) -> None:
         self._obj.SetDrill(int(value * DEFAULT_UNIT_IUS))
 
     @property
-    def size(self):
+    def size(self) -> float:
         """Via diameter"""
         if SWIG_version >= 9:
             alayer = get_board_layer_id(self.board, self.top_layer)
@@ -69,7 +71,7 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
     diameter = size
 
     @property
-    def center(self):
+    def center(self) -> Point:
         """Via center"""
         try:
             return Point.wrap(self._obj.GetStart())
@@ -77,19 +79,19 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
             return Point.wrap(self._obj.GetCenter())
 
     @center.setter
-    def center(self, value):
+    def center(self, value: CoordinateLike) -> None:
         try:
             self._obj.SetEnd(Point.native_from(value))
             self._obj.SetStart(Point.native_from(value))
         except AttributeError:
             self._obj.SetCenter(Point.native_from(value))
 
-    def set_layer_pair(self, layer_pair):
+    def set_layer_pair(self, layer_pair: Union[Tuple[str, str], List[str]]) -> None:
         layer_pair = self._normalize_layer_pair(layer_pair)
         self.top_layer = layer_pair[0]
         self.bottom_layer = layer_pair[1]
 
-    def _normalize_layer_pair(self, layer_pair):
+    def _normalize_layer_pair(self, layer_pair: Union[Tuple[str, str], List[str]]):
         """Normalizes layer pair to ensure consistent hashing regardless of order."""
         try:
             if len(layer_pair) != 2:
@@ -107,39 +109,42 @@ class Via(HasPosition, HasConnection, Selectable, BoardItem):
         return hash(normalized)
 
     @property
-    def top_layer(self):
+    def top_layer(self) -> str:
         return get_board_layer_name(self.board, self._obj.TopLayer())
 
     @top_layer.setter
-    def top_layer(self, value):
+    def top_layer(self, value: str) -> None:
         assert value.endswith(".Cu")
         self._obj.SetTopLayer(get_board_layer_id(self.board, value))
         if value.startswith("In"):
             self.is_through = False
 
     @property
-    def bottom_layer(self):
+    def bottom_layer(self) -> str:
         return get_board_layer_name(self.board, self._obj.BottomLayer())
 
     @bottom_layer.setter
-    def bottom_layer(self, value):
+    def bottom_layer(self, value: str) -> None:
         assert value.endswith(".Cu")
         self._obj.SetBottomLayer(get_board_layer_id(self.board, value))
         if value.startswith("In"):
             self.is_through = False
 
     @property
-    def is_through(self):
+    def is_through(self) -> bool:
+        """Returns False if it's a blind via OR microvia."""
         return self._obj.GetViaType() == ViaType.Through
 
     @is_through.setter
-    def is_through(self, value):
+    def is_through(self, value: bool) -> None:
+        """ thing.is_through = False results in a blind via (not a microvia)
+        """
         if value:
             self._obj.SetViaType(ViaType.Through)
         else:
             self._obj.SetViaType(ViaType.Blind)
 
-    def geohash(self):
+    def geohash(self) -> int:
         mine = hash((
             self.drill,
             self.size,

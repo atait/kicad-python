@@ -1,4 +1,4 @@
-""" Utilities for interacting with the pcbnew GUI application
+""" Utilities for interacting with pcbnew in GUI and headless modes.
 
     "reload" is the builtin reload, which comes from different places depending on python version.
     "kireload" is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
@@ -8,11 +8,15 @@
             import action_script  # Only runs the first time during this instance of pcbnew, even if file changed
             kireload(action_script)  # Forces reimport, rerunning, and any updates to source
 
+    "notify" and "query_user" decide whether to show a GUI dialog or print to console
+    based on whether the code is running in GUI mode or headless mode.
 """
+
+from typing import Any, Optional, Union
 
 try:
     import wx
-except ImportError:
+except (ImportError, AttributeError):
     wx = None
 
 
@@ -24,11 +28,11 @@ except ImportError:
     except ImportError:
         kireload = locals().get('reload', None)
         if kireload is None:
-            def kireload(mod):
+            def kireload(mod: Any) -> None:
                 pass
 
 
-def notify(*args):
+def notify(*args: Any) -> Optional[int]:
     """Show text in a popup window while in the GUI.
     Arguments act the same as print(args).
     Not the best debugging tool ever created, but
@@ -47,15 +51,15 @@ def notify(*args):
         print(text)
 
 
-def query_user(prompt=None, default=""):
+def query_user(prompt: Optional[str] = None, default: Union[str, int, float] = "") -> Optional[str]:
     """Simple GUI dialog asking for a single value.
     Returns what was entered by the user as a string::
 
         retstr = query_user('Enter a drill width in mm', 0.5)
-        if retstr is None:
+        if retstr is None:  # User cancelled
             return
-        drill = float(retstr)
-
+        else:
+            drill = float(retstr)
     """
     if not wx:
         print("Skipping query_user outside of GUI")
@@ -71,7 +75,7 @@ def query_user(prompt=None, default=""):
     return dialog.GetValue()
 
 
-def get_app_window():
+def get_app_window() -> Optional[Any]:
     """Get a parent for action plugin dialogs.
     Returns None if outside of GUI
     """
@@ -84,5 +88,5 @@ def get_app_window():
         return None
 
 
-def in_GUI():
+def in_GUI() -> bool:
     return get_app_window() is not None
