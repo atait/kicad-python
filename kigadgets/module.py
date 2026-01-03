@@ -28,6 +28,17 @@ class FootprintLine(HasLayer, Selectable, BoardItem):
     _wraps_native_cls = SWIGtype.FpShape
 
 
+def wrap_footprint_item(item):
+    if SWIG_version >= 8:
+        return wrap_drawing(item)
+    else:
+        if instanceof(item, SWIGtype.FpShape):
+            return FootprintLine.wrap(item)
+        elif instanceof(item, SWIGtype.FpText):
+            return FootprintLabel.wrap(item)
+        raise Exception("Unknown footprint member type: {}".format(type(item)))
+
+
 class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     _ref_label = None
     _val_label = None
@@ -49,12 +60,12 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
             board.add(self)
 
     @staticmethod
-    def load_from_library(library_path, name):
-        m = pcbnew.FootprintLoad(library_path, name)
-        if m is None:
+    def load_from_library(library_path: str, name: str) -> Optional['Footprint']:
+        mod = pcbnew.FootprintLoad(library_path, name)
+        if mod is None:
             return None
         else:
-            return Module.wrap(m)
+            return Footprint.wrap(mod)
 
     @property
     def reference(self):
@@ -89,17 +100,8 @@ class Footprint(HasPosition, HasOrientation, Selectable, BoardItem):
     @property
     def graphical_items(self):
         """Text and drawings of module iterator."""
-        def wrap_both(item):
-            if instanceof(item, SWIGtype.FpShape):
-                return FootprintLine.wrap(item)
-            elif instanceof(item, SWIGtype.FpText):
-                return FootprintLabel.wrap(item)
-            else:
-                raise Exception("Unknown module item type: {}".format(type(item)))
         drawings = self._obj.GraphicalItems()
-        if SWIG_version >= 8:
-            wrap_both = wrap_drawing
-        return [wrap_both(item) for item in drawings]
+        return [wrap_footprint_item(item) for item in drawings]
 
     def flip(self):
         if SWIG_version >= 7:

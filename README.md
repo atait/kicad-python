@@ -1,7 +1,7 @@
 # kigadgets
 **a.k.a. kicad-python: atait fork**
 
-Development of a stable Python scripting API for KiCad based on Piers Titus van der Torren work and community feedback.
+A stable Python scripting API for KiCad based on Piers Titus van der Torren work and community input.
 
 [Documentation](https://kigadgets.readthedocs.io)
 
@@ -105,7 +105,7 @@ pcbnew.Refresh()
 
 ## Action plugin examples
 ### Mousebite in 200 lines
-It is not feature-rich, but it works with very little code, basic user input, multiple entry points, and GUI Ctrl-Z behavior. It is included primarily as a template for making and packaging your own action plugins with `kigadgets`. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/mousebite_readme.html).
+It is not feature-rich, but it works with very little code, basic user input, multiple entry points, and GUI Ctrl-Z behavior. Use it as a template for making and packaging your own action plugins based on `kigadgets`. [Read about it here](https://kigadgets.readthedocs.io/ap_devs/mousebite_readme.html).
 
 ![Mousebite demo](/examples/action_plugins/mousebite_kigadget/icons/mousebite-demo.gif?raw=true)
 
@@ -116,9 +116,8 @@ This demonstrates a GUI design workflow that is tightly integrated with external
 
 ## Stodgier features
 While helpful for small scripting (above), `kigadgets` also provides significant support for maintaining more complicated codebases that use `pcbnew.py`. It can give cross-version compatibility, code that is concise and modular (i.e. easier to maintain), and multiple CLI/API/GUI entry points.
-All `kigadgets.BoardItem`s are hashable based on their geometric contents.
 
-Together with [`lytest`](https://github.com/atait/lytest), these enable automated testing and things like diff --stat, ultimately giving more workflow options for developing action plugins and batch processing scripts.
+All `kigadgets.BoardItem`s are hashable based on their geometric contents. Together with [`lytest`](https://github.com/atait/lytest), these enable automated testing and things like diff --stat, ultimately giving more workflow options for developing action plugins and batch processing codebases.
 
 [See discussion on software engineering features in the docs.](https://kigadgets.readthedocs.io/ap_devs/developer_guide.html)
 

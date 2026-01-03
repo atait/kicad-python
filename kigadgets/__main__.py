@@ -9,4 +9,8 @@
 
 from kigadgets.environment import cl_main
 
-cl_main()
+def main() -> None:
+    cl_main()
+
+if __name__ == "__main__":
+    main()
