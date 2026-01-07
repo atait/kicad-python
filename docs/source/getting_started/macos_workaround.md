@@ -1,12 +1,34 @@
-# MacOS and Windows python Workaround
+# Using KiCad’s Python (“kipython”) for headless pcbnew
 
-`pcbnew.py` from KiCad v7+ does not import on MacOS because its Mach-O file uses @executable_path instead of relative linker paths. On Windows, it gives unspecified DLL error. Everything works fine when inside the GUI, but not outside in headless mode. The workaround for now is to use KiCad's bundled `python3` executable and then give it a short name: `kipython`.
+`pcbnew.py` from KiCad v7+ does not import reliably when running Python from a Terminal (outside the KiCad GUI). Everything works fine when inside the GUI, but not outside in this “headless” mode.
 
-## KiCad's builtin python
-### Symlinking (one time)
-Run the usual setup `python -m kigadgets`, it will detect if you need this workaround and take care of it.
+The workaround is to use KiCad's bundled `python3` executable and give it a short name on your `PATH`. We will call it `kipython`.
 
-**On MacOS**, it will make the symlink for you, effectively this command
+## When do I need this?
+If you want to use `pcbnew.py` for scripting *independent of a GUI Application* and you are using MacOS or Windows, you will need this workaround step. Linux does not need it.
+
+## Quick start
+
+1. Run the setup:
+   ```bash
+   python -m kigadgets
+   ```
+2. Verify `kipython` works:
+   ```bash
+   kipython -c "import pcbnew; print('pcbnew import OK')"
+   ```
+3. If you need third-party packages for your script, install them for `kipython`:
+   ```bash
+   kipython -m pip install --user numpy
+   ```
+
+## Detailed Setup
+
+
+### macOS: symlink (one time)
+Run the usual setup script `python -m kigadgets`. It will detect if you need this workaround and guide you through it.
+
+On macOS, it is effectively running this command:
 ```bash
 ln -s "/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3" /usr/local/bin/kipython
 ```
@@ -16,16 +38,40 @@ $ which kipython
 /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
 ```
 
-**On Windows**, automatic symlinking is disabled. The kigadgets command will print a command you can use to alias "kipython" to the correct executable.
-```bash
-You should symlink or alias "kipython" to {_paths["kipython"]}. To do this,\n')
+### Windows: PowerShell function / alias
+Run the usual setup script `python -m kigadgets`. It will detect if you need this workaround and guide you through it.
 
-    Function kipython { & 'C:\\Program Files\\KiCad\\8.0\\bin\\python.exe $args }
+On Windows, automatic symlinking is disabled. The `python -m kigadgets` setup will *print* a PowerShell alias command for you that looks like:
+
+```powershell
+function kipython { & 'C:\\Program Files\\KiCad\\8.0\\bin\\python.exe' @args }
 ```
-This is the PowerShell command. It is up to you how to make that alias persistent. The best way depends on which shell you like to use.
 
-### External python packages
+It is up to you how to make this alias persistent. Put it in your PowerShell profile (see `$PROFILE`). Or, if you use a different shell, create the equivalent alias/function for that shell.
+
+## Verify
+
+Basic import test. Run this in any terminal:
+
+```bash
+$ kipython -c "import pcbnew; print('pcbnew import OK')"
+```
+
+For more verification about the interpreter:
+
+```bash
+$ kipython --version
+$ kipython -c "import sys; print('Executable:', sys.executable)"
+$ kipython -m kigadgets
+```
+
+## Using third-party packages with `kipython`
+
 `kipython` is within KiCad.app, so modifications made will be installed Application-wide. It is the same python used in the GUI by action plugins. `kipython` *does not* see your venv or conda environment packages active in a given Terminal. It does see your shell environment variables, including `$PYTHONPATH`.
+
+| Caution |
+| --- |
+| Installing things with `kipython` will get installed in the GUI's environment as well. Read this section before installing third-party python packages. |
 
 Suppose we have a script or module that combines headless pcbnew and some heavier packages
 ```python
@@ -35,32 +81,39 @@ import kigadgets, pcbnew, numpy, tensorflow
 def do_some_pcb_AI():
     ...
 ```
-We typically get dependencies and launch that with
+
+Typically, we get dependencies and launch that like this:
 ```bash
-$ pip install kigadgets numpy tensorflow
+$ python -m pip install numpy tensorflow
 $ python myscript.py
 ```
 
-**On Linux** (and sometimes Windows): this works as expected out of the box.
+**On Linux**: this works as expected out of the box in any terminal with any compatible python interpreter.
 
-**On Mac**: you can do this, but it takes an extra step because you are using bundled `kipython` while Linux/Windows can use any python interpreter.
+**On macOS and Windows**: you need to use bundled `kipython` for both execution and installation, and you need to install in such a way to not pollute the KiCAD environment unintentionally.
 
-#### App install method
-| Caution |
-| --- |
-| Installing things with `kipython` will get installed in the GUI's environment as well. The packages will not be encapsulated between particular environments, and there is a risk of angering System Integrity Protection. |
+### Don't do this
+```bash
+$ kipython -m pip install numpy tensorflow
+$ kipython myscript.py
+```
 
-The best way is with `--user` flag with bundled `pip`
+This will ususally run; however, `kipython -m pip` will install packages directly into the KiCad application bundle. The change is seen Application-wide, and this can cause code signature issues on macOS. You can break the entire KiCAD application this way.
+
+### Recommended: install with `--user`
+
+The simple solution is with `--user` flag with KiCAD-bundled `pip`
 ```bash
 $ kipython -m pip install --user numpy tensorflow
+$ kipython myscript.py
 ```
-That's it. It won't corrupt your system or your KiCad.
+That's it. It won't corrupt your system or your KiCad installation.
 
-I know many install instructions include `--user` for the sake of good practice. Here, it is actually very important to use the `--user` flag. It will install somewhere safe like "~/Library/.../site-packages".
+I know: many install instructions include `--user` for the sake of good practice. Here, it is *actually very important* to use the `--user` flag. It will install somewhere safe like "~/Library/.../site-packages", rather than somewhere inside the KiCad application bundle.
 
-If you forget `--user`, then pip will modify things within KiCad.app/Contents/Frameworks. When you inject new software into an Application package, MacOS gets suspicious and might invalidate KiCad. If you forget --user and then try to install binaries, and everything breaks, then read [KiKit's explanation](https://yaqwsx.github.io/KiKit/latest/installation/macos/) of KiCad code signatures.
+If you forget `--user` and then try to install binaries and MacOS invalidates the application's code signature, read [KiKit's explanation](https://yaqwsx.github.io/KiKit/latest/installation/macos/) of KiCad code signatures. Otherwise, reinstall the app to restore the code signature.
 
-#### Explicit installation paths
+### Advanced: explicit installation paths
 **Using bundled pip with an external package location**
 This is doing the same thing as `--user` except putting it in a custom location. It is useful if you want to create multiple encapsulated pseudo-environments
 ```bash
@@ -81,7 +134,7 @@ sys.path.insert(0, '~/Documents/KiCad/python3rdparty/site-packages')
 import kigadgets, pcbnew, numpy, tensorflow
 ```
 
-**External package managers**
+### Advanced: external package managers
 ```bash
 $ kipython --version
 Python 3.9.13
@@ -106,4 +159,3 @@ To skip typing that export line, you can add it as an environment activation hoo
 $ mamba activate pcbtf
 (pcbtf) $ kipython my_script.py
 ```
-

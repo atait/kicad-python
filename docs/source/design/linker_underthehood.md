@@ -1,6 +1,13 @@
 # What is `python -m kigadgets` doing for you?
 
-The KiCad application comes with its own isolated version of python. It is not designed to manage nontrivial python environments. Furthermore, its python interface is not installed in a place that your external python or pip can find.
+The KiCad application comes with its own isolated version of python. It is not designed to manage nontrivial python environments. Furthermore, its python interface is not installed in a place that your external python or pip can find. These issues are solvable.
+
+Even when paths are correctly set up, `pcbnew.py` behaves differently on different platforms:
+- On Linux, it fully works, no problem.
+- On MacOS, the `pcbnew.so` Mach-O file uses @executable_path instead of relative linker paths, preventing any *non-bundled* Python from resolving its path during import. This prevents external Python from loading the module at all.
+- On Windows, it gives an unspecified DLL error, likely for a similar reason.
+
+This issue is also solvable but needs an extra step for Mac and Windows, described [here](../getting_started/macos_workaround).
 
 ## Auto-linker
 `python -m kigadgets` creates a bidirectional link, telling `kigadgets` (this package) and `pcbnew.py` (their builtin C++ wrapper) where to find each other. The script all does this for you. The auto-linker is new in kigadgets 5.0 and is based on best guess with default install locations. For more advanced use, read this section on what it does and the following section on finding paths manually.
