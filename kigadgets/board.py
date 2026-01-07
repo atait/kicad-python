@@ -65,7 +65,7 @@ class Board(object):
     @property
     def tracks(self):
         """A list of track objects"""
-        return [Track.wrap(t) for t in self._obj.GetTracks() if instanceof(t, SWIGtype.Track)]
+        return [Track.wrap(t) for t in self._obj.GetTracks() if instanceof(t, SWIGtype.Track) and not instanceof(t, SWIGtype.Via)]
 
     @property
     def rule_areas(self):
