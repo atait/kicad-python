@@ -1,18 +1,23 @@
 """ Utilities for interacting with pcbnew in GUI and headless modes.
 
-    "reload" is the builtin reload, which comes from different places depending on python version.
-    "kireload" is useful for on-the-fly updates to action plugin scripts without refreshing plugins.::
+    "kireload" is useful for on-the-fly updates to action plugin scripts without manually refreshing plugins.::
 
         from kigadgets import kireload
-        def run(self):
-            import action_script  # Only runs the first time during this instance of pcbnew, even if file changed
-            kireload(action_script)  # Forces reimport, rerunning, and any updates to source
+        class MyScript(pcbnew.ActionPlugin):
+            def Run(self):
+                import myscript.core
+                kireload(myscript.core)
+                # Any source changes in myscript/core.py have now been picked up
+                myscript.core.run()
 
     "notify" and "query_user" decide whether to show a GUI dialog or print to console
     based on whether the code is running in GUI mode or headless mode.
 """
 
 from typing import Any, Optional, Union
+import importlib
+import sys
+import traceback
 
 try:
     import wx
@@ -21,15 +26,32 @@ except (ImportError, AttributeError):
 
 
 try:
-    from importlib import reload as kireload
+    from importlib import reload as _kireload
 except ImportError:
     try:
-        from imp import reload as kireload
+        from imp import reload as _kireload
     except ImportError:
-        kireload = locals().get('reload', None)
-        if kireload is None:
-            def kireload(mod: Any) -> None:
+        _kireload = locals().get('reload', None)
+        if _kireload is None:
+            def _kireload(mod: Any) -> None:
                 pass
+
+
+def kireload(mod: Any) -> None:
+    """Reload a module. If it is not in sys.modules, it will be imported."""
+    if isinstance(mod, str):
+        if mod not in sys.modules:
+            try:
+                importlib.import_module(mod)
+            except Exception as err:
+                notify("Import failed for", mod, '\n\n', traceback.format_exc())
+            return
+        else:
+            mod = sys.modules[mod]
+    try:
+        _kireload(mod)
+    except Exception as err:
+        notify("Reload failed for", mod, '\n\n', traceback.format_exc())
 
 
 def notify(*args: Any) -> Optional[int]:
