@@ -10,12 +10,15 @@ if SWIG_version >= 6:
     class ViaType:
         Through = pcbnew.VIATYPE_THROUGH
         Micro = pcbnew.VIATYPE_MICROVIA
-        Blind = pcbnew.VIATYPE_BLIND_BURIED
+        # KiCad <10 had a combined BLIND_BURIED; KiCad 10+ split it into two.
+        Blind = getattr(pcbnew, "VIATYPE_BLIND_BURIED", getattr(pcbnew, "VIATYPE_BLIND", None))
+        Buried = getattr(pcbnew, "VIATYPE_BURIED", Blind)
 else:
     class ViaType:
         Through = pcbnew.VIA_THROUGH
         Micro = pcbnew.VIA_MICROVIA
         Blind = pcbnew.VIA_BLIND_BURIED
+        Buried = Blind
 
 
 class Via(HasPosition, HasConnection, Selectable, BoardItem):
