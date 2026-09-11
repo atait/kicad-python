@@ -59,7 +59,9 @@ class SWIGtype:
 if pcbnew_bare is not None:
     # Determine version and map equivalent objects into consistent names
     ver = pcbnew_version()
-    if ver[0] >= 9 or (ver[0] == 8 and ver[1] == 99):
+    if ver[0] >= 10 or (ver[0] == 9 and ver[1] == 99):
+        SWIG_version = 10
+    elif ver[0] >= 9 or (ver[0] == 8 and ver[1] == 99):
         SWIG_version = 9
     elif ver[0] == 8 or (ver[0] == 7 and ver[1] == 99):
         SWIG_version = 8

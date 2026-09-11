@@ -6,7 +6,12 @@ from kigadgets.layer import get_board_layer_id, get_board_layer_name
 from kigadgets.units import CoordinateLike
 from typing import Optional, List, Tuple, Any, Union
 
-if SWIG_version >= 6:
+if SWIG_version >= 10:
+    class ViaType:
+        Through = pcbnew.VIATYPE_THROUGH
+        Micro = pcbnew.VIATYPE_MICROVIA
+        Blind = pcbnew.VIATYPE_BLIND
+elif SWIG_version >= 6:
     class ViaType:
         Through = pcbnew.VIATYPE_THROUGH
         Micro = pcbnew.VIATYPE_MICROVIA
