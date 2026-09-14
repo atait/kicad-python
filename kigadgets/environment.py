@@ -5,6 +5,7 @@
     kipython refers to the python executable that ships with KiCad installation
 """
 
+import glob
 import os
 import sys
 import argparse
@@ -144,6 +145,8 @@ def get_default_paths():
         default_locations["pcbnew"] = [
             "/usr/lib/python3/dist-packages/pcbnew.py",
             "/usr/lib/python3/site-packages/pcbnew.py",
+            # Arch-style: pcbnew installs into the active Python's site-packages
+            *sorted(glob.glob("/usr/lib/python3.*/site-packages/pcbnew.py"), reverse=True),
         ]
         root = os.path.expanduser("~/.config/kicad")
         default_locations["user"] = [
